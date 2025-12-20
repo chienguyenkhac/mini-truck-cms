@@ -1,0 +1,9 @@
+
+{
+  "name": "Sinotruk Hà Nội - Vua Xe Tải Nặng",
+  "description": "A high-performance, aesthetically pleasing landing page for a heavy-duty truck distributor, featuring animations, product showcases, and a Gemini-powered truck consultant.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

@@ -1,19 +1,21 @@
 import Hero from '../components/Home/Hero'
-import ProductCategories from '../components/Home/ProductCategories'
-import FeaturedProducts from '../components/Home/FeaturedProducts'
-import WhyChooseUs from '../components/Home/WhyChooseUs'
-import './Home.css'
+import StatsSection from '../components/Home/StatsSection'
+import VideoSection from '../components/Home/VideoSection'
+import ProductGrid from '../components/Home/ProductGrid'
+import AboutSection from '../components/Home/AboutSection'
+import CategorySection from '../components/Home/CategorySection'
 
 const Home = () => {
   return (
-    <div className="home-page">
+    <div className="bg-background">
       <Hero />
-      <ProductCategories />
-      <FeaturedProducts />
-      <WhyChooseUs />
+      <StatsSection />
+      <VideoSection />
+      <ProductGrid />
+      <AboutSection />
+      <CategorySection />
     </div>
   )
 }
 
 export default Home
-

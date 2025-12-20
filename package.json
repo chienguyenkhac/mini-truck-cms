@@ -1,5 +1,6 @@
 {
-  "name": "sinotruk-hanoi-frontend",
+  "name": "sinotruk-hanoi",
+  "private": true,
   "version": "2.0.0",
   "type": "module",
   "scripts": {
@@ -8,16 +9,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "gsap": "^3.12.5",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.28.0",
-    "lucide-react": "^0.344.0"
+    "@react-three/drei": "^9.114.0",
+    "@react-three/fiber": "^8.17.0",
+    "framer-motion": "^11.0.0",
+    "gsap": "^3.14.2",
+    "lucide-react": "^0.294.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.0",
+    "three": "^0.170.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.3.4",
-    "vite": "^6.0.0"
+    "@vitejs/plugin-react": "^4.2.0",
+    "vite": "^5.0.0"
   }
 }
-
-

@@ -1,145 +1,216 @@
-import { useRef, useState } from 'react'
-import { MapPin, Phone, Mail, Send } from 'lucide-react'
-import './Contact.css'
+import { useState } from 'react'
+import { motion } from 'framer-motion'
 
 const Contact = () => {
-  const sectionRef = useRef(null)
-  const formRef = useRef(null)
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     email: '',
     message: '',
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    // Handle form submission
-    console.log('Form submitted:', formData)
-    alert('Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm nhất có thể.')
-    setFormData({ name: '', phone: '', email: '', message: '' })
+    setIsSubmitting(true)
+
+    // Simulate submission
+    setTimeout(() => {
+      setIsSubmitting(false)
+      setSubmitted(true)
+      setFormData({ name: '', phone: '', email: '', message: '' })
+
+      setTimeout(() => setSubmitted(false), 3000)
+    }, 1000)
   }
 
   return (
-    <div ref={sectionRef} className="contact-page">
-      <div className="contact-header">
-        <div className="container">
-          <h1 className="page-title">LIÊN HỆ</h1>
-          <p className="page-subtitle">
-            Chúng tôi luôn sẵn sàng hỗ trợ bạn
-          </p>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="relative py-20 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent"></div>
+        <div className="container mx-auto px-4 md:px-10 lg:px-20 relative z-10">
+          <motion.div
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="text-center"
+          >
+            <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tighter mb-4">
+              LIÊN <span className="text-primary">HỆ</span>
+            </h1>
+            <p className="text-gray-400 text-lg max-w-xl mx-auto">
+              Chúng tôi luôn sẵn sàng hỗ trợ bạn 24/7
+            </p>
+          </motion.div>
         </div>
       </div>
 
-      <div className="container">
-        <div className="contact-content">
-          <div className="contact-info">
-            <div className="info-card">
-              <MapPin className="info-icon" />
-              <h3>Địa chỉ</h3>
-              <p>
-                Thôn 1, Xã Lại Yên, Hoài Đức, Hà Nội
-                <br />
-                (Cách cầu vượt An Khánh 300m)
-              </p>
-            </div>
-
-            <div className="info-card">
-              <Phone className="info-icon" />
-              <h3>Hotline 24/7</h3>
-              <p>
-                <a href="tel:0382890990">0382.890.990</a>
-              </p>
-            </div>
-
-            <div className="info-card">
-              <Mail className="info-icon" />
-              <h3>Email</h3>
-              <p>
-                <a href="mailto:hnsinotruk@gmail.com">hnsinotruk@gmail.com</a>
-              </p>
-            </div>
+      <div className="container mx-auto px-4 md:px-10 lg:px-20 pb-20">
+        <div className="grid lg:grid-cols-2 gap-12">
+          {/* Contact Info */}
+          <div className="space-y-8">
+            <motion.div
+              initial={{ x: -30, opacity: 0 }}
+              whileInView={{ x: 0, opacity: 1 }}
+              viewport={{ once: true }}
+              className="space-y-6"
+            >
+              {[
+                {
+                  icon: 'location_on',
+                  title: 'Địa chỉ',
+                  content: 'Thôn 1, Xã Lại Yên, Hoài Đức, Hà Nội',
+                  sub: '(Cách cầu vượt An Khánh 300m)'
+                },
+                {
+                  icon: 'call',
+                  title: 'Hotline 24/7',
+                  content: '0382.890.990',
+                  href: 'tel:0382890990'
+                },
+                {
+                  icon: 'mail',
+                  title: 'Email',
+                  content: 'hnsinotruk@gmail.com',
+                  href: 'mailto:hnsinotruk@gmail.com'
+                },
+                {
+                  icon: 'schedule',
+                  title: 'Giờ làm việc',
+                  content: 'Thứ 2 - Chủ nhật: 7:00 - 21:00',
+                },
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className="flex items-start gap-5 p-6 bg-surface border border-border rounded-2xl hover:border-primary/50 transition-all"
+                >
+                  <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary border border-primary/30 flex-shrink-0">
+                    <span className="material-symbols-outlined text-2xl">{item.icon}</span>
+                  </div>
+                  <div>
+                    <h3 className="text-white font-bold text-lg mb-1">{item.title}</h3>
+                    {item.href ? (
+                      <a href={item.href} className="text-gray-400 hover:text-primary transition-colors text-lg">
+                        {item.content}
+                      </a>
+                    ) : (
+                      <p className="text-gray-400">{item.content}</p>
+                    )}
+                    {item.sub && <p className="text-gray-500 text-sm mt-1">{item.sub}</p>}
+                  </div>
+                </div>
+              ))}
+            </motion.div>
           </div>
 
-          <div ref={formRef} className="contact-form-wrapper">
-            <h2>Gửi tin nhắn cho chúng tôi</h2>
-            <form className="contact-form" onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label htmlFor="name">Họ và tên *</label>
+          {/* Contact Form */}
+          <motion.div
+            initial={{ x: 30, opacity: 0 }}
+            whileInView={{ x: 0, opacity: 1 }}
+            viewport={{ once: true }}
+            className="bg-surface border border-border rounded-3xl p-8 md:p-10"
+          >
+            <h2 className="text-2xl font-bold text-white mb-6">Gửi tin nhắn cho chúng tôi</h2>
+
+            {submitted && (
+              <div className="mb-6 p-4 bg-green-500/10 border border-green-500/30 rounded-xl flex items-center gap-3 text-green-400">
+                <span className="material-symbols-outlined">check_circle</span>
+                Cảm ơn bạn! Chúng tôi sẽ phản hồi sớm nhất.
+              </div>
+            )}
+
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              <div>
+                <label className="text-gray-400 text-sm font-medium mb-2 block">Họ và tên *</label>
                 <input
                   type="text"
-                  id="name"
                   required
                   value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-5 py-4 bg-white/5 border border-border rounded-xl text-white focus:outline-none focus:border-primary transition-all"
+                  placeholder="Nhập họ và tên"
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="phone">Số điện thoại *</label>
+              <div>
+                <label className="text-gray-400 text-sm font-medium mb-2 block">Số điện thoại *</label>
                 <input
                   type="tel"
-                  id="phone"
                   required
                   value={formData.phone}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="w-full px-5 py-4 bg-white/5 border border-border rounded-xl text-white focus:outline-none focus:border-primary transition-all"
+                  placeholder="Nhập số điện thoại"
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="email">Email</label>
+              <div>
+                <label className="text-gray-400 text-sm font-medium mb-2 block">Email</label>
                 <input
                   type="email"
-                  id="email"
                   value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full px-5 py-4 bg-white/5 border border-border rounded-xl text-white focus:outline-none focus:border-primary transition-all"
+                  placeholder="Nhập email (không bắt buộc)"
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="message">Tin nhắn *</label>
+              <div>
+                <label className="text-gray-400 text-sm font-medium mb-2 block">Tin nhắn *</label>
                 <textarea
-                  id="message"
-                  rows="5"
+                  rows="4"
                   required
                   value={formData.message}
-                  onChange={(e) =>
-                    setFormData({ ...formData, message: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                  className="w-full px-5 py-4 bg-white/5 border border-border rounded-xl text-white focus:outline-none focus:border-primary transition-all resize-none"
+                  placeholder="Nhập nội dung tin nhắn"
                 ></textarea>
               </div>
 
-              <button type="submit" className="btn-submit">
-                <Send className="btn-icon" />
-                Gửi tin nhắn
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-4 bg-primary hover:bg-red-600 disabled:opacity-50 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
+              >
+                {isSubmitting ? (
+                  <>
+                    <span className="material-symbols-outlined animate-spin">progress_activity</span>
+                    Đang gửi...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined">send</span>
+                    Gửi tin nhắn
+                  </>
+                )}
               </button>
             </form>
-          </div>
+          </motion.div>
         </div>
 
-        <div className="map-wrapper">
+        {/* Map */}
+        <motion.div
+          initial={{ y: 30, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
+          viewport={{ once: true }}
+          className="mt-12 rounded-3xl overflow-hidden border border-border"
+        >
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.123456789!2d105.1234567!3d21.1234567!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjHCsDA3JzI0LjQiTiAxMDXCsDA3JzI0LjQiRQ!5e0!3m2!1svi!2s!4v1234567890123!5m2!1svi!2s"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.123456789!2d105.7!3d21.05!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjHCsDAzJzAwLjAiTiAxMDXCsDQyJzAwLjAiRQ!5e0!3m2!1svi!2s!4v1234567890123!5m2!1svi!2s"
             width="100%"
-            height="450"
-            style={{ border: 0, borderRadius: 'var(--radius-lg)' }}
+            height="400"
+            style={{ border: 0 }}
             allowFullScreen=""
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
             title="SINOTRUK HÀ NỘI"
+            className="grayscale-[50%] hover:grayscale-0 transition-all duration-500"
           ></iframe>
-        </div>
+        </motion.div>
       </div>
     </div>
   )
 }
 
 export default Contact
-
-
