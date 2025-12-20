@@ -112,26 +112,13 @@ const Scene3D = () => {
 const About = () => {
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero with 3D */}
-      <div className="relative h-[50vh] md:h-[70vh] overflow-hidden">
-        {/* 3D Canvas - hidden on mobile for performance */}
-        <div className="absolute inset-0 z-0 hidden md:block">
-          <Canvas camera={{ position: [0, 2, 8], fov: 45 }} dpr={[1, 2]}>
-            <Suspense fallback={null}>
-              <Scene3D />
-            </Suspense>
-          </Canvas>
-        </div>
-
-        {/* Mobile fallback gradient background */}
-        <div className="absolute inset-0 z-0 md:hidden bg-gradient-to-br from-primary/10 via-white to-white" />
-
-        {/* Overlay gradients */}
-        <div className="absolute inset-0 z-[1] bg-gradient-to-b from-white via-transparent to-white pointer-events-none" />
-        <div className="absolute inset-0 z-[1] bg-gradient-to-r from-white/80 via-transparent to-white/80 pointer-events-none" />
+      {/* Hero Section - Clean gradient without 3D */}
+      <div className="relative h-[40vh] md:h-[50vh] overflow-hidden">
+        {/* Gradient background */}
+        <div className="absolute inset-0 z-0 bg-gradient-to-br from-primary/10 via-white to-sky-50" />
 
         {/* Text content */}
-        <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+        <div className="absolute inset-0 z-10 flex items-center justify-center">
           <motion.div
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -143,13 +130,9 @@ const About = () => {
             <h1 className="text-5xl md:text-8xl font-bold text-slate-800 tracking-tighter mb-6">
               GIỚI <span className="text-primary">THIỆU</span>
             </h1>
-            <p className="text-slate-500 text-lg max-w-xl mx-auto">
+            <p className="text-slate-600 text-lg max-w-xl mx-auto">
               Đối tác tin cậy trong ngành vận tải hạng nặng
             </p>
-            <div className="mt-8 flex items-center justify-center gap-2 text-slate-400 text-sm">
-              <span className="material-symbols-outlined text-primary animate-pulse">3d_rotation</span>
-              Kéo để xoay mô hình 3D
-            </div>
           </motion.div>
         </div>
       </div>
