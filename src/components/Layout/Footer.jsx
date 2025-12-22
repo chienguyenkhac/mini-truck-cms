@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 
 const Footer = () => {
   return (
-    <footer className="bg-slate-50 border-t border-slate-200 pt-24 pb-12">
+    <footer className="bg-gray-200 border-t border-gray-300 pt-24 pb-12">
       <div className="container mx-auto px-4 md:px-10 lg:px-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 mb-20">
           {/* Brand Column */}
@@ -23,7 +23,7 @@ const Footer = () => {
 
             <div className="flex gap-4">
               {['public', 'mail', 'location_on'].map((icon, i) => (
-                <a key={i} href="#" className="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-primary hover:border-primary hover:text-white transition-all duration-300">
+                <a key={i} href="#" className="w-12 h-12 rounded-2xl bg-gray-300 border border-gray-400 flex items-center justify-center text-gray-700 hover:bg-primary hover:border-primary hover:text-white transition-all duration-300">
                   <span className="material-symbols-outlined text-xl">{icon}</span>
                 </a>
               ))}
@@ -74,7 +74,7 @@ const Footer = () => {
                 <a href="tel:0382890990" className="text-slate-800 font-bold text-lg hover:text-primary transition-colors">0382.890.990</a>
               </div>
             </div>
-            <div className="flex items-center gap-4 p-5 rounded-2xl bg-slate-100 border border-slate-200">
+            <div className="flex items-center gap-4 p-5 rounded-2xl bg-gray-300 border border-gray-400">
               <span className="material-symbols-outlined text-primary text-3xl">mail</span>
               <div>
                 <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Email</p>

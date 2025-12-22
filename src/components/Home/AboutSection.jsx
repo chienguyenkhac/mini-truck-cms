@@ -142,15 +142,15 @@ const AboutSection = () => {
                         </p>
 
                         <div className="flex flex-wrap gap-4">
-                            <div className="flex items-center gap-3 px-5 py-3 bg-white border border-slate-200 rounded-xl shadow-sm">
+                            <div className="flex items-center gap-3 px-5 py-3 bg-gray-100 border border-gray-300 rounded-xl shadow-sm">
                                 <span className="text-primary text-3xl font-bold">500+</span>
                                 <span className="text-slate-500 text-sm">Khách hàng<br />tin tưởng</span>
                             </div>
-                            <div className="flex items-center gap-3 px-5 py-3 bg-white border border-slate-200 rounded-xl shadow-sm">
+                            <div className="flex items-center gap-3 px-5 py-3 bg-gray-100 border border-gray-300 rounded-xl shadow-sm">
                                 <span className="text-primary text-3xl font-bold">1000+</span>
                                 <span className="text-slate-500 text-sm">Xe đã<br />bàn giao</span>
                             </div>
-                            <div className="flex items-center gap-3 px-5 py-3 bg-white border border-slate-200 rounded-xl shadow-sm">
+                            <div className="flex items-center gap-3 px-5 py-3 bg-gray-100 border border-gray-300 rounded-xl shadow-sm">
                                 <span className="text-primary text-3xl font-bold">63</span>
                                 <span className="text-slate-500 text-sm">Tỉnh thành<br />phủ sóng</span>
                             </div>
@@ -169,7 +169,7 @@ const AboutSection = () => {
                             <motion.div
                                 key={i}
                                 whileHover={{ x: 10, scale: 1.02 }}
-                                className="group flex items-center gap-6 p-6 bg-white border border-slate-200 rounded-2xl hover:border-primary/30 transition-all cursor-pointer shadow-sm"
+                                className="group flex items-center gap-6 p-6 bg-gray-100 border border-gray-300 rounded-2xl hover:border-primary/30 transition-all cursor-pointer shadow-sm"
                             >
                                 <div className="w-16 h-16 flex-shrink-0 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/30 text-primary group-hover:bg-primary group-hover:text-white transition-all">
                                     <span className="material-symbols-outlined text-3xl">{item.icon}</span>

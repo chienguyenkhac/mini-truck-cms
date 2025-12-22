@@ -28,15 +28,27 @@
             theme: {
                 extend: {
                     colors: {
-                        // Light blue + white theme - sáng sủa, tươi mới
+                        // Light blue + gray + white theme - hiện đại, chuyên nghiệp
                         primary: '#0ea5e9',         // Sky blue - xanh da trời
                         'primary-dark': '#0284c7',  // Darker blue for hover
                         'primary-light': '#7dd3fc', // Light blue accent
-                        background: '#ffffff',       // Pure white background
-                        surface: '#f8fafc',          // Subtle gray surface
-                        border: '#e2e8f0',           // Light gray border
-                        'text-primary': '#0f172a',   // Dark text for contrast
-                        'text-secondary': '#64748b', // Gray text
+                        background: '#f9fafb',       // Subtle gray-white background
+                        surface: '#f1f5f9',          // Gray surface
+                        'surface-dark': '#e2e8f0',   // Darker gray surface
+                        border: '#d1d5db',           // Gray border
+                        'border-dark': '#9ca3af',    // Darker gray border
+                        'text-primary': '#1f2937',   // Dark gray text
+                        'text-secondary': '#6b7280', // Medium gray text
+                        'gray-50': '#f9fafb',
+                        'gray-100': '#f3f4f6',
+                        'gray-200': '#e5e7eb',
+                        'gray-300': '#d1d5db',
+                        'gray-400': '#9ca3af',
+                        'gray-500': '#6b7280',
+                        'gray-600': '#4b5563',
+                        'gray-700': '#374151',
+                        'gray-800': '#1f2937',
+                        'gray-900': '#111827',
                     },
                     fontFamily: {
                         sans: ['Space Grotesk', 'sans-serif'],
@@ -44,6 +56,7 @@
                     animation: {
                         'spin-slow': 'spin 8s linear infinite',
                         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'pulse-subtle': 'pulseSubtle 3s ease-in-out infinite',
                         'float': 'float 5s ease-in-out infinite',
                         'scale-up': 'scaleUp 0.3s ease-out',
                         'fade-in': 'fadeIn 0.3s ease-out',
@@ -60,6 +73,10 @@
                         fadeIn: {
                             '0%': { opacity: '0' },
                             '100%': { opacity: '1' },
+                        },
+                        pulseSubtle: {
+                            '0%, 100%': { opacity: '1', filter: 'brightness(1)' },
+                            '50%': { opacity: '0.9', filter: 'brightness(1.1)' },
                         },
                     },
                 }

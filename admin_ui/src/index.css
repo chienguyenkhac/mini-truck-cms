@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  background-color: #f9fafb;
+  color: #1f2937;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar styling - matching frontend current theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0ea5e9;
+}
+
+/* Table styling - matching frontend current theme */
+.admin-table {
+  @apply w-full border-collapse;
+}
+
+.admin-table th {
+  @apply bg-slate-50 text-left px-4 py-3 text-sm font-semibold text-slate-800 border-b border-slate-200;
+}
+
+.admin-table td {
+  @apply px-4 py-3 text-sm text-slate-600 border-b border-slate-200;
+}
+
+.admin-table tr:hover td {
+  @apply bg-slate-50;
+}
+
+/* Button variants - matching frontend current theme */
+.btn {
+  @apply px-4 py-2 rounded-xl font-bold transition-colors duration-200;
+}
+
+.btn-primary {
+  @apply bg-primary text-white hover:bg-primary-dark shadow-lg shadow-primary/20;
+}
+
+.btn-secondary {
+  @apply bg-white border border-slate-200 text-slate-700 hover:border-primary hover:bg-primary/5;
+}
+
+.btn-outline {
+  @apply border border-slate-200 text-slate-700 hover:border-primary hover:bg-primary/5;
+}
+
+/* Input styling - matching frontend current theme */
+.input {
+  @apply w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary transition-colors shadow-sm;
+}
+
+/* Card styling - matching frontend current theme (bg-white, border-slate-200, rounded-3xl) */
+.card {
+  @apply bg-white border border-slate-200 rounded-3xl p-6 shadow-sm;
+}

@@ -2,7 +2,7 @@ import { IMAGES } from '../../constants/images'
 
 const VideoSection = () => {
     return (
-        <section className="py-24 bg-surface/50 overflow-hidden">
+        <section className="py-24 bg-gray-50 overflow-hidden">
             <div className="container mx-auto px-4 md:px-10 lg:px-20">
                 <div className="grid lg:grid-cols-2 gap-16 items-center">
                     <div className="space-y-8">
@@ -11,9 +11,9 @@ const VideoSection = () => {
                             Video Giới Thiệu
                         </div>
 
-                        <h2 className="text-4xl md:text-6xl font-bold text-slate-800 leading-[1.1]">
+                        <h2 className="text-4xl md:text-6xl font-bold text-gray-800 leading-[1.1]">
                             Trải Nghiệm Sức Mạnh <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-sky-400">Không Giới Hạn</span>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-600 via-primary to-sky-400">Không Giới Hạn</span>
                         </h2>
 
                         <p className="text-slate-500 text-xl leading-relaxed">
@@ -25,7 +25,7 @@ const VideoSection = () => {
                                 { title: 'Chất Lượng 4K', desc: 'Hình ảnh sắc nét chân thực', icon: 'hd' },
                                 { title: 'Góc Nhìn 360', desc: 'Chi tiết mọi bộ phận', icon: '360' }
                             ].map((item, i) => (
-                                <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+                                <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-gray-100 border border-gray-300 shadow-sm">
                                     <div className="w-12 h-12 flex-shrink-0 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
                                         <span className="material-symbols-outlined">{item.icon}</span>
                                     </div>
@@ -41,7 +41,7 @@ const VideoSection = () => {
                             href="https://www.youtube.com/@sinotrukhanoi"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-3 px-8 py-4 bg-white hover:bg-primary border border-slate-200 hover:border-primary rounded-xl text-slate-700 hover:text-white font-bold transition-all group w-fit shadow-sm"
+                            className="flex items-center gap-3 px-8 py-4 bg-gray-200 hover:bg-primary border border-gray-300 hover:border-primary rounded-xl text-gray-700 hover:text-white font-bold transition-all group w-fit shadow-sm"
                         >
                             Khám Phá Kênh Youtube
                             <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">open_in_new</span>

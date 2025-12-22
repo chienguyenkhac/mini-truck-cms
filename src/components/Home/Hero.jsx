@@ -99,7 +99,7 @@ const Hero = () => {
   ), [])
 
   const subtitleChars = useMemo(() => (
-    'NEXT GEN'.split('').map((char, i) => (
+    'HÀ NỘI'.split('').map((char, i) => (
       <span key={i} className="char inline-block opacity-0">{char === ' ' ? '\u00A0' : char}</span>
     ))
   ), [])
@@ -169,9 +169,14 @@ const Hero = () => {
 
           <div ref={titleRef} className="overflow-hidden">
             <h1 className="text-slate-800 text-4xl sm:text-5xl md:text-7xl lg:text-9xl font-bold leading-[0.9] tracking-tighter drop-shadow-sm">
-              {titleChars}
+              <span className="inline-block hover:scale-105 transition-transform duration-300 cursor-default">
+                {titleChars}
+              </span>
               <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-sky-400 text-glow">
+              <span
+                className="text-primary inline-block hover:scale-105 transition-transform duration-300 cursor-default animate-pulse-subtle"
+                style={{ textShadow: '0 0 8px rgba(14, 165, 233, 0.6), 0 0 20px rgba(14, 165, 233, 0.4)' }}
+              >
                 {subtitleChars}
               </span>
             </h1>

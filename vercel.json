@@ -1,8 +1,14 @@
 {
+    "buildCommand": "npm run build:all",
+    "outputDirectory": "dist",
     "rewrites": [
         {
+            "source": "/secret/(.*)",
+            "destination": "/secret/index.html"
+        },
+        {
             "source": "/(.*)",
-            "destination": "/"
+            "destination": "/index.html"
         }
     ]
 }

@@ -22,7 +22,7 @@ export const Hero: React.FC = () => {
 
       <div className="relative z-10 container mx-auto px-4 md:px-10 lg:px-20 py-20">
         <div className="max-w-3xl space-y-8">
-          <motion.div 
+          <motion.div
             initial={{ x: -50, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.8 }}
@@ -31,20 +31,20 @@ export const Hero: React.FC = () => {
             <span className="material-symbols-outlined text-sm fill-1">verified</span>
             Thế hệ xe tải nặng 4.0
           </motion.div>
-          
-          <motion.h1 
+
+          <motion.h1
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-white text-6xl md:text-9xl font-bold leading-[0.85] tracking-tighter"
           >
-            SINOTRUK <br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-red-400 text-glow">
-              NEXT GEN
+            SINOTRUK <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-sky-400 text-glow">
+              HÀ NỘI
             </span>
           </motion.h1>
-          
-          <motion.p 
+
+          <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.5 }}
@@ -52,8 +52,8 @@ export const Hero: React.FC = () => {
           >
             Định nghĩa lại hiệu suất vận tải với công nghệ 3D hiện đại. SINOTRUK HÀ NỘI mang đến các dòng xe HOWO & SITRAK đột phá về sức mạnh.
           </motion.p>
-          
-          <motion.div 
+
+          <motion.div
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.7 }}
@@ -72,7 +72,7 @@ export const Hero: React.FC = () => {
       </div>
 
       {/* Floating Interactive hint */}
-      <motion.div 
+      <motion.div
         animate={{ y: [0, -10, 0] }}
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
         className="absolute right-10 bottom-20 hidden xl:block z-20"
