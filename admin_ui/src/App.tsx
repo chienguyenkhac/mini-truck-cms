@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Layout from './components/Layout/Layout';
 import Dashboard from './pages/Dashboard';
@@ -141,7 +141,5 @@ const LoginWrapper: React.FC = () => {
     
     return <Login onLogin={handleLogin} />;
 };
-
-export default App;
 
 export default App;

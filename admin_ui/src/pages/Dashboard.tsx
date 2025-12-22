@@ -80,7 +80,10 @@ const Dashboard: React.FC = () => {
                                 tickFormatter={(value) => `₫${(value / 1000000).toFixed(0)}M`}
                             />
                             <Tooltip 
-                                formatter={(value: number) => [`₫${new Intl.NumberFormat('vi-VN').format(value)}`, 'Doanh thu']}
+                                formatter={(value: number | undefined) => {
+                                    if (value === undefined) return ['', ''];
+                                    return [`₫${new Intl.NumberFormat('vi-VN').format(value)}`, 'Doanh thu'];
+                                }}
                                 contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px' }}
                             />
                             <Legend />
@@ -106,7 +109,7 @@ const Dashboard: React.FC = () => {
                                 cx="50%"
                                 cy="50%"
                                 labelLine={false}
-                                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                label={({ name, percent }: { name: string; percent?: number }) => `${name} ${percent ? (percent * 100).toFixed(0) : 0}%`}
                                 outerRadius={100}
                                 fill="#8884d8"
                                 dataKey="value"

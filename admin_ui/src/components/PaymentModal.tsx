@@ -7,7 +7,7 @@ interface PaymentModalProps {
     onClose: () => void;
 }
 
-const PaymentModal: React.FC<PaymentModalProps> = ({ customerId, customerCode, currentDebt, onClose }) => {
+const PaymentModal: React.FC<PaymentModalProps> = ({ customerCode, currentDebt, onClose }) => {
     const [formData, setFormData] = useState({
         amount: Math.abs(currentDebt),
         paymentMethod: 'cash',
