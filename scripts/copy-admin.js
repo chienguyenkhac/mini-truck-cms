@@ -1,10 +1,22 @@
 import { copyFileSync, mkdirSync, readdirSync, statSync, existsSync } from 'fs';
 import { join } from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-const sourceDir = 'admin_ui/dist';
-const destDir = 'dist/secret';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const rootDir = join(__dirname, '..');
+
+const sourceDir = join(rootDir, 'admin_ui/dist');
+const destDir = join(rootDir, 'dist/secret');
 
 function copyRecursive(src, dest) {
+    if (!existsSync(src)) {
+        console.error(`❌ Source directory does not exist: ${src}`);
+        console.log('💡 Make sure admin_ui is built first: cd admin_ui && npm run build');
+        process.exit(1);
+    }
+
     if (!existsSync(dest)) {
         mkdirSync(dest, { recursive: true });
     }
@@ -25,7 +37,7 @@ function copyRecursive(src, dest) {
 }
 
 try {
-    console.log('Copying admin_ui/dist to dist/secret...');
+    console.log(`📦 Copying ${sourceDir} to ${destDir}...`);
     copyRecursive(sourceDir, destDir);
     console.log('✅ Admin UI copied to dist/secret successfully!');
 } catch (error) {

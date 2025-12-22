@@ -1,7 +1,12 @@
 {
     "buildCommand": "npm run build:all",
     "outputDirectory": "dist",
+    "installCommand": "npm install && cd admin_ui && npm install",
     "rewrites": [
+        {
+            "source": "/secret",
+            "destination": "/secret/index.html"
+        },
         {
             "source": "/secret/(.*)",
             "destination": "/secret/index.html"
