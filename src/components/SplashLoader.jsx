@@ -35,11 +35,52 @@ const SplashLoader = ({ onComplete }) => {
                     animate={{ scale: 1, opacity: 1 }}
                     className="relative z-10 flex flex-col items-center"
                 >
-                    <div className="text-primary mb-8">
-                        <span className="material-symbols-outlined text-8xl font-bold drop-shadow-[0_0_15px_rgba(234,42,51,0.8)] animate-pulse">local_shipping</span>
+                    {/* Animated SINOTRUCK text */}
+                    <div className="mb-8">
+                        <h1 className="text-7xl md:text-9xl font-bold tracking-tighter">
+                            {['S', 'I', 'N', 'O', 'T', 'R', 'U', 'C', 'K'].map((char, index) => (
+                                <motion.span
+                                    key={index}
+                                    className="inline-block text-primary"
+                                    initial={{ opacity: 0, y: 50, rotateX: -90 }}
+                                    animate={{ 
+                                        opacity: 1, 
+                                        y: 0, 
+                                        rotateX: 0,
+                                        textShadow: [
+                                            '0 0 20px rgba(14, 165, 233, 0.5)',
+                                            '0 0 40px rgba(14, 165, 233, 0.8)',
+                                            '0 0 20px rgba(14, 165, 233, 0.5)',
+                                        ]
+                                    }}
+                                    transition={{
+                                        delay: index * 0.1,
+                                        duration: 0.6,
+                                        ease: 'easeOut',
+                                        textShadow: {
+                                            duration: 2,
+                                            repeat: Infinity,
+                                            repeatType: 'reverse',
+                                        }
+                                    }}
+                                    style={{ 
+                                        transformStyle: 'preserve-3d',
+                                        display: 'inline-block',
+                                    }}
+                                >
+                                    {char === ' ' ? '\u00A0' : char}
+                                </motion.span>
+                            ))}
+                        </h1>
                     </div>
-                    <h2 className="text-white text-3xl font-bold tracking-[0.3em] uppercase mb-1">Sinotruk</h2>
-                    <p className="text-primary text-xs font-bold tracking-[0.5em] uppercase mb-12">Hà Nội</p>
+                    <motion.p 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 1 }}
+                        className="text-primary text-xs font-bold tracking-[0.5em] uppercase mb-12"
+                    >
+                        Hà Nội
+                    </motion.p>
 
                     <div className="w-64 h-1 bg-white/5 rounded-full overflow-hidden">
                         <motion.div
