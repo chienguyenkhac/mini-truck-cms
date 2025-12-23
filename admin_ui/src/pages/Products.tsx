@@ -95,12 +95,11 @@ const Products: React.FC = () => {
             {/* Advanced Filters */}
             <div className="card">
                 <div className="flex items-center gap-4">
-                    <div className="flex-1 relative">
-                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                    <div className="flex-1">
                         <input
                             type="text"
                             placeholder="Tra cứu nhanh theo tên, mã sản phẩm, thông số..."
-                            className="input w-full pl-12"
+                            className="input w-full"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
