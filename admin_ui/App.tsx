@@ -14,7 +14,7 @@ import './src/index.css';
 function App() {
   return (
     <NotificationProvider>
-      <Router>
+      <Router basename="/secret">
         <div className="admin-layout">
           <Sidebar />
           <main className="admin-main">
