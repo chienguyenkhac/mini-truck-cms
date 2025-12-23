@@ -27,25 +27,26 @@ body {
   /* slate-50 */
 }
 
-/* Scrollbar styling - matching frontend current theme */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* Hide scrollbars globally */
+*::-webkit-scrollbar {
+  display: none;
 }
 
-::-webkit-scrollbar-track {
-  background: #e2e8f0;
-  /* slate-200 */
+* {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
-::-webkit-scrollbar-thumb {
-  background: #94a3b8;
-  /* slate-400 */
-  border-radius: 4px;
+/* Specific utility for hiding where needed */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #0ea5e9;
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* Table styling - with subtle gray accents */

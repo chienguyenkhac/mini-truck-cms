@@ -25,13 +25,13 @@ const categoryDistribution = [
     { name: 'KHÁC', value: 150, color: '#94a3b8' },
 ];
 
-const stockTrendData = [
-    { month: 'T1', count: 1800 },
-    { month: 'T2', count: 1950 },
-    { month: 'T3', count: 2100 },
-    { month: 'T4', count: 2050 },
-    { month: 'T5', count: 2200 },
-    { month: 'T6', count: 2298 },
+const catalogCompletionData = [
+    { month: 'T1', rate: 65 },
+    { month: 'T2', rate: 72 },
+    { month: 'T3', rate: 78 },
+    { month: 'T4', rate: 82 },
+    { month: 'T5', rate: 88 },
+    { month: 'T6', rate: 94 },
 ];
 
 const Dashboard: React.FC = () => {
@@ -62,25 +62,27 @@ const Dashboard: React.FC = () => {
 
             {/* Charts Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Stock Trend Chart */}
+                {/* Catalog Completion Chart */}
                 <div className="card">
-                    <h2 className="text-xl font-bold text-slate-800 tracking-tight mb-6">Tăng trưởng sản phẩm</h2>
+                    <h2 className="text-xl font-bold text-slate-800 tracking-tight mb-2">Độ hoàn thiện Catalog</h2>
+                    <p className="text-slate-500 text-sm mb-6">Tỷ lệ SP đầy đủ thông số kỹ thuật & hình ảnh</p>
                     <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={stockTrendData}>
+                        <LineChart data={catalogCompletionData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                             <XAxis dataKey="month" stroke="#64748b" />
-                            <YAxis stroke="#64748b" />
+                            <YAxis stroke="#64748b" tickFormatter={(v) => `${v}%`} />
                             <Tooltip
                                 contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                formatter={(v) => [`${v}%`, 'Độ hoàn thiện']}
                             />
                             <Line
                                 type="monotone"
-                                dataKey="count"
-                                stroke="#0ea5e9"
+                                dataKey="rate"
+                                stroke="#14b8a6"
                                 strokeWidth={4}
-                                dot={{ fill: '#0ea5e9', r: 4, strokeWidth: 2, stroke: '#fff' }}
+                                dot={{ fill: '#14b8a6', r: 4, strokeWidth: 2, stroke: '#fff' }}
                                 activeDot={{ r: 6, strokeWidth: 0 }}
-                                name="Số lượng SP"
+                                name="Độ hoàn thiện"
                             />
                         </LineChart>
                     </ResponsiveContainer>
