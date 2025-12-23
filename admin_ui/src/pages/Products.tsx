@@ -49,10 +49,23 @@ const Products: React.FC = () => {
         return products.filter((p: Product) => {
             const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
                 (p.code?.toLowerCase().includes(search.toLowerCase()) || false);
-            const matchesCategory = categoryFilter === 'ALL' || p.category_id === parseInt(categoryFilter);
+
+            // Find category_id from category name if needed
+            let matchesCategory = categoryFilter === 'ALL';
+            if (!matchesCategory) {
+                // Try to match by category name first (from URL like "ĐỘNG CƠ")
+                const categoryByName = categories.find(c => c.name === categoryFilter);
+                if (categoryByName) {
+                    matchesCategory = p.category_id === categoryByName.id;
+                } else {
+                    // Fallback to parsing as number (if URL has category_id)
+                    matchesCategory = p.category_id === parseInt(categoryFilter);
+                }
+            }
+
             return matchesSearch && matchesCategory;
         }).sort((a: Product, b: Product) => a.id - b.id);
-    }, [products, categoryFilter, search]);
+    }, [products, categories, categoryFilter, search]);
 
     // Cursor-based pagination logic
     const paginatedData = useMemo(() => {
