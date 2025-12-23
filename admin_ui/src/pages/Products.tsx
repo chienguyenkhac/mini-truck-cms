@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNotification } from '../components/shared/Notification';
+import AddProductModal from '../components/AddProductModal';
 import * as XLSX from 'xlsx';
 
 // Mock products data - will be replaced with API
@@ -15,6 +16,7 @@ const Products: React.FC = () => {
     const notification = useNotification();
     const [search, setSearch] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('');
+    const [showAddModal, setShowAddModal] = useState(false);
 
     const filteredProducts = mockProducts.filter(p => {
         const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -53,7 +55,10 @@ const Products: React.FC = () => {
                     <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Sản phẩm</h1>
                     <p className="text-slate-500">Quản lý danh sách sản phẩm</p>
                 </div>
-                <button className="flex items-center gap-2 px-6 py-2.5 bg-primary hover:bg-primary-dark text-white text-sm font-bold rounded-xl transition-colors shadow-lg shadow-primary/20">
+                <button
+                    onClick={() => setShowAddModal(true)}
+                    className="flex items-center gap-2 px-6 py-2.5 bg-primary hover:bg-primary-dark text-white text-sm font-bold rounded-xl transition-colors shadow-lg shadow-primary/20"
+                >
                     <span className="material-symbols-outlined text-xl">add</span>
                     Thêm sản phẩm
                 </button>
@@ -149,6 +154,17 @@ const Products: React.FC = () => {
                     Hiển thị {filteredProducts.length} / {mockProducts.length} sản phẩm
                 </p>
             </div>
+
+            {showAddModal && (
+                <AddProductModal
+                    onClose={() => setShowAddModal(false)}
+                    onAdd={(product) => {
+                        // In production, call API to add product
+                        console.log('Adding product:', product);
+                        setShowAddModal(false);
+                    }}
+                />
+            )}
         </div>
     );
 };
