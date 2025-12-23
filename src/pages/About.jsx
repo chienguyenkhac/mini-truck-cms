@@ -131,7 +131,7 @@ const About = () => {
               GIỚI <span className="text-primary">THIỆU</span>
             </h1>
             <p className="text-slate-600 text-lg max-w-xl mx-auto">
-              Đối tác tin cậy trong ngành vận tải hạng nặng
+              Đối tác tin cậy trong lĩnh vực phụ tùng xe tải
             </p>
           </motion.div>
         </div>
@@ -147,9 +147,9 @@ const About = () => {
         >
           {[
             { value: '15+', label: 'Năm kinh nghiệm' },
-            { value: '500+', label: 'Khách hàng' },
-            { value: '1000+', label: 'Xe đã bàn giao' },
-            { value: '63', label: 'Tỉnh thành' },
+            { value: '500+', label: 'Khách hàng tin tưởng' },
+            { value: '50K+', label: 'Phụ tùng đã bán' },
+            { value: '63', label: 'Tỉnh thành phủ sóng' },
           ].map((stat, i) => (
             <div key={i} className="bg-white/90 backdrop-blur-xl border border-slate-200 rounded-2xl p-6 text-center shadow-sm">
               <div className="text-primary text-4xl md:text-5xl font-bold">{stat.value}</div>

@@ -1,40 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { getProducts, getCategories } from '../services/supabase'
+import { supabase } from '../services/supabase'
+import { getCategories } from '../services/supabase'
 
-// Fallback products
-const fallbackProducts = [
-  {
-    id: 1,
-    name: 'Lọc dầu động cơ HOWO A7',
-    code: 'LDDC-A7',
-    description: 'Phụ tùng động cơ',
-    price: 350000,
-    price_bulk: 300000,
-    image: null,
-    category_id: 2,
-  },
-  {
-    id: 2,
-    name: 'Má phanh SITRAK G7',
-    code: 'MPH-G7S',
-    description: 'Phụ tùng phanh',
-    price: 850000,
-    price_bulk: 750000,
-    image: null,
-    category_id: 5,
-  },
-  {
-    id: 3,
-    name: 'Bơm thủy lực cabin HOWO',
-    code: 'BTL-HW',
-    description: 'Phụ tùng cabin',
-    price: 2500000,
-    price_bulk: 2200000,
-    image: null,
-    category_id: 1,
-  },
-]
+const ITEMS_PER_PAGE = 9
 
 // Format price
 const formatPrice = (price) => {
@@ -48,36 +18,92 @@ const Products = () => {
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+  const [lastId, setLastId] = useState(null)
 
-  // Load products and categories from Supabase
+  // Load categories
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [productsData, categoriesData] = await Promise.all([
-          getProducts(50),
-          getCategories()
-        ])
-        setProducts(productsData.length > 0 ? productsData : fallbackProducts)
-        setCategories(categoriesData)
-      } catch (err) {
-        console.error('Error loading data:', err)
-        setProducts(fallbackProducts)
-      } finally {
-        setLoading(false)
-      }
+    const loadCategories = async () => {
+      const data = await getCategories()
+      setCategories(data)
     }
-    loadData()
+    loadCategories()
   }, [])
 
-  // Filter products
-  const filteredProducts = products.filter((p) => {
-    const matchesCategory = selectedCategory === 'all' || p.category_id === parseInt(selectedCategory)
-    const matchesSearch = !searchTerm ||
-      p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.code?.toLowerCase().includes(searchTerm.toLowerCase())
-    return matchesCategory && matchesSearch
-  })
+  // Load products with cursor pagination
+  const loadProducts = useCallback(async (reset = false) => {
+    if (reset) {
+      setLoading(true)
+      setProducts([])
+      setLastId(null)
+      setHasMore(true)
+    } else {
+      setLoadingMore(true)
+    }
+
+    try {
+      let query = supabase
+        .from('products')
+        .select('*')
+        .order('id', { ascending: true })
+        .limit(ITEMS_PER_PAGE)
+
+      // Cursor pagination: get products after lastId
+      if (!reset && lastId) {
+        query = query.gt('id', lastId)
+      }
+
+      // Category filter
+      if (selectedCategory !== 'all') {
+        query = query.eq('category_id', parseInt(selectedCategory))
+      }
+
+      // Search filter
+      if (searchTerm) {
+        query = query.or(`name.ilike.%${searchTerm}%,code.ilike.%${searchTerm}%`)
+      }
+
+      const { data, error } = await query
+
+      if (error) {
+        console.error('Error fetching products:', error)
+        return
+      }
+
+      if (reset) {
+        setProducts(data || [])
+      } else {
+        setProducts(prev => [...prev, ...(data || [])])
+      }
+
+      // Check if there are more products
+      if (data && data.length > 0) {
+        setLastId(data[data.length - 1].id)
+        setHasMore(data.length === ITEMS_PER_PAGE)
+      } else {
+        setHasMore(false)
+      }
+    } catch (err) {
+      console.error('Error:', err)
+    } finally {
+      setLoading(false)
+      setLoadingMore(false)
+    }
+  }, [selectedCategory, searchTerm, lastId])
+
+  // Initial load and filter changes
+  useEffect(() => {
+    loadProducts(true)
+  }, [selectedCategory, searchTerm])
+
+  // Load more
+  const handleLoadMore = () => {
+    if (!loadingMore && hasMore) {
+      loadProducts(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -112,11 +138,6 @@ const Products = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary transition-all shadow-sm"
             />
-            {searchTerm && (
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-primary text-sm font-bold">
-                {filteredProducts.length} kết quả
-              </span>
-            )}
           </div>
           <button
             className={`flex items-center gap-2 px-6 py-4 rounded-2xl font-bold transition-all ${showFilters ? 'bg-primary text-white' : 'bg-white border border-slate-200 text-slate-700 hover:border-primary shadow-sm'}`}
@@ -175,69 +196,105 @@ const Products = () => {
               </div>
             ))}
           </div>
-        ) : filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredProducts.map((product, index) => (
-              <motion.div
-                key={product.id}
-                initial={{ y: 30, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                transition={{ delay: index * 0.05 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -5 }}
-                className="group bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-lg"
-              >
-                <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
-                  {product.image ? (
-                    <img
-                      src={product.image.startsWith('http') ? product.image : `https://irncljhvsjtohiqllnsv.supabase.co/storage/v1/object/public/products/${product.image}`}
-                      alt={product.name}
-                      loading="lazy"
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      onError={(e) => { e.target.style.display = 'none' }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="material-symbols-outlined text-8xl text-gray-300">settings</span>
+        ) : products.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {products.map((product, index) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ y: 30, opacity: 0 }}
+                  whileInView={{ y: 0, opacity: 1 }}
+                  transition={{ delay: Math.min(index * 0.05, 0.3) }}
+                  viewport={{ once: true }}
+                  whileHover={{ y: -5 }}
+                  className="group bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-lg"
+                >
+                  <Link to={`/product/${product.id}`}>
+                    <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                      {product.image ? (
+                        <img
+                          src={product.image.startsWith('http') ? product.image : `https://irncljhvsjtohiqllnsv.supabase.co/storage/v1/object/public/products/${product.image}`}
+                          alt={product.name}
+                          loading="lazy"
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          onError={(e) => { e.target.style.display = 'none' }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="material-symbols-outlined text-8xl text-gray-300">settings</span>
+                        </div>
+                      )}
+                      <div className="absolute top-4 left-4 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                        {product.code || 'Mới'}
+                      </div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent opacity-60"></div>
                     </div>
+                  </Link>
+                  <div className="p-6 space-y-4">
+                    <Link to={`/product/${product.id}`}>
+                      <h3 className="text-slate-800 font-bold text-lg group-hover:text-primary transition-colors line-clamp-2">
+                        {product.name}
+                      </h3>
+                    </Link>
+                    <p className="text-slate-400 text-sm">{product.description || 'Phụ tùng chính hãng'}</p>
+
+                    <div className="space-y-1">
+                      {product.price > 0 && (
+                        <p className="text-sm text-slate-600">
+                          Giá lẻ: <span className="font-bold text-slate-800">{formatPrice(product.price)}</span>
+                        </p>
+                      )}
+                      {product.price_bulk > 0 && (
+                        <p className="text-sm text-slate-600">
+                          Giá sỉ: <span className="font-bold text-green-600">{formatPrice(product.price_bulk)}</span>
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Link
+                        to={`/product/${product.id}`}
+                        className="flex-1 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2"
+                      >
+                        <span className="material-symbols-outlined text-lg">visibility</span>
+                        Chi Tiết
+                      </Link>
+                      <a
+                        href="tel:0382890990"
+                        className="flex-1 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-all flex items-center justify-center gap-2"
+                      >
+                        <span className="material-symbols-outlined text-lg">call</span>
+                        Đặt Hàng
+                      </a>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Load More Button */}
+            {hasMore && (
+              <div className="mt-12 text-center">
+                <button
+                  onClick={handleLoadMore}
+                  disabled={loadingMore}
+                  className="px-8 py-4 bg-white border border-slate-200 rounded-2xl text-slate-700 font-bold hover:border-primary hover:text-primary transition-all shadow-sm disabled:opacity-50 flex items-center gap-2 mx-auto"
+                >
+                  {loadingMore ? (
+                    <>
+                      <span className="animate-spin material-symbols-outlined">refresh</span>
+                      Đang tải...
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined">expand_more</span>
+                      Xem thêm sản phẩm
+                    </>
                   )}
-                  <div className="absolute top-4 left-4 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                    {product.code || 'Mới'}
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent opacity-60"></div>
-                </div>
-                <div className="p-6 space-y-4">
-                  <div>
-                    <h3 className="text-slate-800 font-bold text-lg group-hover:text-primary transition-colors line-clamp-2">
-                      {product.name}
-                    </h3>
-                    <p className="text-slate-400 text-sm mt-1">{product.description || 'Phụ tùng chính hãng'}</p>
-                  </div>
-
-                  <div className="space-y-1">
-                    {product.price > 0 && (
-                      <p className="text-sm text-slate-600">
-                        Giá lẻ: <span className="font-bold text-slate-800">{formatPrice(product.price)}</span>
-                      </p>
-                    )}
-                    {product.price_bulk > 0 && (
-                      <p className="text-sm text-slate-600">
-                        Giá sỉ: <span className="font-bold text-green-600">{formatPrice(product.price_bulk)}</span>
-                      </p>
-                    )}
-                  </div>
-
-                  <a
-                    href="tel:0382890990"
-                    className="w-full py-3 bg-primary/10 text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-2"
-                  >
-                    <span className="material-symbols-outlined text-lg">call</span>
-                    Đặt Hàng
-                  </a>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-20">
             <span className="material-symbols-outlined text-6xl text-slate-300 mb-4">search_off</span>
