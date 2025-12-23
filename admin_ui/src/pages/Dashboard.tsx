@@ -1,43 +1,37 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 // Stats card data
 const stats = [
     { label: 'Tổng sản phẩm', value: '2,298', icon: 'inventory_2', color: 'bg-blue-500' },
-    { label: 'Đơn hàng', value: '156', icon: 'shopping_cart', color: 'bg-green-500' },
-    { label: 'Khách hàng', value: '240', icon: 'people', color: 'bg-purple-500' },
-    { label: 'Doanh thu', value: '₫1.2B', icon: 'payments', color: 'bg-primary' },
+    { label: 'Sắp hết hàng', value: '45', icon: 'warning', color: 'bg-yellow-500' },
+    { label: 'Hết hàng', value: '12', icon: 'error', color: 'bg-red-500' },
+    { label: 'Danh mục', value: '8', icon: 'category', color: 'bg-primary' },
 ];
 
-const recentOrders = [
-    { id: 'ORD-001', customer: 'Công ty ABC', amount: '₫15,000,000', status: 'Hoàn thành' },
-    { id: 'ORD-002', customer: 'Nguyễn Văn A', amount: '₫8,500,000', status: 'Đang xử lý' },
-    { id: 'ORD-003', customer: 'Công ty XYZ', amount: '₫25,000,000', status: 'Chờ duyệt' },
+const lowStockProducts = [
+    { code: 'XLKVX', name: 'Xilanh kích cabin VX350', total: 5, category: 'CABIN' },
+    { code: 'LDDC-A7', name: 'Lọc dầu động cơ HOWO A7', total: 2, category: 'ĐỘNG CƠ' },
+    { code: 'LC420', name: 'Lá côn HOWO 420', total: 0, category: 'LY HỢP' },
 ];
 
 // Chart data
-const revenueData = [
-    { month: 'T1', revenue: 1200000000 },
-    { month: 'T2', revenue: 1500000000 },
-    { month: 'T3', revenue: 1800000000 },
-    { month: 'T4', revenue: 1400000000 },
-    { month: 'T5', revenue: 2000000000 },
-    { month: 'T6', revenue: 2200000000 },
+const categoryDistribution = [
+    { name: 'CABIN', value: 450, color: '#0ea5e9' },
+    { name: 'ĐỘNG CƠ', value: 380, color: '#10b981' },
+    { name: 'PHANH', value: 280, color: '#f59e0b' },
+    { name: 'LY HỢP', value: 220, color: '#8b5cf6' },
+    { name: 'KHÁC', value: 150, color: '#94a3b8' },
 ];
 
-const orderStatusData = [
-    { name: 'Hoàn thành', value: 45, color: '#10b981' },
-    { name: 'Đang xử lý', value: 30, color: '#f59e0b' },
-    { name: 'Chờ duyệt', value: 25, color: '#6b7280' },
-];
-
-const categoryData = [
-    { name: 'CABIN', orders: 45 },
-    { name: 'ĐỘNG CƠ', orders: 38 },
-    { name: 'PHANH', orders: 28 },
-    { name: 'LY HỢP', orders: 22 },
-    { name: 'KHÁC', orders: 15 },
+const stockTrendData = [
+    { month: 'T1', count: 1800 },
+    { month: 'T2', count: 1950 },
+    { month: 'T3', count: 2100 },
+    { month: 'T4', count: 2050 },
+    { month: 'T5', count: 2200 },
+    { month: 'T6', count: 2298 },
 ];
 
 const Dashboard: React.FC = () => {
@@ -48,13 +42,13 @@ const Dashboard: React.FC = () => {
             {/* Page Header */}
             <div className="mb-2 md:mb-0">
                 <h1 className="text-2xl md:text-3xl font-bold text-slate-800 tracking-tight">Dashboard</h1>
-                <p className="text-slate-500 text-sm md:text-base">Tổng quan hệ thống quản lý</p>
+                <p className="text-slate-500 text-sm md:text-base">Tổng quan kho sản phẩm Sinotruk</p>
             </div>
 
-            {/* Stats Grid - matching frontend current theme */}
+            {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 {stats.map((stat, i) => (
-                    <div key={i} className="card flex items-center gap-4 p-4 md:p-6">
+                    <div key={i} className="card flex items-center gap-4 p-4 md:p-6 hover:border-primary/30 transition-colors">
                         <div className={`w-10 h-10 md:w-12 md:h-12 ${stat.color} rounded-xl flex items-center justify-center shadow-lg flex-shrink-0`}>
                             <span className="material-symbols-outlined text-white text-xl md:text-2xl">{stat.icon}</span>
                         </div>
@@ -68,89 +62,66 @@ const Dashboard: React.FC = () => {
 
             {/* Charts Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Revenue Chart */}
+                {/* Stock Trend Chart */}
                 <div className="card">
-                    <h2 className="text-xl font-bold text-slate-800 tracking-tight mb-6">Doanh thu theo tháng</h2>
+                    <h2 className="text-xl font-bold text-slate-800 tracking-tight mb-6">Tăng trưởng sản phẩm</h2>
                     <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={revenueData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <LineChart data={stockTrendData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                             <XAxis dataKey="month" stroke="#64748b" />
-                            <YAxis
-                                stroke="#64748b"
-                                tickFormatter={(value) => `₫${(value / 1000000).toFixed(0)}M`}
-                            />
+                            <YAxis stroke="#64748b" />
                             <Tooltip
-                                formatter={(value: number | undefined) => {
-                                    if (value === undefined) return ['', ''];
-                                    return [`₫${new Intl.NumberFormat('vi-VN').format(value)}`, 'Doanh thu'];
-                                }}
-                                contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+                                contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                             />
-                            <Legend />
                             <Line
                                 type="monotone"
-                                dataKey="revenue"
+                                dataKey="count"
                                 stroke="#0ea5e9"
-                                strokeWidth={3}
-                                dot={{ fill: '#0ea5e9', r: 4 }}
-                                name="Doanh thu"
+                                strokeWidth={4}
+                                dot={{ fill: '#0ea5e9', r: 4, strokeWidth: 2, stroke: '#fff' }}
+                                activeDot={{ r: 6, strokeWidth: 0 }}
+                                name="Số lượng SP"
                             />
                         </LineChart>
                     </ResponsiveContainer>
                 </div>
 
-                {/* Order Status Pie Chart */}
+                {/* Category Distribution Chart */}
                 <div className="card">
-                    <h2 className="text-xl font-bold text-slate-800 tracking-tight mb-6">Trạng thái đơn hàng</h2>
+                    <h2 className="text-xl font-bold text-slate-800 tracking-tight mb-6">Phân bổ theo danh mục</h2>
                     <ResponsiveContainer width="100%" height={300}>
                         <PieChart>
                             <Pie
-                                data={orderStatusData}
+                                data={categoryDistribution}
                                 cx="50%"
                                 cy="50%"
-                                labelLine={false}
-                                label={(props: any) => {
-                                    const { name, percent } = props;
-                                    if (!name || percent === undefined) return '';
-                                    return `${name} ${(percent * 100).toFixed(0)}%`;
-                                }}
+                                innerRadius={60}
                                 outerRadius={100}
-                                fill="#8884d8"
+                                paddingAngle={5}
                                 dataKey="value"
                             >
-                                {orderStatusData.map((entry, index) => (
+                                {categoryDistribution.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={entry.color} />
                                 ))}
                             </Pie>
-                            <Tooltip />
+                            <Tooltip
+                                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                            />
+                            <Legend verticalAlign="bottom" height={36} />
                         </PieChart>
                     </ResponsiveContainer>
                 </div>
             </div>
 
-            {/* Category Chart */}
-            <div className="card">
-                <h2 className="text-xl font-bold text-slate-800 tracking-tight mb-6">Đơn hàng theo danh mục</h2>
-                <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={categoryData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                        <XAxis dataKey="name" stroke="#64748b" />
-                        <YAxis stroke="#64748b" />
-                        <Tooltip
-                            contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px' }}
-                        />
-                        <Legend />
-                        <Bar dataKey="orders" fill="#0ea5e9" name="Số đơn hàng" radius={[8, 8, 0, 0]} />
-                    </BarChart>
-                </ResponsiveContainer>
-            </div>
-
-            {/* Recent Orders */}
-            <div className="card">
+            {/* Low Stock Alerts */}
+            <div className="card border-red-100">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold text-slate-800 tracking-tight">Đơn hàng gần đây</h2>
+                    <div className="flex items-center gap-2">
+                        <span className="material-symbols-outlined text-red-500">warning</span>
+                        <h2 className="text-xl font-bold text-slate-800 tracking-tight">Cảnh báo tồn kho thấp</h2>
+                    </div>
                     <button
-                        onClick={() => navigate('/orders')}
+                        onClick={() => navigate('/products')}
                         className="btn btn-outline text-xs md:text-sm px-4"
                     >
                         Xem tất cả
@@ -160,25 +131,26 @@ const Dashboard: React.FC = () => {
                     <table className="admin-table w-full min-w-[600px]">
                         <thead>
                             <tr>
-                                <th>Mã đơn</th>
-                                <th>Khách hàng</th>
-                                <th>Giá trị</th>
-                                <th>Trạng thái</th>
+                                <th>Mã sản phẩm</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Danh mục</th>
+                                <th>Tồn kho</th>
                                 <th className="w-10"></th>
                             </tr>
                         </thead>
                         <tbody>
-                            {recentOrders.map((order) => (
-                                <tr key={order.id}>
-                                    <td className="font-medium text-slate-800">{order.id}</td>
-                                    <td className="text-slate-600 truncate max-w-[150px]">{order.customer}</td>
-                                    <td className="text-slate-600">{order.amount}</td>
+                            {lowStockProducts.map((product) => (
+                                <tr key={product.code}>
+                                    <td className="font-mono text-slate-800">{product.code}</td>
+                                    <td className="font-medium text-slate-800">{product.name}</td>
                                     <td>
-                                        <span className={`px-2 md:px-3 py-1 rounded-full text-[10px] md:text-xs font-bold ${order.status === 'Hoàn thành' ? 'bg-green-100 text-green-700' :
-                                            order.status === 'Đang xử lý' ? 'bg-yellow-100 text-yellow-700' :
-                                                'bg-slate-100 text-slate-600'
-                                            }`}>
-                                            {order.status}
+                                        <span className="px-2 py-1 bg-slate-100 rounded-lg text-[10px] font-bold text-slate-600">
+                                            {product.category}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span className={`font-bold ${product.total === 0 ? 'text-red-600' : 'text-yellow-600'}`}>
+                                            {product.total}
                                         </span>
                                     </td>
                                     <td className="text-right">

@@ -4,11 +4,6 @@ import { NavLink } from 'react-router-dom';
 const menuItems = [
     { path: '/dashboard', icon: 'dashboard', label: 'Dashboard' },
     { path: '/products', icon: 'inventory_2', label: 'Sản phẩm' },
-    { path: '/orders', icon: 'shopping_cart', label: 'Đơn hàng' },
-    { path: '/customers', icon: 'people', label: 'Khách hàng' },
-    { path: '/exports', icon: 'output', label: 'Xuất kho' },
-    { path: '/imports', icon: 'input', label: 'Nhập kho' },
-    { path: '/quotes', icon: 'request_quote', label: 'Báo giá' },
 ];
 
 const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({ isOpen, onClose }) => {
