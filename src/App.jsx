@@ -7,6 +7,7 @@ import ProductCategory from "./pages/ProductCategory"
 import About from "./pages/About"
 import Contact from "./pages/Contact"
 import Catalog from "./pages/Catalog"
+import ImageLibrary from "./pages/ImageLibrary"
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/catalog" element={<Catalog />} />
+          <Route path="/image-library" element={<ImageLibrary />} />
         </Routes>
       </Layout>
     </Router>

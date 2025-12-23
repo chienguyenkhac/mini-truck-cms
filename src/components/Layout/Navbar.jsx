@@ -5,24 +5,44 @@ import { gsap } from 'gsap'
 
 const Navbar = ({ isScrolled }) => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+    const [openDropdown, setOpenDropdown] = useState(null)
     const location = useLocation()
     const logoRef = useRef(null)
     const navRef = useRef(null)
 
     const menuItems = [
         { path: '/', label: 'Trang chủ' },
-        { path: '/products', label: 'Sản phẩm' },
         { path: '/about', label: 'Giới thiệu' },
+        {
+            path: '/products',
+            label: 'Phụ tùng theo xe',
+            dropdown: [
+                { path: '/products?category=howo', label: 'HOWO' },
+                { path: '/products?category=sitrak', label: 'SITRAK' },
+                { path: '/products?category=sinotruk', label: 'SINOTRUK' },
+            ]
+        },
+        {
+            path: '/products',
+            label: 'Phụ tùng bộ phận',
+            dropdown: [
+                { path: '/products?category=1', label: 'Cabin' },
+                { path: '/products?category=2', label: 'Động cơ' },
+                { path: '/products?category=3', label: 'Ly hợp' },
+                { path: '/products?category=5', label: 'Phanh' },
+                { path: '/products?category=7', label: 'Gầm' },
+            ]
+        },
         { path: '/catalog', label: 'Catalog' },
+        { path: '/image-library', label: 'Thư viện ảnh' },
         { path: '/contact', label: 'Liên hệ' },
     ]
 
     const isActive = (path) => {
         if (path === '/') return location.pathname === '/'
-        return location.pathname.startsWith(path)
+        return location.pathname.startsWith(path.split('?')[0])
     }
 
-    // Logo magnetic effect
     useEffect(() => {
         const logo = logoRef.current
         if (!logo) return
@@ -32,21 +52,11 @@ const Navbar = ({ isScrolled }) => {
             const x = (e.clientX - rect.left - rect.width / 2) * 0.2
             const y = (e.clientY - rect.top - rect.height / 2) * 0.2
 
-            gsap.to(logo, {
-                x,
-                y,
-                duration: 0.3,
-                ease: 'power2.out'
-            })
+            gsap.to(logo, { x, y, duration: 0.3, ease: 'power2.out' })
         }
 
         const handleMouseLeave = () => {
-            gsap.to(logo, {
-                x: 0,
-                y: 0,
-                duration: 0.5,
-                ease: 'elastic.out(1, 0.3)'
-            })
+            gsap.to(logo, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1, 0.3)' })
         }
 
         logo.addEventListener('mousemove', handleMouseMove)
@@ -58,21 +68,13 @@ const Navbar = ({ isScrolled }) => {
         }
     }, [])
 
-    // Nav links stagger animation
     useEffect(() => {
         if (!navRef.current) return
-        const links = navRef.current.querySelectorAll('a')
+        const links = navRef.current.querySelectorAll('a, button')
 
         gsap.fromTo(links,
             { y: -20, opacity: 0 },
-            {
-                y: 0,
-                opacity: 1,
-                duration: 0.5,
-                stagger: 0.05,
-                ease: 'power2.out',
-                delay: 0.3
-            }
+            { y: 0, opacity: 1, duration: 0.5, stagger: 0.05, ease: 'power2.out', delay: 0.3 }
         )
     }, [])
 
@@ -91,30 +93,59 @@ const Navbar = ({ isScrolled }) => {
                 </Link>
 
                 {/* Desktop Navigation */}
-                <nav ref={navRef} className="hidden lg:flex items-center gap-10">
+                <nav ref={navRef} className="hidden lg:flex items-center gap-6">
                     {menuItems.map((item, i) => (
-                        <Link
-                            key={item.path}
-                            to={item.path}
-                            className={`text-sm font-medium transition-colors relative group ${isActive(item.path) ? 'text-primary' : 'text-slate-700 hover:text-primary'}`}
-                        >
-                            {item.label}
-                            <span className={`absolute -bottom-1 left-0 h-[2px] bg-primary transition-all duration-300 ${isActive(item.path) ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
-                            <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-primary/20 scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
-                        </Link>
+                        item.dropdown ? (
+                            <div
+                                key={i}
+                                className="relative"
+                                onMouseEnter={() => setOpenDropdown(i)}
+                                onMouseLeave={() => setOpenDropdown(null)}
+                            >
+                                <button
+                                    className={`text-sm font-medium transition-colors relative group flex items-center gap-1 ${isActive(item.path) ? 'text-primary' : 'text-slate-700 hover:text-primary'}`}
+                                >
+                                    {item.label}
+                                    <span className="material-symbols-outlined text-sm">expand_more</span>
+                                </button>
+                                {openDropdown === i && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="absolute top-full left-0 mt-2 bg-white rounded-xl shadow-xl border border-slate-200 py-2 min-w-[180px]"
+                                    >
+                                        {item.dropdown.map((subItem, j) => (
+                                            <Link
+                                                key={j}
+                                                to={subItem.path}
+                                                className="block px-4 py-2 text-sm text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors"
+                                            >
+                                                {subItem.label}
+                                            </Link>
+                                        ))}
+                                    </motion.div>
+                                )}
+                            </div>
+                        ) : (
+                            <Link
+                                key={item.path + i}
+                                to={item.path}
+                                className={`text-sm font-medium transition-colors relative group ${isActive(item.path) ? 'text-primary' : 'text-slate-700 hover:text-primary'}`}
+                            >
+                                {item.label}
+                                <span className={`absolute -bottom-1 left-0 h-[2px] bg-primary transition-all duration-300 ${isActive(item.path) ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
+                            </Link>
+                        )
                     ))}
                 </nav>
 
-                {/* CTA Button with glow effect */}
+                {/* CTA Button */}
                 <Link
                     to="/contact"
-                    className="hidden sm:flex items-center gap-2 px-6 py-2.5 bg-primary hover:brightness-110 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:scale-105 active:scale-95 relative overflow-hidden group"
+                    className="hidden sm:flex items-center gap-2 px-5 py-2 bg-primary hover:brightness-110 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:scale-105 active:scale-95"
                 >
-                    <span className="absolute inset-0 bg-gradient-to-r from-sky-600 via-primary to-sky-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[length:200%] animate-shimmer"></span>
-                    <span className="relative flex items-center gap-2">
-                        Nhận Báo Giá
-                        <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                    </span>
+                    Nhận Báo Giá
+                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
                 </Link>
 
                 {/* Mobile Menu Button */}
@@ -139,18 +170,36 @@ const Navbar = ({ isScrolled }) => {
                     <nav className="container mx-auto px-4 py-6 flex flex-col gap-4">
                         {menuItems.map((item, i) => (
                             <motion.div
-                                key={item.path}
+                                key={i}
                                 initial={{ x: -20, opacity: 0 }}
                                 animate={{ x: 0, opacity: 1 }}
                                 transition={{ delay: i * 0.05 }}
                             >
-                                <Link
-                                    to={item.path}
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className={`text-lg font-medium py-2 border-b border-border/50 block ${isActive(item.path) ? 'text-primary' : 'text-slate-700'}`}
-                                >
-                                    {item.label}
-                                </Link>
+                                {item.dropdown ? (
+                                    <div className="py-2 border-b border-border/50">
+                                        <span className="text-lg font-medium text-slate-700">{item.label}</span>
+                                        <div className="mt-2 pl-4 space-y-2">
+                                            {item.dropdown.map((subItem, j) => (
+                                                <Link
+                                                    key={j}
+                                                    to={subItem.path}
+                                                    onClick={() => setIsMobileMenuOpen(false)}
+                                                    className="block text-slate-500 hover:text-primary"
+                                                >
+                                                    {subItem.label}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <Link
+                                        to={item.path}
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        className={`text-lg font-medium py-2 border-b border-border/50 block ${isActive(item.path) ? 'text-primary' : 'text-slate-700'}`}
+                                    >
+                                        {item.label}
+                                    </Link>
+                                )}
                             </motion.div>
                         ))}
                         <motion.div
