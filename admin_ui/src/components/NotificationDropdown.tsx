@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ViewAllNotificationsModal from './ViewAllNotificationsModal';
 
 interface Notification {
     id: number;
@@ -16,6 +17,7 @@ const NotificationDropdown: React.FC = () => {
         { id: 2, type: 'order', title: 'Đơn hàng mới', message: 'Đơn hàng TQ #002 vừa được tạo', time: '15 phút trước', read: false },
         { id: 3, type: 'system', title: 'Thông báo hệ thống', message: 'Cập nhật phiên bản mới', time: '1 giờ trước', read: true },
     ]);
+    const [showAllModal, setShowAllModal] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Close dropdown when clicking outside
@@ -106,14 +108,12 @@ const NotificationDropdown: React.FC = () => {
                                 <div
                                     key={notification.id}
                                     onClick={() => markAsRead(notification.id)}
-                                    className={`p-4 border-b border-slate-100 cursor-pointer hover:bg-slate-50 transition-colors ${
-                                        !notification.read ? 'bg-primary/5' : ''
-                                    }`}
+                                    className={`p-4 border-b border-slate-100 cursor-pointer hover:bg-slate-50 transition-colors ${!notification.read ? 'bg-primary/5' : ''
+                                        }`}
                                 >
                                     <div className="flex items-start gap-3">
-                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                                            notification.type === 'order' ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-600'
-                                        }`}>
+                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${notification.type === 'order' ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-600'
+                                            }`}>
                                             <span className="material-symbols-outlined text-xl">
                                                 {notification.type === 'order' ? 'shopping_cart' : 'info'}
                                             </span>
@@ -137,12 +137,26 @@ const NotificationDropdown: React.FC = () => {
                     {/* Footer */}
                     {notifications.length > 0 && (
                         <div className="p-3 border-t border-slate-200 text-center">
-                            <button className="text-xs text-primary hover:text-primary-dark transition-colors">
+                            <button
+                                onClick={() => {
+                                    setShowAllModal(true);
+                                    setIsOpen(false);
+                                }}
+                                className="text-sm font-bold text-primary hover:text-primary-dark transition-colors px-4 py-1"
+                            >
                                 Xem tất cả
                             </button>
                         </div>
                     )}
                 </div>
+            )}
+
+            {showAllModal && (
+                <ViewAllNotificationsModal
+                    notifications={notifications}
+                    onClose={() => setShowAllModal(false)}
+                    onMarkAsRead={markAsRead}
+                />
             )}
         </div>
     );
