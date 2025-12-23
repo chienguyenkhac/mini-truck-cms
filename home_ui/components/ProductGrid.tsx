@@ -1,70 +1,75 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useFeaturedProducts } from '../hooks/useApi';
-import { Product } from '../services/api';
+import { getProducts, Product } from '../services/supabase';
 
 // Fallback products for spare parts
-const fallbackProducts = [
+const fallbackProducts: Product[] = [
   {
     id: 1,
     name: 'Lọc dầu động cơ HOWO A7',
     code: 'LDDC-A7',
-    type: 'Phụ tùng động cơ',
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=600',
     price: 350000,
     price_bulk: 300000,
     total: 50,
+    category_id: 2,
+    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=600',
+    description: 'Phụ tùng động cơ',
   },
   {
     id: 2,
     name: 'Má phanh SITRAK G7',
     code: 'MPH-G7S',
-    type: 'Phụ tùng phanh',
-    image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&q=80&w=600',
     price: 850000,
     price_bulk: 750000,
     total: 30,
+    category_id: 5,
+    image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&q=80&w=600',
+    description: 'Phụ tùng phanh',
   },
   {
     id: 3,
     name: 'Bơm thủy lực cabin HOWO',
     code: 'BTL-HW',
-    type: 'Phụ tùng cabin',
-    image: 'https://images.unsplash.com/photo-1565043589221-1a6fd9ae45c7?auto=format&fit=crop&q=80&w=600',
     price: 2500000,
     price_bulk: 2200000,
     total: 15,
+    category_id: 1,
+    image: 'https://images.unsplash.com/photo-1565043589221-1a6fd9ae45c7?auto=format&fit=crop&q=80&w=600',
+    description: 'Phụ tùng cabin',
   },
   {
     id: 4,
     name: 'Đĩa ly hợp SITRAK C7H',
     code: 'DLH-C7H',
-    type: 'Phụ tùng ly hợp',
-    image: 'https://images.unsplash.com/photo-1635784440093-7b2f0c4a6b69?auto=format&fit=crop&q=80&w=600',
     price: 1800000,
     price_bulk: 1600000,
     total: 25,
+    category_id: 3,
+    image: 'https://images.unsplash.com/photo-1635784440093-7b2f0c4a6b69?auto=format&fit=crop&q=80&w=600',
+    description: 'Phụ tùng ly hợp',
   },
   {
     id: 5,
     name: 'Gương chiếu hậu HOWO TX',
     code: 'GCH-TX',
-    type: 'Phụ tùng cabin',
-    image: 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&q=80&w=600',
     price: 650000,
     price_bulk: 550000,
     total: 40,
+    category_id: 1,
+    image: 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&q=80&w=600',
+    description: 'Phụ tùng cabin',
   },
   {
     id: 6,
     name: 'Bộ lọc gió động cơ',
     code: 'BLG-DC',
-    type: 'Phụ tùng động cơ',
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=600',
     price: 280000,
     price_bulk: 240000,
     total: 80,
+    category_id: 2,
+    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=600',
+    description: 'Phụ tùng động cơ',
   }
 ];
 
@@ -86,17 +91,15 @@ const ProductSkeleton: React.FC = () => (
   </div>
 );
 
-// Get image URL - handles both local and remote images
-const getImageUrl = (product: Product | typeof fallbackProducts[0]): string => {
+// Get image URL
+const getImageUrl = (product: Product): string => {
   if (!product.image) {
     return 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=600';
   }
-  // If it's already a full URL, use it
   if (product.image.startsWith('http')) {
     return product.image;
   }
-  // Otherwise, prepend the API base URL
-  return `https://dongha.sinotruk-hanoi.com/${product.image}`;
+  return `https://irncljhvsjtohiqllnsv.supabase.co/storage/v1/object/public/products/${product.image}`;
 };
 
 // Format price to Vietnamese currency
@@ -106,10 +109,27 @@ const formatPrice = (price: number): string => {
 };
 
 export const ProductGrid: React.FC = () => {
-  const { products: apiProducts, loading, error } = useFeaturedProducts();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Use API products if available, otherwise use fallback
-  const displayProducts = apiProducts.length > 0 ? apiProducts : fallbackProducts;
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const data = await getProducts();
+        setProducts(data.length > 0 ? data : fallbackProducts);
+      } catch (err) {
+        console.error('Error loading products:', err);
+        setError('Không thể tải sản phẩm');
+        setProducts(fallbackProducts);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadProducts();
+  }, []);
+
+  const displayProducts = products.length > 0 ? products : fallbackProducts;
 
   return (
     <section className="py-24 bg-background relative overflow-hidden">
@@ -141,7 +161,7 @@ export const ProductGrid: React.FC = () => {
         {/* Error message */}
         {error && (
           <div className="text-center text-yellow-500 mb-8 text-sm">
-            ⚠️ Đang hiển thị dữ liệu mẫu. {error}
+            ⚠️ {error}
           </div>
         )}
 
@@ -181,23 +201,23 @@ export const ProductGrid: React.FC = () => {
                 <div className="p-8 space-y-6">
                   <div>
                     <h3 className="text-white text-xl font-bold group-hover:text-primary transition-colors tracking-tight">{product.name}</h3>
-                    <p className="text-gray-500 text-sm font-medium mt-1">{product.type}</p>
+                    <p className="text-gray-500 text-sm font-medium mt-1">{product.description || 'Phụ tùng chính hãng'}</p>
                   </div>
 
                   <div className="space-y-3">
-                    {'price' in product && product.price > 0 && (
+                    {product.price > 0 && (
                       <div className="flex items-center gap-3 text-gray-400 text-xs font-medium uppercase tracking-wider">
                         <div className="w-1 h-1 bg-primary rounded-full"></div>
                         Giá lẻ: <span className="text-white font-bold">{formatPrice(product.price)}</span>
                       </div>
                     )}
-                    {'price_bulk' in product && product.price_bulk > 0 && (
+                    {product.price_bulk > 0 && (
                       <div className="flex items-center gap-3 text-gray-400 text-xs font-medium uppercase tracking-wider">
                         <div className="w-1 h-1 bg-green-500 rounded-full"></div>
                         Giá sỉ: <span className="text-green-400 font-bold">{formatPrice(product.price_bulk)}</span>
                       </div>
                     )}
-                    {'total' in product && product.total > 0 && (
+                    {product.total > 0 && (
                       <div className="flex items-center gap-3 text-gray-400 text-xs font-medium uppercase tracking-wider">
                         <div className="w-1 h-1 bg-blue-500 rounded-full"></div>
                         Còn: {product.total} sản phẩm

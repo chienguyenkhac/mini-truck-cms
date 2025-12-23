@@ -38,9 +38,9 @@ export const Hero: React.FC = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-white text-5xl md:text-8xl font-bold leading-[0.9] tracking-tighter"
           >
-            PHỤ TÙNG <br />
+            SINOTRUK <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-sky-400 text-glow">
-              XE TẢI SINOTRUK
+              HÀ NỘI
             </span>
           </motion.h1>
 
