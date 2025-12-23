@@ -15,7 +15,44 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ onClose, onAdd }) => 
         total: 0,
         category: '',
         description: '',
+        image: '', // URL of the uploaded image
     });
+    const [isUploading, setIsUploading] = useState(false);
+
+    // Cloudinary configuration - Replace with real credentials
+    const CLOUDINARY_UPLOAD_PRESET = 'antigravity_preset'; // Replace with user's preset
+    const CLOUDINARY_CLOUD_NAME = 'dgv7d7n6q'; // Replace with user's cloud name
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploading(true);
+        const data = new FormData();
+        data.append('file', file);
+        data.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+        try {
+            const response = await fetch(
+                `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+                {
+                    method: 'POST',
+                    body: data,
+                }
+            );
+
+            if (!response.ok) throw new Error('Upload failed');
+
+            const result = await response.json();
+            setFormData({ ...formData, image: result.secure_url });
+            notification.success('Tải ảnh lên thành công');
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            notification.error('Không thể tải ảnh lên. Vui lòng kiểm tra cấu hình Cloudinary.');
+        } finally {
+            setIsUploading(false);
+        }
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -119,6 +156,46 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ onClose, onAdd }) => 
                                 className="input"
                                 placeholder="10"
                             />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Hình ảnh sản phẩm</label>
+                        <div className="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 hover:border-primary transition-colors cursor-pointer relative group">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageUpload}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                disabled={isUploading}
+                            />
+
+                            {formData.image ? (
+                                <div className="relative w-24 h-24 rounded-xl overflow-hidden shadow-md">
+                                    <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                        <span className="text-white text-xs font-bold">Thay đổi</span>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="w-24 h-24 rounded-xl bg-white border border-slate-200 flex flex-col items-center justify-center text-slate-400">
+                                    {isUploading ? (
+                                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                                    ) : (
+                                        <>
+                                            <span className="material-symbols-outlined text-3xl">add_photo_alternate</span>
+                                            <span className="text-[10px] mt-1 font-bold">TẢI ẢNH</span>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
+                            <div className="flex-1 flex flex-col justify-center h-24">
+                                <p className="text-sm font-bold text-slate-700">
+                                    {isUploading ? 'Đang tải lên...' : formData.image ? 'Đã tải ảnh lên' : 'Nhấn để chọn ảnh'}
+                                </p>
+                                <p className="text-xs text-slate-400 mt-1">Định dạng: JPG, PNG, WEBP. Tối đa 5MB.</p>
+                            </div>
                         </div>
                     </div>
 

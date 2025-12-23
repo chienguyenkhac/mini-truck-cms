@@ -5,11 +5,11 @@ import * as XLSX from 'xlsx';
 
 // Mock products data - will be replaced with API
 const mockProducts = [
-    { id: 1, code: 'XLKVX', name: 'Xilanh kích cabin VX350', price: 850000, total: 15, category: 'CABIN' },
-    { id: 2, code: 'TBTSI', name: 'Tăm bét trước SITRAK', price: 1200000, total: 8, category: 'ĐỘNG CƠ' },
-    { id: 3, code: 'LDDC-A7', name: 'Lọc dầu động cơ HOWO A7', price: 350000, total: 25, category: 'ĐỘNG CƠ' },
-    { id: 4, code: 'LC420', name: 'Lá côn HOWO 420', price: 2500000, total: 4, category: 'LY HỢP' },
-    { id: 5, code: 'PTTS', name: 'Phanh tang trống sau', price: 1800000, total: 12, category: 'PHANH' },
+    { id: 1, code: 'XLKVX', name: 'Xilanh kích cabin VX350', price: 850000, total: 15, category: 'CABIN', image: 'https://res.cloudinary.com/dgv7d7n6q/image/upload/v1734944400/product_placeholder.png' },
+    { id: 2, code: 'TBTSI', name: 'Tăm bét trước SITRAK', price: 1200000, total: 8, category: 'ĐỘNG CƠ', image: 'https://res.cloudinary.com/dgv7d7n6q/image/upload/v1734944400/product_placeholder.png' },
+    { id: 3, code: 'LDDC-A7', name: 'Lọc dầu động cơ HOWO A7', price: 350000, total: 25, category: 'ĐỘNG CƠ', image: 'https://res.cloudinary.com/dgv7d7n6q/image/upload/v1734944400/product_placeholder.png' },
+    { id: 4, code: 'LC420', name: 'Lá côn HOWO 420', price: 2500000, total: 4, category: 'LY HỢP', image: 'https://res.cloudinary.com/dgv7d7n6q/image/upload/v1734944400/product_placeholder.png' },
+    { id: 5, code: 'PTTS', name: 'Phanh tang trống sau', price: 1800000, total: 12, category: 'PHANH', image: 'https://res.cloudinary.com/dgv7d7n6q/image/upload/v1734944400/product_placeholder.png' },
 ];
 
 const Products: React.FC = () => {
@@ -102,6 +102,7 @@ const Products: React.FC = () => {
                 <table className="admin-table">
                     <thead>
                         <tr>
+                            <th className="w-20">Ảnh</th>
                             <th>Mã SP</th>
                             <th>Tên sản phẩm</th>
                             <th>Giá lẻ</th>
@@ -113,6 +114,15 @@ const Products: React.FC = () => {
                     <tbody>
                         {filteredProducts.map((product) => (
                             <tr key={product.id}>
+                                <td>
+                                    <div className="w-12 h-12 rounded-lg bg-slate-50 border border-slate-100 overflow-hidden shadow-sm">
+                                        <img
+                                            src={product.image || 'https://res.cloudinary.com/dgv7d7n6q/image/upload/v1734944400/product_placeholder.png'}
+                                            alt={product.name}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                </td>
                                 <td className="font-mono text-slate-800">{product.code}</td>
                                 <td className="font-medium text-slate-800">{product.name}</td>
                                 <td className="text-slate-600">{new Intl.NumberFormat('vi-VN').format(product.price)}đ</td>
