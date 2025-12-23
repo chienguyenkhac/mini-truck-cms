@@ -33,19 +33,19 @@ const Navbar = ({ isScrolled }) => {
     }, [])
 
     const menuItems = [
-        { path: '/', label: 'Trang chủ' },
-        { path: '/about', label: 'Giới thiệu' },
+        { path: '/', label: 'TRANG CHỦ' },
+        { path: '/about', label: 'GIỚI THIỆU' },
         {
-            label: 'Phụ tùng theo xe',
+            label: 'PHỤ TÙNG THEO XE',
             dropdownType: 'vehicle'
         },
         {
-            label: 'Phụ tùng bộ phận',
+            label: 'PHỤ TÙNG BỘ PHẬN',
             dropdownType: 'parts'
         },
-        { path: '/catalog', label: 'Catalog' },
-        { path: '/image-library', label: 'Thư viện ảnh' },
-        { path: '/contact', label: 'Liên hệ' },
+        { path: '/catalog', label: 'CATALOG' },
+        { path: '/image-library', label: 'THƯ VIỆN ẢNH' },
+        { path: '/contact', label: 'LIÊN HỆ' },
     ]
 
     const isActive = (path) => {
@@ -132,16 +132,16 @@ const Navbar = ({ isScrolled }) => {
                                         <div className="bg-white rounded-xl shadow-xl border border-slate-200 py-2">
                                             <Link
                                                 to="/products"
-                                                className="block px-4 py-2 text-sm text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors font-medium"
+                                                className="block px-4 py-2 text-sm text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors font-medium uppercase"
                                             >
-                                                Tất cả
+                                                TẤT CẢ
                                             </Link>
                                             <div className="h-px bg-slate-100 my-1"></div>
                                             {getDropdownItems(item.dropdownType).map((cat) => (
                                                 <Link
                                                     key={cat.id}
-                                                    to={`/products?${item.dropdownType === 'vehicle' ? 'vehicle' : 'category'}=${cat.id}`}
-                                                    className="block px-4 py-2 text-sm text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors"
+                                                    to={`/products?category=${cat.id}`}
+                                                    className="block px-4 py-2 text-sm text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors uppercase"
                                                 >
                                                     {cat.name}
                                                 </Link>
