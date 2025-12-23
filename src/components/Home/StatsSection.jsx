@@ -1,8 +1,8 @@
 const stats = [
     { label: 'Năm Kinh Nghiệm', value: '15+', icon: 'calendar_month' },
-    { label: 'Xe Đã Bán', value: '5000+', icon: 'local_shipping' },
+    { label: 'Phụ Tùng Đã Bán', value: '50K+', icon: 'settings' },
     { label: 'Khách Hàng Hài Lòng', value: '98%', icon: 'sentiment_satisfied' },
-    { label: 'Hỗ Trợ Kỹ Thuật', value: '24/7', icon: 'build' },
+    { label: 'Hỗ Trợ Kỹ Thuật', value: '24/7', icon: 'support_agent' },
 ]
 
 const StatsSection = () => {

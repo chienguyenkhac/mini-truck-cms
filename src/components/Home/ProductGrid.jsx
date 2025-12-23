@@ -1,38 +1,46 @@
-import { useRef, useEffect, useMemo, useCallback } from 'react'
+import { useRef, useEffect, useMemo, useCallback, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
+import { getProducts } from '../../services/supabase'
 import { IMAGES } from '../../constants/images'
 
-const products = [
+// Fallback products for spare parts
+const fallbackProducts = [
     {
-        name: 'HOWO MAX 2024',
-        subtitle: 'Động cơ 460HP - Cabin MAX',
-        tag: 'Flagship',
-        tagColor: 'bg-primary',
+        id: 1,
+        name: 'Lọc dầu động cơ HOWO A7',
+        code: 'LDDC-A7',
+        description: 'Phụ tùng động cơ',
+        price: 350000,
+        price_bulk: 300000,
         image: IMAGES.trucks.howoMax,
-        features: ['Hệ thống treo khí nén', 'Ghế massage hiện đại'],
-        category: 'howo-a7'
     },
     {
-        name: 'SITRAK G7S',
-        subtitle: 'Chuẩn Châu Âu - Bền bỉ',
-        tag: 'Premium',
-        tagColor: 'bg-blue-600',
+        id: 2,
+        name: 'Má phanh SITRAK G7',
+        code: 'MPH-G7S',
+        description: 'Phụ tùng phanh',
+        price: 850000,
+        price_bulk: 750000,
         image: IMAGES.trucks.sitrakG7S,
-        features: ['Phanh đĩa EBS/ESC', 'Tiết kiệm 5% dầu'],
-        category: 'sitrak'
     },
     {
-        name: 'HOWO TX Mixer',
-        subtitle: 'Bồn trộn chuyên dụng 12m3',
-        tag: 'Reliable',
-        tagColor: 'bg-green-600',
+        id: 3,
+        name: 'Bơm thủy lực cabin HOWO',
+        code: 'BTL-HW',
+        description: 'Phụ tùng cabin',
+        price: 2500000,
+        price_bulk: 2200000,
         image: IMAGES.trucks.howoMixer,
-        features: ['Thép cường lực K400', 'Bơm thủy lực Eaton'],
-        category: 'howo-ben'
     }
 ]
+
+// Format price
+const formatPrice = (price) => {
+    if (!price || price === 0) return 'Liên hệ'
+    return new Intl.NumberFormat('vi-VN').format(price) + 'đ'
+}
 
 // Optimized TiltCard
 const TiltCard = ({ children, className }) => {
@@ -89,9 +97,27 @@ const TiltCard = ({ children, className }) => {
 const ProductGrid = () => {
     const containerRef = useRef(null)
     const hasAnimated = useRef(false)
+    const [products, setProducts] = useState([])
+    const [loading, setLoading] = useState(true)
+
+    // Fetch products from Supabase
+    useEffect(() => {
+        const loadProducts = async () => {
+            try {
+                const data = await getProducts(6)
+                setProducts(data.length > 0 ? data : fallbackProducts)
+            } catch (err) {
+                console.error('Error loading products:', err)
+                setProducts(fallbackProducts)
+            } finally {
+                setLoading(false)
+            }
+        }
+        loadProducts()
+    }, [])
 
     useEffect(() => {
-        if (!containerRef.current || hasAnimated.current) return
+        if (!containerRef.current || hasAnimated.current || loading) return
         const cards = containerRef.current.querySelectorAll('.product-card')
 
         const observer = new IntersectionObserver(
@@ -110,22 +136,25 @@ const ProductGrid = () => {
 
         observer.observe(containerRef.current)
         return () => observer.disconnect()
-    }, [])
+    }, [loading])
 
-    const productCards = useMemo(() => products.map((p, idx) => (
+    const displayProducts = products.length > 0 ? products : fallbackProducts
+
+    const productCards = useMemo(() => displayProducts.map((p, idx) => (
         <TiltCard
-            key={idx}
+            key={p.id || idx}
             className="product-card group relative bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-primary/40 transition-colors duration-300 shadow-sm hover:shadow-lg opacity-0"
         >
             <div className="aspect-[16/10] overflow-hidden relative">
                 <img
-                    src={p.image}
+                    src={p.image || IMAGES.trucks.howoMax}
                     alt={p.name}
                     loading="lazy"
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 grayscale-[30%] group-hover:grayscale-0"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    onError={(e) => { e.target.src = IMAGES.trucks.howoMax }}
                 />
-                <div className={`absolute top-5 left-5 ${p.tagColor} text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-lg`}>
-                    {p.tag}
+                <div className="absolute top-5 left-5 bg-primary text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">
+                    {p.code || 'Mới'}
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent opacity-50"></div>
             </div>
@@ -133,53 +162,77 @@ const ProductGrid = () => {
             <div className="p-6 space-y-4">
                 <div>
                     <h3 className="text-slate-800 text-xl font-bold group-hover:text-primary transition-colors">{p.name}</h3>
-                    <p className="text-slate-400 text-sm mt-1">{p.subtitle}</p>
+                    <p className="text-slate-400 text-sm mt-1">{p.description || 'Phụ tùng chính hãng'}</p>
                 </div>
 
                 <div className="space-y-2">
-                    {p.features.map((f, i) => (
-                        <div key={i} className="flex items-center gap-2 text-slate-500 text-xs">
+                    {p.price > 0 && (
+                        <div className="flex items-center gap-2 text-slate-500 text-xs">
                             <div className="w-1 h-1 bg-primary rounded-full"></div>
-                            {f}
+                            Giá lẻ: <span className="text-slate-800 font-bold">{formatPrice(p.price)}</span>
                         </div>
-                    ))}
+                    )}
+                    {p.price_bulk > 0 && (
+                        <div className="flex items-center gap-2 text-slate-500 text-xs">
+                            <div className="w-1 h-1 bg-green-500 rounded-full"></div>
+                            Giá sỉ: <span className="text-green-600 font-bold">{formatPrice(p.price_bulk)}</span>
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex gap-2 pt-2">
                     <Link
-                        to={`/products/${p.category}`}
+                        to="/contact"
                         className="flex-grow py-3 rounded-xl bg-primary text-white font-bold text-xs uppercase tracking-wide hover:brightness-110 transition-colors text-center"
                     >
-                        Xem Chi Tiết
+                        Đặt Hàng
                     </Link>
-                    <button className="w-11 h-11 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 hover:text-primary hover:border-primary/50 transition-colors">
-                        <span className="material-symbols-outlined text-lg">favorite</span>
-                    </button>
+                    <a
+                        href="tel:0382890990"
+                        className="w-11 h-11 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 hover:text-primary hover:border-primary/50 transition-colors"
+                    >
+                        <span className="material-symbols-outlined text-lg">call</span>
+                    </a>
                 </div>
             </div>
         </TiltCard>
-    )), [])
+    )), [displayProducts])
 
     return (
         <section className="py-20 bg-background relative overflow-hidden">
             <div className="container mx-auto px-4 md:px-10 lg:px-20 relative z-10">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
                     <div>
-                        <span className="text-primary font-bold tracking-widest text-sm uppercase mb-2 block">Showroom</span>
-                        <h2 className="text-slate-800 text-4xl md:text-5xl font-bold tracking-tight">Xe Tải Nặng</h2>
+                        <span className="text-primary font-bold tracking-widest text-sm uppercase mb-2 block">Danh mục phụ tùng</span>
+                        <h2 className="text-slate-800 text-4xl md:text-5xl font-bold tracking-tight">Sản Phẩm Bán Chạy</h2>
                     </div>
                     <Link
                         to="/products"
                         className="flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-700 font-medium text-sm hover:border-primary/50 transition-colors shadow-sm"
                     >
-                        Tất cả
+                        Tất cả phụ tùng
                         <span className="material-symbols-outlined text-primary text-lg">arrow_forward</span>
                     </Link>
                 </div>
 
-                <div ref={containerRef} className="grid md:grid-cols-3 gap-8">
-                    {productCards}
-                </div>
+                {loading ? (
+                    <div className="grid md:grid-cols-3 gap-8">
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="bg-white border border-slate-200 rounded-3xl overflow-hidden animate-pulse">
+                                <div className="aspect-[16/10] bg-slate-200" />
+                                <div className="p-6 space-y-4">
+                                    <div className="h-6 bg-slate-200 rounded w-3/4" />
+                                    <div className="h-4 bg-slate-200 rounded w-1/2" />
+                                    <div className="h-10 bg-slate-200 rounded" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div ref={containerRef} className="grid md:grid-cols-3 gap-8">
+                        {productCards}
+                    </div>
+                )}
             </div>
         </section>
     )

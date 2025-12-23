@@ -164,7 +164,7 @@ const Hero = () => {
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs font-bold uppercase tracking-widest backdrop-blur-sm"
           >
             <span className="material-symbols-outlined text-sm">verified</span>
-            Thế hệ xe tải nặng 4.0
+            Phụ tùng chính hãng 100%
           </motion.div>
 
           <div ref={titleRef} className="overflow-hidden">
@@ -188,7 +188,7 @@ const Hero = () => {
             transition={{ duration: 0.8, delay: 0.5 }}
             className="text-slate-600 text-lg md:text-xl max-w-xl leading-relaxed font-light"
           >
-            Định nghĩa lại hiệu suất vận tải với công nghệ 3D hiện đại. SINOTRUK HÀ NỘI mang đến các dòng xe HOWO & SITRAK đột phá về sức mạnh.
+            Chuyên cung cấp phụ tùng chính hãng cho xe tải HOWO & SITRAK. Đầy đủ linh kiện từ động cơ, hộp số, phanh đến các chi tiết nhỏ nhất. Cam kết giá tốt nhất thị trường.
           </motion.p>
 
           <motion.div
