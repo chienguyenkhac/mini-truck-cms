@@ -16,6 +16,7 @@ export interface Product {
     total: number;
     category_id: number | null;
     category_ids?: number[];
+    vehicle_ids?: number[];
     image: string | null;
     description: string | null;
     created_at: string;
@@ -25,6 +26,7 @@ export interface Product {
 export interface Category {
     id: number;
     name: string;
+    is_vehicle_name?: boolean;
     created_at: string;
     updated_at: string;
 }
@@ -111,10 +113,21 @@ export const categoryService = {
         return data || [];
     },
 
-    create: async (name: string) => {
+    create: async (name: string, is_vehicle_name: boolean = false) => {
         const { data, error } = await supabase
             .from('categories')
-            .insert([{ name }])
+            .insert([{ name, is_vehicle_name }])
+            .select()
+            .single();
+        if (error) throw error;
+        return data;
+    },
+
+    update: async (id: number, name: string, is_vehicle_name: boolean) => {
+        const { data, error } = await supabase
+            .from('categories')
+            .update({ name, is_vehicle_name })
+            .eq('id', id)
             .select()
             .single();
         if (error) throw error;

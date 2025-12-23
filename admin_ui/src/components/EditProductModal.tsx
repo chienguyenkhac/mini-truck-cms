@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom';
 import { useNotification } from './shared/Notification';
 import { productService, categoryService, Category, Product } from '../services/supabase';
 
+interface CategoryWithVehicle extends Category {
+    is_vehicle_name?: boolean;
+}
+
 interface EditProductModalProps {
     product: Product;
     onClose: () => void;
@@ -11,14 +15,15 @@ interface EditProductModalProps {
 
 const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, onSave }) => {
     const notification = useNotification();
-    const [categories, setCategories] = useState<Category[]>([]);
+    const [categories, setCategories] = useState<CategoryWithVehicle[]>([]);
     const [formData, setFormData] = useState({
         code: product.code || '',
         name: product.name || '',
         price: product.price || 0,
         price_bulk: product.price_bulk || 0,
         total: product.total || 0,
-        category_ids: product.category_ids || (product.category_id ? [product.category_id] : []),
+        category_id: product.category_id || null,
+        vehicle_ids: product.vehicle_ids || [],
         description: product.description || '',
         image: product.image || '',
     });
@@ -36,6 +41,9 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
         };
         loadCategories();
     }, []);
+
+    const vehicleCategories = categories.filter(c => c.is_vehicle_name);
+    const partCategories = categories.filter(c => !c.is_vehicle_name);
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -80,12 +88,12 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
         }
     };
 
-    const toggleCategory = (categoryId: number) => {
+    const toggleVehicle = (vehicleId: number) => {
         setFormData(prev => {
-            const ids = prev.category_ids.includes(categoryId)
-                ? prev.category_ids.filter(id => id !== categoryId)
-                : [...prev.category_ids, categoryId];
-            return { ...prev, category_ids: ids };
+            const ids = prev.vehicle_ids.includes(vehicleId)
+                ? prev.vehicle_ids.filter((id: number) => id !== vehicleId)
+                : [...prev.vehicle_ids, vehicleId];
+            return { ...prev, vehicle_ids: ids };
         });
     };
 
@@ -106,8 +114,8 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
                 price: formData.price,
                 price_bulk: formData.price_bulk,
                 total: formData.total,
-                category_id: formData.category_ids[0] || null,
-                category_ids: formData.category_ids,
+                category_id: formData.category_id,
+                vehicle_ids: formData.vehicle_ids,
                 description: formData.description,
                 image: formData.image || null,
             });
@@ -176,32 +184,50 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
                         />
                     </div>
 
-                    {/* Multi-select Categories */}
+                    {/* Part Category - Single Select */}
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-2">
-                            Danh mục (chọn nhiều)
+                            <span className="material-symbols-outlined text-sm align-middle mr-1">category</span>
+                            Bộ phận
                         </label>
-                        <div className="flex flex-wrap gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200">
-                            {categories.map((cat) => (
+                        <select
+                            value={formData.category_id || ''}
+                            onChange={(e) => setFormData({ ...formData, category_id: e.target.value ? Number(e.target.value) : null })}
+                            className="input"
+                        >
+                            <option value="">Chọn bộ phận</option>
+                            {partCategories.map(cat => (
+                                <option key={cat.id} value={cat.id}>{cat.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Vehicle Categories - Multi Select */}
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">
+                            <span className="material-symbols-outlined text-sm align-middle mr-1">local_shipping</span>
+                            Loại xe (chọn nhiều)
+                        </label>
+                        <div className="flex flex-wrap gap-2 p-3 bg-blue-50/50 rounded-xl border border-blue-100">
+                            {vehicleCategories.length > 0 ? vehicleCategories.map(cat => (
                                 <button
                                     key={cat.id}
                                     type="button"
-                                    onClick={() => toggleCategory(cat.id)}
-                                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${formData.category_ids.includes(cat.id)
-                                            ? 'bg-primary text-white shadow-md'
-                                            : 'bg-white text-slate-600 border border-slate-200 hover:border-primary hover:text-primary'
+                                    onClick={() => toggleVehicle(cat.id)}
+                                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${formData.vehicle_ids.includes(cat.id)
+                                            ? 'bg-blue-500 text-white shadow-md'
+                                            : 'bg-white text-slate-600 border border-slate-200 hover:border-blue-300 hover:text-blue-600'
                                         }`}
                                 >
-                                    {formData.category_ids.includes(cat.id) && (
+                                    {formData.vehicle_ids.includes(cat.id) && (
                                         <span className="material-symbols-outlined text-sm mr-1 align-middle">check</span>
                                     )}
                                     {cat.name}
                                 </button>
-                            ))}
+                            )) : (
+                                <p className="text-xs text-slate-400">Chưa có loại xe nào. Thêm trong Danh mục.</p>
+                            )}
                         </div>
-                        {formData.category_ids.length === 0 && (
-                            <p className="text-xs text-slate-400 mt-1">Click để chọn danh mục</p>
-                        )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -229,8 +255,8 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
 
                     {/* Image Upload */}
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">Hình ảnh sản phẩm</label>
-                        <div className="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 hover:border-primary transition-colors cursor-pointer relative group">
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Hình ảnh</label>
+                        <div className="flex items-center gap-4 p-3 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200 hover:border-primary transition-colors cursor-pointer relative group">
                             <input
                                 type="file"
                                 accept="image/*"
@@ -240,30 +266,24 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
                             />
 
                             {formData.image ? (
-                                <div className="relative w-20 h-20 rounded-xl overflow-hidden shadow-md">
+                                <div className="relative w-16 h-16 rounded-lg overflow-hidden shadow">
                                     <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
-                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                        <span className="text-white text-xs font-bold">Đổi</span>
-                                    </div>
                                 </div>
                             ) : (
-                                <div className="w-20 h-20 rounded-xl bg-white border border-slate-200 flex flex-col items-center justify-center text-slate-400">
+                                <div className="w-16 h-16 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400">
                                     {isUploading ? (
-                                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
                                     ) : (
-                                        <>
-                                            <span className="material-symbols-outlined text-2xl">add_photo_alternate</span>
-                                            <span className="text-[9px] font-bold">TẢI ẢNH</span>
-                                        </>
+                                        <span className="material-symbols-outlined text-2xl">add_photo_alternate</span>
                                     )}
                                 </div>
                             )}
 
-                            <div className="flex-1 flex flex-col justify-center h-20">
-                                <p className="text-sm font-bold text-slate-700">
-                                    {isUploading ? 'Đang tải lên...' : formData.image ? 'Đã có ảnh' : 'Nhấn để chọn ảnh'}
+                            <div className="flex-1">
+                                <p className="text-sm font-medium text-slate-700">
+                                    {isUploading ? 'Đang tải...' : formData.image ? 'Đổi ảnh' : 'Chọn ảnh'}
                                 </p>
-                                <p className="text-xs text-slate-400">JPG, PNG, WEBP. Max 5MB.</p>
+                                <p className="text-xs text-slate-400">Max 5MB</p>
                             </div>
                         </div>
                     </div>

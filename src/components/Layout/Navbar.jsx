@@ -7,7 +7,8 @@ import { supabase } from '../../services/supabase'
 const Navbar = ({ isScrolled }) => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     const [openDropdown, setOpenDropdown] = useState(null)
-    const [categories, setCategories] = useState([])
+    const [vehicleCategories, setVehicleCategories] = useState([])
+    const [partCategories, setPartCategories] = useState([])
     const location = useLocation()
     const logoRef = useRef(null)
     const navRef = useRef(null)
@@ -21,7 +22,8 @@ const Navbar = ({ isScrolled }) => {
                     .select('*')
                     .order('name')
                 if (!error && data) {
-                    setCategories(data)
+                    setVehicleCategories(data.filter(c => c.is_vehicle_name))
+                    setPartCategories(data.filter(c => !c.is_vehicle_name))
                 }
             } catch (err) {
                 console.error('Error loading categories:', err)
@@ -34,9 +36,12 @@ const Navbar = ({ isScrolled }) => {
         { path: '/', label: 'Trang chủ' },
         { path: '/about', label: 'Giới thiệu' },
         {
-            path: '/products',
+            label: 'Phụ tùng theo xe',
+            dropdownType: 'vehicle'
+        },
+        {
             label: 'Phụ tùng bộ phận',
-            dropdownType: 'categories'
+            dropdownType: 'parts'
         },
         { path: '/catalog', label: 'Catalog' },
         { path: '/image-library', label: 'Thư viện ảnh' },
@@ -44,6 +49,7 @@ const Navbar = ({ isScrolled }) => {
     ]
 
     const isActive = (path) => {
+        if (!path) return false
         if (path === '/') return location.pathname === '/'
         return location.pathname.startsWith(path.split('?')[0])
     }
@@ -81,6 +87,12 @@ const Navbar = ({ isScrolled }) => {
         )
     }, [])
 
+    const getDropdownItems = (type) => {
+        if (type === 'vehicle') return vehicleCategories
+        if (type === 'parts') return partCategories
+        return []
+    }
+
     return (
         <header className={`fixed top-0 z-50 w-full transition-all duration-300 ${isScrolled ? 'bg-background/95 backdrop-blur-md border-b border-border py-3 shadow-lg' : 'bg-transparent py-5'}`}>
             <div className="container mx-auto px-4 md:px-10 lg:px-20 flex items-center justify-between">
@@ -96,9 +108,9 @@ const Navbar = ({ isScrolled }) => {
                 </Link>
 
                 {/* Desktop Navigation */}
-                <nav ref={navRef} className="hidden lg:flex items-center gap-6">
+                <nav ref={navRef} className="hidden lg:flex items-center gap-5">
                     {menuItems.map((item, i) => (
-                        item.dropdownType === 'categories' ? (
+                        item.dropdownType ? (
                             <div
                                 key={i}
                                 className="relative"
@@ -106,7 +118,7 @@ const Navbar = ({ isScrolled }) => {
                                 onMouseLeave={() => setOpenDropdown(null)}
                             >
                                 <button
-                                    className={`text-sm font-medium transition-colors relative group flex items-center gap-1 py-2 ${isActive(item.path) ? 'text-primary' : 'text-slate-700 hover:text-primary'}`}
+                                    className={`text-sm font-medium transition-colors relative group flex items-center gap-1 py-2 ${location.pathname.includes('/products') ? 'text-primary' : 'text-slate-700 hover:text-primary'}`}
                                 >
                                     {item.label}
                                     <span className="material-symbols-outlined text-sm">expand_more</span>
@@ -122,18 +134,21 @@ const Navbar = ({ isScrolled }) => {
                                                 to="/products"
                                                 className="block px-4 py-2 text-sm text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors font-medium"
                                             >
-                                                Tất cả phụ tùng
+                                                Tất cả
                                             </Link>
                                             <div className="h-px bg-slate-100 my-1"></div>
-                                            {categories.map((cat) => (
+                                            {getDropdownItems(item.dropdownType).map((cat) => (
                                                 <Link
                                                     key={cat.id}
-                                                    to={`/products?category=${cat.id}`}
+                                                    to={`/products?${item.dropdownType === 'vehicle' ? 'vehicle' : 'category'}=${cat.id}`}
                                                     className="block px-4 py-2 text-sm text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors"
                                                 >
                                                     {cat.name}
                                                 </Link>
                                             ))}
+                                            {getDropdownItems(item.dropdownType).length === 0 && (
+                                                <p className="px-4 py-2 text-xs text-slate-400">Chưa có danh mục</p>
+                                            )}
                                         </div>
                                     </motion.div>
                                 )}
@@ -187,7 +202,7 @@ const Navbar = ({ isScrolled }) => {
                                 animate={{ x: 0, opacity: 1 }}
                                 transition={{ delay: i * 0.05 }}
                             >
-                                {item.dropdownType === 'categories' ? (
+                                {item.dropdownType ? (
                                     <div className="py-2 border-b border-border/50">
                                         <span className="text-lg font-medium text-slate-700">{item.label}</span>
                                         <div className="mt-2 pl-4 space-y-2">
@@ -196,12 +211,12 @@ const Navbar = ({ isScrolled }) => {
                                                 onClick={() => setIsMobileMenuOpen(false)}
                                                 className="block text-slate-500 hover:text-primary"
                                             >
-                                                Tất cả phụ tùng
+                                                Tất cả
                                             </Link>
-                                            {categories.map((cat) => (
+                                            {getDropdownItems(item.dropdownType).map((cat) => (
                                                 <Link
                                                     key={cat.id}
-                                                    to={`/products?category=${cat.id}`}
+                                                    to={`/products?${item.dropdownType === 'vehicle' ? 'vehicle' : 'category'}=${cat.id}`}
                                                     onClick={() => setIsMobileMenuOpen(false)}
                                                     className="block text-slate-500 hover:text-primary"
                                                 >
