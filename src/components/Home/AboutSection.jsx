@@ -93,8 +93,8 @@ const AboutSection = () => {
 
     return (
         <section className="relative py-32 overflow-hidden bg-background">
-            {/* 3D Background */}
-            <div className="absolute inset-0 z-0 opacity-40">
+            {/* 3D Background - hidden on mobile for performance */}
+            <div className="absolute inset-0 z-0 opacity-40 hidden lg:block">
                 <Canvas camera={{ position: [0, 0, 5], fov: 45 }} dpr={[1, 1.5]}>
                     <Suspense fallback={null}>
                         <Scene3D />
