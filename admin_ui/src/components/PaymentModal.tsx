@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNotification } from './shared/Notification';
 
 interface PaymentModalProps {
     customerCode: string;
@@ -7,6 +8,7 @@ interface PaymentModalProps {
 }
 
 const PaymentModal: React.FC<PaymentModalProps> = ({ customerCode, currentDebt, onClose }) => {
+    const notification = useNotification();
     const [formData, setFormData] = useState({
         amount: Math.abs(currentDebt),
         paymentMethod: 'cash',
@@ -15,7 +17,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ customerCode, currentDebt, 
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        alert(`Đã thanh toán ${new Intl.NumberFormat('vi-VN').format(formData.amount)}đ cho khách hàng ${customerCode}`);
+        notification.success(`Đã thanh toán ${new Intl.NumberFormat('vi-VN').format(formData.amount)}đ cho khách hàng ${customerCode}`);
         onClose();
     };
 

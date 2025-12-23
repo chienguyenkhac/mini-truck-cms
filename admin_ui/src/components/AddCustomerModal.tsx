@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNotification } from './shared/Notification';
 
 interface AddCustomerModalProps {
     onClose: () => void;
@@ -6,6 +7,7 @@ interface AddCustomerModalProps {
 }
 
 const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ onClose, onAdd }) => {
+    const notification = useNotification();
     const [formData, setFormData] = useState({
         code: '',
         name: '',
@@ -23,7 +25,7 @@ const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ onClose, onAdd }) =
         if (onAdd) {
             onAdd(formData);
         }
-        alert('Khách hàng đã được thêm thành công');
+        notification.success('Khách hàng đã được thêm thành công');
         onClose();
     };
 

@@ -1,10 +1,12 @@
 import React from 'react';
+import { useNotification } from './shared/Notification';
 
 interface SettingsModalProps {
     onClose: () => void;
 }
 
 const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
+    const notification = useNotification();
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
             <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
@@ -95,7 +97,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                         </button>
                         <button
                             onClick={() => {
-                                alert('Cài đặt đã được lưu');
+                                notification.success('Cài đặt đã được lưu');
                                 onClose();
                             }}
                             className="px-6 py-2.5 bg-primary text-white rounded-xl hover:bg-primary-dark transition-colors font-medium"

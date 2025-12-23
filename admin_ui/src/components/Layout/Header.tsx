@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
+import { useNotification } from '../shared/Notification';
 import NotificationDropdown from '../NotificationDropdown';
 import SettingsModal from '../SettingsModal';
 
 const Header: React.FC = () => {
+    const notification = useNotification();
     const [showSettings, setShowSettings] = useState(false);
 
     const handleExportReport = () => {
         // In production, call API to export report
-        alert('Tính năng xuất báo cáo đang được phát triển. Báo cáo sẽ được tải xuống dưới dạng Excel.');
+        notification.info('Tính năng xuất báo cáo đang được phát triển. Báo cáo sẽ được tải xuống dạng Excel.');
         // Example: window.open('/api/reports/export', '_blank');
     };
 
@@ -26,7 +28,7 @@ const Header: React.FC = () => {
                 {/* Actions */}
                 <div className="flex items-center gap-4">
                     <NotificationDropdown />
-                    <button 
+                    <button
                         onClick={() => setShowSettings(true)}
                         className="p-2 text-slate-600 hover:text-primary transition-colors"
                         title="Cài đặt"
@@ -35,7 +37,7 @@ const Header: React.FC = () => {
                     </button>
 
                     {/* CTA Button matching frontend exactly */}
-                    <button 
+                    <button
                         onClick={handleExportReport}
                         className="hidden sm:flex items-center gap-2 px-6 py-2.5 bg-primary hover:bg-primary-dark text-white text-sm font-bold rounded-xl transition-colors shadow-lg shadow-primary/20"
                     >

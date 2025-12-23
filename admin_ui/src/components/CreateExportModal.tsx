@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNotification } from './shared/Notification';
 import ProductSelectionModal from './ProductSelectionModal';
 
 interface ProductItem {
@@ -15,6 +16,7 @@ interface CreateExportModalProps {
 }
 
 const CreateExportModal: React.FC<CreateExportModalProps> = ({ onClose, onSave }) => {
+    const notification = useNotification();
     const [formData, setFormData] = useState({
         tenphieu: '',
         customer: '',
@@ -42,13 +44,13 @@ const CreateExportModal: React.FC<CreateExportModalProps> = ({ onClose, onSave }
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (products.length === 0) {
-            alert('Vui lòng thêm ít nhất một sản phẩm');
+            notification.warning('Vui lòng thêm ít nhất một sản phẩm');
             return;
         }
         if (onSave) {
             onSave({ ...formData, products });
         }
-        alert('Phiếu xuất kho đã được tạo thành công');
+        notification.success('Phiếu xuất kho đã được tạo thành công');
         onClose();
     };
 
@@ -81,8 +83,8 @@ const CreateExportModal: React.FC<CreateExportModalProps> = ({ onClose, onSave }
                             <label className="block text-sm font-medium text-slate-700 mb-2">
                                 Khách hàng <span className="text-red-500">*</span>
                             </label>
-                            <select 
-                                required 
+                            <select
+                                required
                                 value={formData.customer}
                                 onChange={(e) => setFormData({ ...formData, customer: e.target.value })}
                                 className="input"
@@ -121,8 +123,8 @@ const CreateExportModal: React.FC<CreateExportModalProps> = ({ onClose, onSave }
                     <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
                         <div className="flex items-center justify-between mb-4">
                             <p className="text-sm font-medium text-slate-700">Danh sách sản phẩm xuất kho</p>
-                            <button 
-                                type="button" 
+                            <button
+                                type="button"
                                 onClick={() => setShowProductModal(true)}
                                 className="text-sm text-primary hover:text-primary-dark font-medium flex items-center gap-1"
                             >
@@ -143,7 +145,7 @@ const CreateExportModal: React.FC<CreateExportModalProps> = ({ onClose, onSave }
                                                 {new Intl.NumberFormat('vi-VN').format(product.price * product.quantity)}đ
                                             </p>
                                         </div>
-                                        <button 
+                                        <button
                                             type="button"
                                             onClick={() => handleRemoveProduct(product.id)}
                                             className="text-red-500 hover:text-red-700 ml-4"

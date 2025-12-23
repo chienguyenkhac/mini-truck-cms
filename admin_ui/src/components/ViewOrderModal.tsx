@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNotification } from './shared/Notification';
 
 interface ViewOrderModalProps {
     orderId: number;
@@ -6,6 +7,7 @@ interface ViewOrderModalProps {
 }
 
 const ViewOrderModal: React.FC<ViewOrderModalProps> = ({ orderId, onClose }) => {
+    const notification = useNotification();
     // Mock order data - in production, fetch from API
     const order = {
         id: orderId,
@@ -86,15 +88,15 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({ orderId, onClose }) => 
                     </div>
 
                     <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
-                        <button 
+                        <button
                             onClick={onClose}
                             className="px-6 py-2.5 border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors font-medium"
                         >
                             Đóng
                         </button>
-                        <button 
+                        <button
                             onClick={() => {
-                                alert('Xuất PDF đơn hàng');
+                                notification.success('Đã xuất PDF đơn hàng');
                                 onClose();
                             }}
                             className="px-6 py-2.5 bg-primary text-white rounded-xl hover:bg-primary-dark transition-colors font-medium"

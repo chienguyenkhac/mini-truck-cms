@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNotification } from './shared/Notification';
 
 interface EditOrderModalProps {
     orderId: number;
@@ -6,6 +7,7 @@ interface EditOrderModalProps {
 }
 
 const EditOrderModal: React.FC<EditOrderModalProps> = ({ orderId, onClose }) => {
+    const notification = useNotification();
     const [formData, setFormData] = useState({
         tenphieu: `Đơn hàng TQ #${String(orderId).padStart(3, '0')}`,
         money: 15000000,
@@ -15,7 +17,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ orderId, onClose }) => 
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        alert('Đơn hàng đã được cập nhật');
+        notification.success('Đơn hàng đã được cập nhật');
         onClose();
     };
 
