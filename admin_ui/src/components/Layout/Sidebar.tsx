@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { getCategories } from '../../data/mockDatabase';
+import ProfileModal from '../ProfileModal';
 
 interface Category {
     id: string;
@@ -15,10 +16,7 @@ const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({ isOpen,
     const [categories, setCategories] = useState<Category[]>([]);
     const [adminName, setAdminName] = useState(() => localStorage.getItem(ADMIN_NAME_KEY) || 'Admin');
     const [adminAvatar, setAdminAvatar] = useState(() => localStorage.getItem(ADMIN_AVATAR_KEY) || '');
-    const [isEditingName, setIsEditingName] = useState(false);
-    const [tempName, setTempName] = useState(adminName);
-    const inputRef = useRef<HTMLInputElement>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [showProfileModal, setShowProfileModal] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -26,45 +24,11 @@ const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({ isOpen,
         setCategories(getCategories());
     }, [location.pathname]);
 
-    useEffect(() => {
-        if (isEditingName && inputRef.current) {
-            inputRef.current.focus();
-            inputRef.current.select();
-        }
-    }, [isEditingName]);
-
-    const handleStartEdit = () => {
-        setTempName(adminName);
-        setIsEditingName(true);
-    };
-
-    const handleSaveName = () => {
-        const newName = tempName.trim() || 'Admin';
-        setAdminName(newName);
-        localStorage.setItem(ADMIN_NAME_KEY, newName);
-        setIsEditingName(false);
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') handleSaveName();
-        else if (e.key === 'Escape') setIsEditingName(false);
-    };
-
-    const handleAvatarClick = () => {
-        fileInputRef.current?.click();
-    };
-
-    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const base64 = event.target?.result as string;
-            setAdminAvatar(base64);
-            localStorage.setItem(ADMIN_AVATAR_KEY, base64);
-        };
-        reader.readAsDataURL(file);
+    const handleSaveProfile = (name: string, avatar: string) => {
+        setAdminName(name);
+        setAdminAvatar(avatar);
+        localStorage.setItem(ADMIN_NAME_KEY, name);
+        localStorage.setItem(ADMIN_AVATAR_KEY, avatar);
     };
 
     const isProductsActive = location.pathname.includes('/products');
@@ -149,14 +113,13 @@ const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({ isOpen,
                     </NavLink>
                 </nav>
 
-                {/* User */}
+                {/* User - Click to open profile modal */}
                 <div className="p-4 border-t border-slate-200">
                     <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-slate-50 border border-slate-200">
-                        {/* Avatar with upload */}
                         <div
-                            onClick={handleAvatarClick}
+                            onClick={() => setShowProfileModal(true)}
                             className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center border border-slate-200 flex-shrink-0 cursor-pointer overflow-hidden hover:border-primary transition-colors"
-                            title="Click để đổi ảnh"
+                            title="Click để chỉnh sửa hồ sơ"
                         >
                             {adminAvatar ? (
                                 <img src={adminAvatar} alt="Avatar" className="w-full h-full object-cover" />
@@ -164,39 +127,16 @@ const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({ isOpen,
                                 <span className="material-symbols-outlined text-slate-600 text-sm">person</span>
                             )}
                         </div>
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            onChange={handleAvatarChange}
-                            className="hidden"
-                        />
 
-                        {/* Name with edit */}
                         <div
                             className="flex-1 min-w-0 cursor-pointer group"
-                            onClick={handleStartEdit}
-                            title="Click để đổi tên"
+                            onClick={() => setShowProfileModal(true)}
+                            title="Click để chỉnh sửa hồ sơ"
                         >
-                            {isEditingName ? (
-                                <input
-                                    ref={inputRef}
-                                    type="text"
-                                    value={tempName}
-                                    onChange={(e) => setTempName(e.target.value)}
-                                    onBlur={handleSaveName}
-                                    onKeyDown={handleKeyDown}
-                                    className="w-full text-slate-800 text-xs font-bold bg-white border border-primary rounded px-1 py-0.5 focus:outline-none"
-                                />
-                            ) : (
-                                <>
-                                    <p className="text-slate-800 text-xs font-bold truncate group-hover:text-primary transition-colors">{adminName}</p>
-                                    <p className="text-slate-500 text-[10px] truncate">Quản trị</p>
-                                </>
-                            )}
+                            <p className="text-slate-800 text-xs font-bold truncate group-hover:text-primary transition-colors">{adminName}</p>
+                            <p className="text-slate-500 text-[10px] truncate">Quản trị</p>
                         </div>
 
-                        {/* Logout */}
                         <button
                             onClick={() => {
                                 localStorage.removeItem('isAuthenticated');
@@ -211,6 +151,16 @@ const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({ isOpen,
                     </div>
                 </div>
             </aside>
+
+            {/* Profile Modal */}
+            {showProfileModal && (
+                <ProfileModal
+                    onClose={() => setShowProfileModal(false)}
+                    currentName={adminName}
+                    currentAvatar={adminAvatar}
+                    onSave={handleSaveProfile}
+                />
+            )}
         </>
     );
 };
