@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { supabase } from '../services/supabase'
 import { getCategories } from '../services/supabase'
@@ -13,8 +13,11 @@ const formatPrice = (price) => {
 }
 
 const Products = () => {
+  const [searchParams] = useSearchParams()
+  const categoryFromUrl = searchParams.get('category')
+
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('all')
+  const [selectedCategory, setSelectedCategory] = useState(categoryFromUrl || 'all')
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
@@ -22,6 +25,15 @@ const Products = () => {
   const [showFilters, setShowFilters] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [lastId, setLastId] = useState(null)
+
+  // Update selectedCategory when URL changes
+  useEffect(() => {
+    if (categoryFromUrl) {
+      setSelectedCategory(categoryFromUrl)
+    } else {
+      setSelectedCategory('all')
+    }
+  }, [categoryFromUrl])
 
   // Load categories
   useEffect(() => {
