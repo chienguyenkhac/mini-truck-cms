@@ -18,7 +18,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
         price: product.price || 0,
         price_bulk: product.price_bulk || 0,
         total: product.total || 0,
-        category_id: product.category_id || 0,
+        category_ids: product.category_ids || (product.category_id ? [product.category_id] : []),
         description: product.description || '',
         image: product.image || '',
     });
@@ -80,6 +80,15 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
         }
     };
 
+    const toggleCategory = (categoryId: number) => {
+        setFormData(prev => {
+            const ids = prev.category_ids.includes(categoryId)
+                ? prev.category_ids.filter(id => id !== categoryId)
+                : [...prev.category_ids, categoryId];
+            return { ...prev, category_ids: ids };
+        });
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -97,7 +106,8 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
                 price: formData.price,
                 price_bulk: formData.price_bulk,
                 total: formData.total,
-                category_id: formData.category_id || null,
+                category_id: formData.category_ids[0] || null,
+                category_ids: formData.category_ids,
                 description: formData.description,
                 image: formData.image || null,
             });
@@ -142,17 +152,14 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">Danh mục</label>
-                            <select
-                                value={formData.category_id}
-                                onChange={(e) => setFormData({ ...formData, category_id: Number(e.target.value) })}
+                            <label className="block text-sm font-medium text-slate-700 mb-2">Tồn kho</label>
+                            <input
+                                type="number"
+                                min="0"
+                                value={formData.total}
+                                onChange={(e) => setFormData({ ...formData, total: Number(e.target.value) })}
                                 className="input"
-                            >
-                                <option value={0}>Chọn danh mục</option>
-                                {categories.map((cat) => (
-                                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                ))}
-                            </select>
+                            />
                         </div>
                     </div>
 
@@ -169,7 +176,35 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
                         />
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4">
+                    {/* Multi-select Categories */}
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Danh mục (chọn nhiều)
+                        </label>
+                        <div className="flex flex-wrap gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                            {categories.map((cat) => (
+                                <button
+                                    key={cat.id}
+                                    type="button"
+                                    onClick={() => toggleCategory(cat.id)}
+                                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${formData.category_ids.includes(cat.id)
+                                            ? 'bg-primary text-white shadow-md'
+                                            : 'bg-white text-slate-600 border border-slate-200 hover:border-primary hover:text-primary'
+                                        }`}
+                                >
+                                    {formData.category_ids.includes(cat.id) && (
+                                        <span className="material-symbols-outlined text-sm mr-1 align-middle">check</span>
+                                    )}
+                                    {cat.name}
+                                </button>
+                            ))}
+                        </div>
+                        {formData.category_ids.length === 0 && (
+                            <p className="text-xs text-slate-400 mt-1">Click để chọn danh mục</p>
+                        )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">Giá lẻ (VNĐ)</label>
                             <input
@@ -190,16 +225,6 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
                                 className="input"
                             />
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">Tồn kho</label>
-                            <input
-                                type="number"
-                                min="0"
-                                value={formData.total}
-                                onChange={(e) => setFormData({ ...formData, total: Number(e.target.value) })}
-                                className="input"
-                            />
-                        </div>
                     </div>
 
                     {/* Image Upload */}
@@ -215,33 +240,30 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
                             />
 
                             {formData.image ? (
-                                <div className="relative w-24 h-24 rounded-xl overflow-hidden shadow-md">
+                                <div className="relative w-20 h-20 rounded-xl overflow-hidden shadow-md">
                                     <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
                                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                        <span className="text-white text-xs font-bold">Thay đổi</span>
+                                        <span className="text-white text-xs font-bold">Đổi</span>
                                     </div>
                                 </div>
                             ) : (
-                                <div className="w-24 h-24 rounded-xl bg-white border border-slate-200 flex flex-col items-center justify-center text-slate-400">
+                                <div className="w-20 h-20 rounded-xl bg-white border border-slate-200 flex flex-col items-center justify-center text-slate-400">
                                     {isUploading ? (
                                         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                                     ) : (
                                         <>
-                                            <span className="material-symbols-outlined text-3xl">add_photo_alternate</span>
-                                            <span className="text-[10px] mt-1 font-bold">TẢI ẢNH</span>
+                                            <span className="material-symbols-outlined text-2xl">add_photo_alternate</span>
+                                            <span className="text-[9px] font-bold">TẢI ẢNH</span>
                                         </>
                                     )}
                                 </div>
                             )}
 
-                            <div className="flex-1 flex flex-col justify-center h-24">
+                            <div className="flex-1 flex flex-col justify-center h-20">
                                 <p className="text-sm font-bold text-slate-700">
-                                    {isUploading ? 'Đang tải lên Cloudinary...' : formData.image ? 'Đã có ảnh' : 'Nhấn để chọn ảnh'}
+                                    {isUploading ? 'Đang tải lên...' : formData.image ? 'Đã có ảnh' : 'Nhấn để chọn ảnh'}
                                 </p>
-                                <p className="text-xs text-slate-400 mt-1">Định dạng: JPG, PNG, WEBP. Tối đa 5MB.</p>
-                                {formData.image && (
-                                    <p className="text-xs text-green-600 mt-1 truncate">✓ {formData.image.substring(0, 50)}...</p>
-                                )}
+                                <p className="text-xs text-slate-400">JPG, PNG, WEBP. Max 5MB.</p>
                             </div>
                         </div>
                     </div>
@@ -251,7 +273,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
                         <textarea
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            className="input min-h-[80px]"
+                            className="input min-h-[60px]"
                         />
                     </div>
 

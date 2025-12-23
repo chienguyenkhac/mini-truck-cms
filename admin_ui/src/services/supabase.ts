@@ -15,6 +15,7 @@ export interface Product {
     price_bulk: number;
     total: number;
     category_id: number | null;
+    category_ids?: number[];
     image: string | null;
     description: string | null;
     created_at: string;
