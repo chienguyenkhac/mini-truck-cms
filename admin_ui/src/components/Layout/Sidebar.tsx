@@ -29,6 +29,8 @@ const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({ isOpen,
         setAdminAvatar(avatar);
         localStorage.setItem(ADMIN_NAME_KEY, name);
         localStorage.setItem(ADMIN_AVATAR_KEY, avatar);
+        // Dispatch event to notify Header
+        window.dispatchEvent(new Event('profileUpdate'));
     };
 
     const isProductsActive = location.pathname.includes('/products');

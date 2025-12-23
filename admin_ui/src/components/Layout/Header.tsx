@@ -5,14 +5,36 @@ interface HeaderProps {
     onMenuClick?: () => void;
 }
 
+const ADMIN_NAME_KEY = 'sinotruk_admin_name';
+const ADMIN_AVATAR_KEY = 'sinotruk_admin_avatar';
+
 const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
     const [showSettings, setShowSettings] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
+    const [adminName, setAdminName] = useState(() => localStorage.getItem(ADMIN_NAME_KEY) || 'Admin');
+    const [adminAvatar, setAdminAvatar] = useState(() => localStorage.getItem(ADMIN_AVATAR_KEY) || '');
 
     // Update time every minute
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 60000);
         return () => clearInterval(timer);
+    }, []);
+
+    // Listen for localStorage changes (when Sidebar updates profile)
+    useEffect(() => {
+        const handleStorageChange = () => {
+            setAdminName(localStorage.getItem(ADMIN_NAME_KEY) || 'Admin');
+            setAdminAvatar(localStorage.getItem(ADMIN_AVATAR_KEY) || '');
+        };
+
+        // Custom event for same-tab updates
+        window.addEventListener('storage', handleStorageChange);
+        window.addEventListener('profileUpdate', handleStorageChange);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('profileUpdate', handleStorageChange);
+        };
     }, []);
 
     useEffect(() => {
@@ -51,12 +73,16 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                     {/* Welcome Message */}
                     <div className="flex items-center gap-3">
                         <div className="hidden sm:flex items-center gap-2">
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center shadow-lg shadow-primary/20">
-                                <span className="material-symbols-outlined text-white text-lg">person</span>
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center shadow-lg shadow-primary/20 overflow-hidden">
+                                {adminAvatar ? (
+                                    <img src={adminAvatar} alt="Avatar" className="w-full h-full object-cover" />
+                                ) : (
+                                    <span className="material-symbols-outlined text-white text-lg">person</span>
+                                )}
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-xs text-slate-400">Xin chào,</span>
-                                <span className="text-sm font-bold text-slate-800 leading-tight">Admin</span>
+                                <span className="text-sm font-bold text-slate-800 leading-tight">{adminName}</span>
                             </div>
                         </div>
                     </div>
