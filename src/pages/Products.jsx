@@ -26,10 +26,11 @@ const Products = () => {
   const [hasMore, setHasMore] = useState(true)
   const [lastId, setLastId] = useState(null)
 
-  // Update selectedCategory when URL changes
+  // Update selectedCategory when URL changes and show filters
   useEffect(() => {
     if (categoryFromUrl) {
       setSelectedCategory(categoryFromUrl)
+      setShowFilters(true) // Auto show filter panel when navigating with category
     } else {
       setSelectedCategory('all')
     }
