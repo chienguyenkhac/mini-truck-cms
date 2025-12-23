@@ -1,33 +1,57 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useNotification } from '../components/shared/Notification';
 import AddProductModal from '../components/AddProductModal';
 import * as XLSX from 'xlsx';
 
-import { mockProducts } from '../data/mockDatabase';
+import { productService, categoryService, Product, Category } from '../services/supabase';
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 10;
 
 const Products: React.FC = () => {
     const notification = useNotification();
     const [searchParams, setSearchParams] = useSearchParams();
     const [search, setSearch] = useState('');
     const [showAddModal, setShowAddModal] = useState(false);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [loading, setLoading] = useState(true);
 
     // Get category and cursor from URL params  
     const categoryFilter = searchParams.get('category') || 'ALL';
     const cursorParam = searchParams.get('cursor');
     const currentCursor = cursorParam ? parseInt(cursorParam, 10) : null;
 
+    // Load products and categories from Supabase
+    useEffect(() => {
+        const loadData = async () => {
+            setLoading(true);
+            try {
+                const [productsData, categoriesData] = await Promise.all([
+                    productService.getAll({ limit: 100 }),
+                    categoryService.getAll()
+                ]);
+                setProducts(productsData);
+                setCategories(categoriesData);
+            } catch (err) {
+                console.error('Error loading data:', err);
+                notification.error('Không thể tải dữ liệu từ database');
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadData();
+    }, []);
+
     // Filter products by category and search
     const filteredProducts = useMemo(() => {
-        return mockProducts.filter(p => {
+        return products.filter((p: Product) => {
             const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
-                p.code.toLowerCase().includes(search.toLowerCase());
-            const matchesCategory = categoryFilter === 'ALL' || p.category === categoryFilter;
+                (p.code?.toLowerCase().includes(search.toLowerCase()) || false);
+            const matchesCategory = categoryFilter === 'ALL' || p.category_id === parseInt(categoryFilter);
             return matchesSearch && matchesCategory;
-        }).sort((a, b) => a.id - b.id); // Ensure sorted by ID for cursor pagination
-    }, [categoryFilter, search]);
+        }).sort((a: Product, b: Product) => a.id - b.id);
+    }, [products, categoryFilter, search]);
 
     // Cursor-based pagination logic
     const paginatedData = useMemo(() => {
@@ -208,7 +232,7 @@ const Products: React.FC = () => {
                                             </div>
                                         </td>
                                         <td>
-                                            <span className="badge badge-gray">{product.category}</span>
+                                            <span className="badge badge-gray">{categories.find(c => c.id === product.category_id)?.name || '-'}</span>
                                         </td>
                                         <td className="text-right px-6">
                                             <div className="flex items-center justify-end gap-2">
@@ -257,8 +281,8 @@ const Products: React.FC = () => {
                         onClick={handleFirstPage}
                         disabled={!paginatedData.hasPrevPage && currentCursor === null}
                         className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${paginatedData.hasPrevPage || currentCursor !== null
-                                ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                                : 'bg-slate-50 text-slate-300 cursor-not-allowed'
+                            ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                            : 'bg-slate-50 text-slate-300 cursor-not-allowed'
                             }`}
                         title="Trang đầu"
                     >
@@ -270,8 +294,8 @@ const Products: React.FC = () => {
                         onClick={handlePrevPage}
                         disabled={!paginatedData.hasPrevPage && currentCursor === null}
                         className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${paginatedData.hasPrevPage || currentCursor !== null
-                                ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                                : 'bg-slate-50 text-slate-300 cursor-not-allowed'
+                            ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                            : 'bg-slate-50 text-slate-300 cursor-not-allowed'
                             }`}
                     >
                         <span className="material-symbols-outlined text-lg">chevron_left</span>
@@ -288,8 +312,8 @@ const Products: React.FC = () => {
                         onClick={handleNextPage}
                         disabled={!paginatedData.hasNextPage}
                         className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${paginatedData.hasNextPage
-                                ? 'bg-primary text-white hover:bg-primary-dark'
-                                : 'bg-slate-50 text-slate-300 cursor-not-allowed'
+                            ? 'bg-primary text-white hover:bg-primary-dark'
+                            : 'bg-slate-50 text-slate-300 cursor-not-allowed'
                             }`}
                     >
                         <span className="hidden sm:inline">Tiếp</span>

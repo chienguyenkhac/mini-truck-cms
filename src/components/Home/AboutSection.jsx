@@ -136,8 +136,8 @@ const AboutSection = () => {
 
                         <p className="text-slate-500 text-lg leading-relaxed">
                             Với hơn <span className="text-primary font-bold">15 năm</span> hình thành và phát triển,
-                            SINOTRUK HÀ NỘI tự hào là đơn vị phân phối hàng đầu các dòng xe tải nặng.
-                            Chúng tôi cam kết mang đến giải pháp vận tải tối ưu, tiết kiệm chi phí
+                            SINOTRUK HÀ NỘI tự hào là đơn vị cung cấp phụ tùng chính hãng HOWO, SITRAK hàng đầu.
+                            Chúng tôi cam kết mang đến sản phẩm chất lượng cao, giá cạnh tranh
                             và dịch vụ hậu mãi chuyên nghiệp nhất.
                         </p>
 
@@ -147,8 +147,8 @@ const AboutSection = () => {
                                 <span className="text-slate-500 text-sm">Khách hàng<br />tin tưởng</span>
                             </div>
                             <div className="flex items-center gap-3 px-5 py-3 bg-gray-100 border border-gray-300 rounded-xl shadow-sm">
-                                <span className="text-primary text-3xl font-bold">1000+</span>
-                                <span className="text-slate-500 text-sm">Xe đã<br />bàn giao</span>
+                                <span className="text-primary text-3xl font-bold">50K+</span>
+                                <span className="text-slate-500 text-sm">Phụ tùng<br />đã bán</span>
                             </div>
                             <div className="flex items-center gap-3 px-5 py-3 bg-gray-100 border border-gray-300 rounded-xl shadow-sm">
                                 <span className="text-primary text-3xl font-bold">63</span>
