@@ -15,7 +15,7 @@ const Categories: React.FC = () => {
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editName, setEditName] = useState('');
     const [editIsVehicle, setEditIsVehicle] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [_loading, setLoading] = useState(true);
 
     const loadCategories = async () => {
         setLoading(true);
