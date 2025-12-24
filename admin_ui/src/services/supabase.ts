@@ -223,9 +223,120 @@ export const catalogService = {
     }
 };
 
+// Image interface
+export interface Image {
+    id: number;
+    url: string;
+    public_id?: string;
+    created_at: string;
+}
+
+export interface ProductImage {
+    id: number;
+    product_id: number;
+    image_id: number;
+    sort_order: number;
+    is_primary: boolean;
+    created_at: string;
+    image?: Image; // Joined data
+}
+
+// Image Service
+export const imageService = {
+    create: async (url: string, publicId?: string) => {
+        const { data, error } = await supabase
+            .from('images')
+            .insert([{ url, public_id: publicId }])
+            .select()
+            .single();
+        if (error) throw error;
+        return data as Image;
+    },
+
+    delete: async (id: number) => {
+        const { error } = await supabase
+            .from('images')
+            .delete()
+            .eq('id', id);
+        if (error) throw error;
+    }
+};
+
+// Product Images Service (junction table)
+export const productImageService = {
+    // Get all images for a product
+    getByProduct: async (productId: number) => {
+        const { data, error } = await supabase
+            .from('product_images')
+            .select(`
+                *,
+                image:images(*)
+            `)
+            .eq('product_id', productId)
+            .order('sort_order', { ascending: true });
+        if (error) throw error;
+        return data || [];
+    },
+
+    // Add image to product
+    addToProduct: async (productId: number, imageId: number, isPrimary = false, sortOrder = 0) => {
+        const { data, error } = await supabase
+            .from('product_images')
+            .insert([{
+                product_id: productId,
+                image_id: imageId,
+                is_primary: isPrimary,
+                sort_order: sortOrder
+            }])
+            .select()
+            .single();
+        if (error) throw error;
+        return data;
+    },
+
+    // Remove image from product
+    removeFromProduct: async (productId: number, imageId: number) => {
+        const { error } = await supabase
+            .from('product_images')
+            .delete()
+            .eq('product_id', productId)
+            .eq('image_id', imageId);
+        if (error) throw error;
+    },
+
+    // Set primary image
+    setPrimary: async (productId: number, imageId: number) => {
+        // First, unset all primary for this product
+        await supabase
+            .from('product_images')
+            .update({ is_primary: false })
+            .eq('product_id', productId);
+
+        // Then set the new primary
+        const { error } = await supabase
+            .from('product_images')
+            .update({ is_primary: true })
+            .eq('product_id', productId)
+            .eq('image_id', imageId);
+        if (error) throw error;
+    },
+
+    // Reorder images
+    updateOrder: async (productId: number, imageId: number, newOrder: number) => {
+        const { error } = await supabase
+            .from('product_images')
+            .update({ sort_order: newOrder })
+            .eq('product_id', productId)
+            .eq('image_id', imageId);
+        if (error) throw error;
+    }
+};
+
 export default {
     products: productService,
     categories: categoryService,
     catalogs: catalogService,
+    images: imageService,
+    productImages: productImageService,
     supabase
 };
