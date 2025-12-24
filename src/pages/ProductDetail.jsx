@@ -13,13 +13,13 @@ const ProductDetail = () => {
     const [images, setImages] = useState([])
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
-    // Auto-slide images every 2 seconds
+    // Auto-slide images every 7 seconds
     useEffect(() => {
         if (images.length <= 1) return
 
         const interval = setInterval(() => {
             setCurrentImageIndex(prev => (prev + 1) % images.length)
-        }, 2000)
+        }, 7000)
 
         return () => clearInterval(interval)
     }, [images.length])
