@@ -33,9 +33,14 @@ ALTER TABLE categories
   ADD COLUMN IF NOT EXISTS thumbnail VARCHAR(500),
   ADD COLUMN IF NOT EXISTS is_visible BOOLEAN DEFAULT true;
 
--- 4. Enable RLS policies for catalog_articles
+-- 4. Enable RLS for catalog_articles
 ALTER TABLE catalog_articles ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist (to avoid errors)
+DROP POLICY IF EXISTS "Allow public read for published articles" ON catalog_articles;
+DROP POLICY IF EXISTS "Allow all for authenticated" ON catalog_articles;
+
+-- Recreate policies
 CREATE POLICY "Allow public read for published articles" ON catalog_articles
   FOR SELECT USING (is_published = true);
 
@@ -66,7 +71,7 @@ CREATE TABLE IF NOT EXISTS product_images (
   UNIQUE(product_id, image_id)
 );
 
--- Index for faster lookups
+-- Index for faster lookups (IF NOT EXISTS)
 CREATE INDEX IF NOT EXISTS idx_product_images_product ON product_images(product_id);
 CREATE INDEX IF NOT EXISTS idx_product_images_image ON product_images(image_id);
 
@@ -74,6 +79,13 @@ CREATE INDEX IF NOT EXISTS idx_product_images_image ON product_images(image_id);
 ALTER TABLE images ENABLE ROW LEVEL SECURITY;
 ALTER TABLE product_images ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Allow public read images" ON images;
+DROP POLICY IF EXISTS "Allow all for authenticated images" ON images;
+DROP POLICY IF EXISTS "Allow public read product_images" ON product_images;
+DROP POLICY IF EXISTS "Allow all for authenticated product_images" ON product_images;
+
+-- Recreate policies
 CREATE POLICY "Allow public read images" ON images FOR SELECT USING (true);
 CREATE POLICY "Allow all for authenticated images" ON images FOR ALL USING (true);
 
