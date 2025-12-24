@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useNotification } from '../components/shared/Notification';
 import ConfirmDeleteModal from '../components/shared/ConfirmDeleteModal';
 import { catalogService, CatalogArticle } from '../services/supabase';
@@ -370,10 +371,10 @@ const Catalogs: React.FC = () => {
                 itemName={deleteArticle?.title}
             />
 
-            {/* Help Modal */}
-            {showHelp && (
+            {/* Help Modal - rendered at root level via Portal */}
+            {showHelp && createPortal(
                 <div
-                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+                    className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm"
                     onClick={() => setShowHelp(false)}
                 >
                     <div
@@ -442,7 +443,7 @@ const Catalogs: React.FC = () => {
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>, document.body
             )}
         </div>
     );
