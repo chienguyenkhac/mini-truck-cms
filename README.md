@@ -2,7 +2,8 @@
 
 <div align="center">
 
-# 🚛 SINOTRUK HÀ NỘI
+![SINOTRUK Hà Nội](./assets/hero-screenshot.png)
+
 
 **Enterprise-grade Parts Management & E-Commerce Solution**
 
