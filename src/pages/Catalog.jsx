@@ -1,95 +1,75 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { supabase } from '../services/supabase'
+import { getCatalogArticles } from '../services/supabase'
 
-// Catalog items - technical diagrams with part lists
-const catalogSections = [
-  {
-    id: 'cooling',
-    title: 'COOLING SYSTEM',
-    image: '/catalog/cooling-system.png',
-    parts: [
-      { no: 1, partNo: '190003989315', name: 'Clamp', qty: 10 },
-      { no: 2, partNo: 'WG9719530108', name: 'Hose', qty: 1 },
-      { no: 3, partNo: 'WG9725530036', name: 'Radiator', qty: 1 },
-    ]
-  },
-  {
-    id: 'fuel',
-    title: '350L FUEL TANK',
-    image: '/catalog/fuel-tank.png',
-    parts: [
-      { no: 1, partNo: 'AZ9112550210', name: '350L Fuel tank', qty: 1 },
-      { no: 2, partNo: 'WG9725550006', name: 'Fuel pipe', qty: 2 },
-    ]
-  },
-  {
-    id: 'airfilter',
-    title: 'AIR FILTER',
-    image: '/catalog/air-filter.png',
-    parts: [
-      { no: 1, partNo: 'WG9719190002', name: 'Supporter', qty: 1 },
-      { no: 2, partNo: 'WG9100190026', name: 'Strap', qty: 2 },
-    ]
-  },
-  {
-    id: 'operation',
-    title: 'OPERATION DEVICE',
-    image: '/catalog/operation-device.png',
-    parts: [
-      { no: 1, partNo: 'WG9719570001', name: 'Rubber footboard', qty: 1 },
-      { no: 2, partNo: 'AZ9719570002', name: 'Pedal', qty: 1 },
-    ]
-  },
-  {
-    id: 'suspension',
-    title: 'SUSPENSION FOR ENGINE',
-    image: '/catalog/suspension-engine.png',
-    parts: [
-      { no: 1, partNo: 'Q40308', name: 'Spring washer', qty: 4 },
-      { no: 2, partNo: 'Q150B0816', name: 'Bolt', qty: 4 },
-    ]
-  },
-  {
-    id: 'oilsep',
-    title: 'WD615 ENGINE SERIES OIL SEPARATOR',
-    image: '/catalog/oil-separator.png',
-    parts: [
-      { no: 1, partNo: 'VG2600010267', name: 'Oil Separator', qty: 1 },
-      { no: 2, partNo: 'VG1500019045A', name: 'Oil filter', qty: 1 },
-    ]
-  },
-]
+// Render EditorJS blocks to HTML
+const renderContent = (content) => {
+  if (!content || !content.blocks) return null
+
+  return content.blocks.map((block, index) => {
+    switch (block.type) {
+      case 'header':
+        const HeaderTag = `h${block.data.level || 2}`
+        return (
+          <HeaderTag key={index} className="text-2xl font-bold text-slate-800 mt-6 mb-3">
+            {block.data.text}
+          </HeaderTag>
+        )
+      case 'paragraph':
+        return (
+          <p key={index} className="text-slate-600 leading-relaxed mb-4" dangerouslySetInnerHTML={{ __html: block.data.text }} />
+        )
+      case 'list':
+        const ListTag = block.data.style === 'ordered' ? 'ol' : 'ul'
+        return (
+          <ListTag key={index} className={`${block.data.style === 'ordered' ? 'list-decimal' : 'list-disc'} list-inside text-slate-600 mb-4 space-y-1`}>
+            {block.data.items.map((item, i) => (
+              <li key={i} dangerouslySetInnerHTML={{ __html: item }} />
+            ))}
+          </ListTag>
+        )
+      case 'image':
+        return (
+          <figure key={index} className="my-6">
+            <img
+              src={block.data.file?.url || block.data.url}
+              alt={block.data.caption || ''}
+              className="w-full rounded-xl shadow-lg"
+            />
+            {block.data.caption && (
+              <figcaption className="text-center text-sm text-slate-500 mt-2">{block.data.caption}</figcaption>
+            )}
+          </figure>
+        )
+      default:
+        return null
+    }
+  })
+}
 
 const Catalog = () => {
-  const [catalogs, setCatalogs] = useState([])
+  const [articles, setArticles] = useState([])
   const [loading, setLoading] = useState(true)
-  const [selectedCatalog, setSelectedCatalog] = useState(null)
+  const [selectedArticle, setSelectedArticle] = useState(null)
 
-  // Load catalogs from database
+  // Load articles from database
   useEffect(() => {
-    const loadCatalogs = async () => {
+    const loadArticles = async () => {
       try {
-        const { data, error } = await supabase
-          .from('catalogs')
-          .select('*')
-          .order('title')
-
-        if (!error && data && data.length > 0) {
-          setCatalogs(data)
-        }
+        const data = await getCatalogArticles()
+        setArticles(data)
       } catch (err) {
-        console.error('Error loading catalogs:', err)
+        console.error('Error loading articles:', err)
       } finally {
         setLoading(false)
       }
     }
-    loadCatalogs()
+    loadArticles()
   }, [])
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header - same style as About */}
+      {/* Header */}
       <div className="relative h-[30vh] md:h-[40vh] lg:h-[50vh] overflow-hidden">
         <div className="absolute inset-0 z-0 bg-gradient-to-br from-primary/10 via-white to-sky-50" />
         <div className="absolute inset-0 z-10 flex items-center justify-center px-4">
@@ -105,96 +85,86 @@ const Catalog = () => {
               CATA<span className="text-primary">LOG</span>
             </h1>
             <p className="text-slate-600 text-sm md:text-lg max-w-xl mx-auto">
-              Sơ đồ kỹ thuật và danh sách mã phụ tùng chính hãng
+              Bài viết kỹ thuật và hướng dẫn sử dụng phụ tùng xe tải
             </p>
           </motion.div>
         </div>
       </div>
 
       <div className="container mx-auto px-4 md:px-10 lg:px-20 py-8 md:py-16">
-        {/* PDF Catalogs Download Section */}
-        {catalogs.length > 0 && (
-          <div className="mb-16">
-            <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary">picture_as_pdf</span>
-              Tải Catalog PDF
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {catalogs.map(catalog => (
-                <a
-                  key={catalog.id}
-                  href={catalog.file_url || '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-200 hover:border-primary hover:shadow-lg transition-all group"
-                >
-                  <div className="w-14 h-14 bg-red-50 rounded-xl flex items-center justify-center group-hover:bg-red-100 transition-colors">
-                    <span className="material-symbols-outlined text-3xl text-red-500">picture_as_pdf</span>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-slate-800 group-hover:text-primary transition-colors">{catalog.title}</h3>
-                    <p className="text-sm text-slate-400">{catalog.pages || 0} trang</p>
-                  </div>
-                  <span className="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors">download</span>
-                </a>
-              ))}
-            </div>
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full"></div>
           </div>
-        )}
+        ) : articles.length === 0 ? (
+          // Empty State
+          <div className="text-center py-20">
+            <span className="material-symbols-outlined text-8xl text-slate-300 mb-6">article</span>
+            <h2 className="text-2xl font-bold text-slate-600 mb-2">Chưa có bài viết nào</h2>
+            <p className="text-slate-400 max-w-md mx-auto">
+              Các bài viết hướng dẫn kỹ thuật và thông tin về phụ tùng xe tải sẽ được cập nhật tại đây.
+            </p>
+          </div>
+        ) : selectedArticle ? (
+          // Article Detail View
+          <div>
+            <button
+              onClick={() => setSelectedArticle(null)}
+              className="flex items-center gap-2 text-slate-500 hover:text-primary transition-colors mb-8"
+            >
+              <span className="material-symbols-outlined">arrow_back</span>
+              Quay lại danh sách
+            </button>
 
-        {/* Technical Parts Diagrams */}
-        <div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary">engineering</span>
-            Sơ Đồ Bộ Phận Kỹ Thuật
-          </h2>
-
+            <article className="max-w-4xl mx-auto bg-white rounded-3xl shadow-lg border border-slate-200 p-8 md:p-12">
+              <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
+                {selectedArticle.title}
+              </h1>
+              <div className="flex items-center gap-4 text-sm text-slate-400 mb-8 pb-8 border-b border-slate-200">
+                <span className="flex items-center gap-1">
+                  <span className="material-symbols-outlined text-sm">calendar_today</span>
+                  {new Date(selectedArticle.created_at).toLocaleDateString('vi-VN')}
+                </span>
+              </div>
+              <div className="prose prose-slate max-w-none">
+                {renderContent(selectedArticle.content)}
+              </div>
+            </article>
+          </div>
+        ) : (
+          // Articles List
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {catalogSections.map((section, index) => (
+            {articles.map((article, index) => (
               <motion.div
-                key={section.id}
+                key={article.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 className="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl transition-all group cursor-pointer"
-                onClick={() => setSelectedCatalog(selectedCatalog === section.id ? null : section.id)}
+                onClick={() => setSelectedArticle(article)}
               >
-                {/* Diagram Image */}
-                <div className="aspect-square bg-gradient-to-br from-slate-50 to-slate-100 p-6 flex items-center justify-center relative">
-                  <div className="w-full h-full flex items-center justify-center">
-                    <span className="material-symbols-outlined text-8xl text-slate-300 group-hover:text-primary/50 transition-colors">settings</span>
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent"></div>
+                {/* Thumbnail */}
+                <div className="aspect-video bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center relative overflow-hidden">
+                  {article.thumbnail ? (
+                    <img src={article.thumbnail} alt={article.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="material-symbols-outlined text-6xl text-slate-300 group-hover:text-primary/50 transition-colors">article</span>
+                  )}
                 </div>
 
-                {/* Title */}
-                <div className="p-4 border-t border-slate-100">
-                  <h3 className="font-bold text-slate-800 uppercase tracking-wide text-sm">{section.title}</h3>
-                </div>
-
-                {/* Parts List */}
-                <div className={`border-t border-slate-100 transition-all overflow-hidden ${selectedCatalog === section.id ? 'max-h-96' : 'max-h-0'}`}>
-                  <div className="p-4 bg-slate-50">
-                    <div className="grid grid-cols-4 gap-2 text-xs font-bold text-slate-500 uppercase mb-2 pb-2 border-b border-slate-200">
-                      <span>NO.</span>
-                      <span>Part No.</span>
-                      <span>Part Name</span>
-                      <span className="text-right">Qty</span>
-                    </div>
-                    {section.parts.map((part, i) => (
-                      <div key={i} className="grid grid-cols-4 gap-2 text-sm py-1.5 border-b border-slate-100 last:border-0">
-                        <span className="text-slate-500">{part.no}</span>
-                        <span className="font-mono text-primary text-xs">{part.partNo}</span>
-                        <span className="text-slate-700 truncate">{part.name}</span>
-                        <span className="text-right text-slate-700">{part.qty}</span>
-                      </div>
-                    ))}
-                  </div>
+                {/* Content */}
+                <div className="p-6">
+                  <h3 className="font-bold text-slate-800 text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                    {article.title}
+                  </h3>
+                  <p className="text-sm text-slate-400">
+                    {new Date(article.created_at).toLocaleDateString('vi-VN')}
+                  </p>
                 </div>
               </motion.div>
             ))}
           </div>
-        </div>
+        )}
 
         {/* Contact CTA */}
         <div className="mt-16 text-center p-12 bg-gradient-to-r from-primary to-sky-600 rounded-3xl shadow-lg">
