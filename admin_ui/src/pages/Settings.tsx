@@ -114,9 +114,7 @@ const Settings: React.FC = () => {
         );
     }
 
-    // Group settings by category
-    const companySettings = ['company_name', 'company_logo', 'hotline', 'address'];
-    const watermarkSettings = ['watermark_enabled', 'watermark_text', 'watermark_opacity'];
+
 
     return (
         <div className="space-y-8">
