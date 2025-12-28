@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
 import Categories from './pages/Categories';
 import Catalogs from './pages/Catalogs';
+import Settings from './pages/Settings';
 import Login from './pages/Login';
 
 // Protected Route Component
@@ -112,6 +113,16 @@ const App: React.FC = () => {
                         <ProtectedRoute>
                             <Layout>
                                 <Catalogs />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/settings"
+                    element={
+                        <ProtectedRoute>
+                            <Layout>
+                                <Settings />
                             </Layout>
                         </ProtectedRoute>
                     }

@@ -166,7 +166,14 @@ const ProductGrid = () => {
 
             <div className="p-6 space-y-4">
                 <div>
-                    <h3 className="text-slate-800 text-xl font-bold group-hover:text-primary transition-colors">{p.name}</h3>
+                    <Link
+                        to={`/product/${p.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block"
+                    >
+                        <h3 className="text-slate-800 text-xl font-bold group-hover:text-primary transition-colors">{p.name}</h3>
+                    </Link>
                     <p className="text-slate-400 text-sm mt-1">{p.description || 'Phụ tùng chính hãng'}</p>
                 </div>
 

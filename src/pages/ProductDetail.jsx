@@ -217,6 +217,22 @@ const ProductDetail = () => {
                             {product.name}
                         </h1>
 
+                        {/* Product Codes */}
+                        <div className="flex flex-wrap gap-4 text-sm">
+                            {product.code && (
+                                <div className="flex items-center gap-2 text-slate-600">
+                                    <span className="font-medium">Mã SP:</span>
+                                    <span className="font-mono bg-slate-100 px-2 py-1 rounded">{product.code}</span>
+                                </div>
+                            )}
+                            {product.manufacturer_code && (
+                                <div className="flex items-center gap-2 text-slate-600">
+                                    <span className="font-medium">Mã NSX:</span>
+                                    <span className="font-mono bg-slate-100 px-2 py-1 rounded">{product.manufacturer_code}</span>
+                                </div>
+                            )}
+                        </div>
+
                         {product.description && (
                             <p className="text-slate-500 text-lg leading-relaxed">
                                 {product.description}

@@ -14,6 +14,7 @@ export interface Product {
     category_id: number | null;
     category_ids?: number[];
     vehicle_ids?: number[];
+    manufacturer_code?: string | null;
     image: string | null;
     thumbnail?: string | null;
     description: string | null;

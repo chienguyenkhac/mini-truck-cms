@@ -4,12 +4,14 @@ import VideoSection from '../components/Home/VideoSection'
 import ProductGrid from '../components/Home/ProductGrid'
 import AboutSection from '../components/Home/AboutSection'
 import CategorySection from '../components/Home/CategorySection'
+import CategoryShowcase from '../components/Home/CategoryShowcase'
 
 const Home = () => {
   return (
     <div className="bg-background">
       <Hero />
       <StatsSection />
+      <CategoryShowcase />
       <VideoSection />
       <ProductGrid />
       <AboutSection />

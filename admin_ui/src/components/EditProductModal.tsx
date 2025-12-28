@@ -28,6 +28,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
         name: product.name || '',
         category_id: product.category_id || null,
         vehicle_ids: product.vehicle_ids || [],
+        manufacturer_code: product.manufacturer_code || '',
         description: product.description || '',
         show_on_homepage: product.show_on_homepage !== false,
     });
@@ -38,11 +39,9 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
     useEffect(() => {
         const loadData = async () => {
             try {
-                // Load categories
                 const catData = await categoryService.getAll();
                 setCategories(catData);
 
-                // Load existing product images
                 const productImages = await productImageService.getByProduct(product.id);
                 const existingImages = productImages.map((pi: ProductImage) => ({
                     id: pi.id,
@@ -51,7 +50,6 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
                     isNew: false
                 }));
 
-                // If no images in junction table but product has legacy image field
                 if (existingImages.length === 0 && product.image) {
                     setImages([{ url: product.image, isNew: false }]);
                 } else {
@@ -115,7 +113,6 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
     const removeImage = async (index: number) => {
         const img = images[index];
 
-        // If it's an existing image (has id), remove from product_images
         if (img.id && img.imageId) {
             try {
                 await productImageService.removeFromProduct(product.id, img.imageId);
@@ -147,11 +144,11 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
         setIsSubmitting(true);
 
         try {
-            // Update product basic info
             const thumbnail = images.length > 0 ? images[0].url : null;
             await productService.update(product.id, {
                 code: formData.code,
                 name: formData.name,
+                manufacturer_code: formData.manufacturer_code || null,
                 category_id: formData.category_id,
                 vehicle_ids: formData.vehicle_ids,
                 description: formData.description,
@@ -160,7 +157,6 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
                 show_on_homepage: formData.show_on_homepage,
             });
 
-            // Save new images
             for (let i = 0; i < images.length; i++) {
                 const img = images[i];
                 if (img.isNew) {
@@ -200,6 +196,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                    {/* Row 1: Code + Manufacturer Code */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -215,21 +212,36 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">
-                                Danh mục
+                                Mã nhà sản xuất
                             </label>
-                            <select
-                                value={formData.category_id || 0}
-                                onChange={(e) => setFormData({ ...formData, category_id: Number(e.target.value) || null })}
+                            <input
+                                type="text"
+                                value={formData.manufacturer_code}
+                                onChange={(e) => setFormData({ ...formData, manufacturer_code: e.target.value })}
                                 className="input"
-                            >
-                                <option value={0}>Chọn danh mục</option>
-                                {partCategories.map((cat) => (
-                                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                ))}
-                            </select>
+                                placeholder="VD: WEICHAI-612600130777"
+                            />
                         </div>
                     </div>
 
+                    {/* Row 2: Category */}
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Danh mục
+                        </label>
+                        <select
+                            value={formData.category_id || 0}
+                            onChange={(e) => setFormData({ ...formData, category_id: Number(e.target.value) || null })}
+                            className="input"
+                        >
+                            <option value={0}>Chọn danh mục</option>
+                            {partCategories.map((cat) => (
+                                <option key={cat.id} value={cat.id}>{cat.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Product Name */}
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-2">
                             Tên sản phẩm <span className="text-red-500">*</span>
@@ -256,8 +268,8 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
                                         type="button"
                                         onClick={() => toggleVehicle(cat.id)}
                                         className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${formData.vehicle_ids.includes(cat.id)
-                                                ? 'bg-primary text-white'
-                                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                            ? 'bg-primary text-white'
+                                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                                             }`}
                                     >
                                         {cat.name}
@@ -314,6 +326,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
                         <p className="text-xs text-slate-400">Ảnh đầu tiên sẽ là ảnh đại diện. Định dạng: JPG, PNG, WEBP. Tối đa 5MB/ảnh.</p>
                     </div>
 
+                    {/* Description */}
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-2">Mô tả</label>
                         <textarea

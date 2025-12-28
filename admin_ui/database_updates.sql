@@ -27,11 +27,40 @@ ALTER TABLE products
   ADD COLUMN IF NOT EXISTS thumbnail VARCHAR(500);
 
 -- 3. Update categories table
--- Add code, thumbnail, visibility
+-- Add code, thumbnail, visibility, and vehicle type flag
 ALTER TABLE categories 
   ADD COLUMN IF NOT EXISTS code VARCHAR(50),
   ADD COLUMN IF NOT EXISTS thumbnail VARCHAR(500),
-  ADD COLUMN IF NOT EXISTS is_visible BOOLEAN DEFAULT true;
+  ADD COLUMN IF NOT EXISTS is_visible BOOLEAN DEFAULT true,
+  ADD COLUMN IF NOT EXISTS is_vehicle_name BOOLEAN DEFAULT false;
+
+-- =====================================================
+-- 6. Phase 1 Updates - Separate Categories and Vehicle Types
+-- =====================================================
+
+-- Add vehicle_ids array to products for multi-vehicle support
+ALTER TABLE products
+  ADD COLUMN IF NOT EXISTS vehicle_ids BIGINT[] DEFAULT '{}';
+
+-- Create index for vehicle_ids array search
+CREATE INDEX IF NOT EXISTS idx_products_vehicle_ids ON products USING GIN(vehicle_ids);
+
+-- Update existing vehicle categories (examples - adjust based on actual data)
+-- Mark categories that are vehicle types (HOWO, SITRAK, etc.)
+UPDATE categories SET is_vehicle_name = true 
+WHERE name ILIKE '%HOWO%' OR name ILIKE '%SITRAK%' OR name ILIKE '%BEN%' 
+   OR name ILIKE '%A7%' OR name ILIKE '%T7H%';
+
+-- =====================================================
+-- 7. Phase 2 Updates - Manufacturer Code
+-- =====================================================
+
+-- Add manufacturer_code field to products
+ALTER TABLE products
+  ADD COLUMN IF NOT EXISTS manufacturer_code VARCHAR(100);
+
+-- Create index for faster manufacturer code lookups
+CREATE INDEX IF NOT EXISTS idx_products_manufacturer_code ON products(manufacturer_code);
 
 -- 4. Enable RLS for catalog_articles
 ALTER TABLE catalog_articles ENABLE ROW LEVEL SECURITY;
@@ -92,5 +121,40 @@ CREATE POLICY "Allow all for authenticated images" ON images FOR ALL USING (true
 CREATE POLICY "Allow public read product_images" ON product_images FOR SELECT USING (true);
 CREATE POLICY "Allow all for authenticated product_images" ON product_images FOR ALL USING (true);
 
+-- =====================================================
+-- 8. Phase 3 Updates - Site Settings & Watermark
+-- =====================================================
+
+-- Site settings table for admin configuration
+CREATE TABLE IF NOT EXISTS site_settings (
+  id SERIAL PRIMARY KEY,
+  key VARCHAR(100) UNIQUE NOT NULL,
+  value TEXT,
+  type VARCHAR(50) DEFAULT 'text', -- text, image, json
+  description VARCHAR(255),
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Insert default settings
+INSERT INTO site_settings (key, value, type, description) VALUES
+  ('company_name', 'SINOTRUK Hà Nội', 'text', 'Tên công ty'),
+  ('company_logo', NULL, 'image', 'Logo công ty'),
+  ('hotline', '0382890990', 'text', 'Số hotline'),
+  ('address', 'Hà Nội, Việt Nam', 'text', 'Địa chỉ công ty'),
+  ('watermark_enabled', 'true', 'text', 'Bật/tắt watermark'),
+  ('watermark_text', 'SINOTRUK Hà Nội', 'text', 'Text watermark'),
+  ('watermark_opacity', '40', 'text', 'Độ trong suốt watermark (0-100)')
+ON CONFLICT (key) DO NOTHING;
+
+-- Enable RLS for site_settings
+ALTER TABLE site_settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow public read site_settings" ON site_settings;
+DROP POLICY IF EXISTS "Allow all for authenticated site_settings" ON site_settings;
+
+CREATE POLICY "Allow public read site_settings" ON site_settings FOR SELECT USING (true);
+CREATE POLICY "Allow all for authenticated site_settings" ON site_settings FOR ALL USING (true);
+
 -- Done!
-SELECT 'Schema updated successfully with multi-image support!' as status;
+SELECT 'Schema updated with Phase 3 settings support!' as status;

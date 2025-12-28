@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { useNotification } from './shared/Notification';
 import { productService, categoryService, imageService, productImageService, Category } from '../services/supabase';
@@ -21,6 +21,8 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ onClose, onAdd }) => 
         code: '',
         name: '',
         category_id: 0,
+        vehicle_ids: [] as number[],
+        manufacturer_code: '',
         description: '',
         show_on_homepage: true,
     });
@@ -40,6 +42,27 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ onClose, onAdd }) => 
         };
         loadCategories();
     }, []);
+
+    // Separate categories: Part categories vs Vehicle types
+    const partCategories = useMemo(() =>
+        categories.filter(c => !c.is_vehicle_name),
+        [categories]
+    );
+
+    const vehicleCategories = useMemo(() =>
+        categories.filter(c => c.is_vehicle_name),
+        [categories]
+    );
+
+    // Handle vehicle checkbox toggle
+    const handleVehicleToggle = (vehicleId: number) => {
+        setFormData(prev => ({
+            ...prev,
+            vehicle_ids: prev.vehicle_ids.includes(vehicleId)
+                ? prev.vehicle_ids.filter(id => id !== vehicleId)
+                : [...prev.vehicle_ids, vehicleId]
+        }));
+    };
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
@@ -106,7 +129,9 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ onClose, onAdd }) => 
             const newProduct = await productService.create({
                 code: formData.code,
                 name: formData.name,
+                manufacturer_code: formData.manufacturer_code || null,
                 category_id: formData.category_id || null,
+                vehicle_ids: formData.vehicle_ids.length > 0 ? formData.vehicle_ids : undefined,
                 description: formData.description,
                 image: thumbnail,
                 thumbnail: thumbnail,
@@ -171,21 +196,66 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ onClose, onAdd }) => 
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">
-                                Danh mục <span className="text-red-500">*</span>
+                                Mã nhà sản xuất
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.manufacturer_code}
+                                onChange={(e) => setFormData({ ...formData, manufacturer_code: e.target.value })}
+                                className="input"
+                                placeholder="VD: WEICHAI-612600130777"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">
+                                Danh mục phụ tùng
                             </label>
                             <select
-                                required
                                 value={formData.category_id}
                                 onChange={(e) => setFormData({ ...formData, category_id: Number(e.target.value) })}
                                 className="input"
                             >
                                 <option value={0}>Chọn danh mục</option>
-                                {categories.map((cat) => (
+                                {partCategories.map((cat) => (
                                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                                 ))}
                             </select>
                         </div>
                     </div>
+
+                    {/* Vehicle Types - Multi-select */}
+                    {vehicleCategories.length > 0 && (
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">
+                                Loại xe áp dụng <span className="text-slate-400 text-xs">(có thể chọn nhiều)</span>
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                                {vehicleCategories.map((vehicle) => (
+                                    <label
+                                        key={vehicle.id}
+                                        className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${formData.vehicle_ids.includes(vehicle.id)
+                                            ? 'bg-primary/10 border-primary text-primary'
+                                            : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
+                                            }`}
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.vehicle_ids.includes(vehicle.id)}
+                                            onChange={() => handleVehicleToggle(vehicle.id)}
+                                            className="sr-only"
+                                        />
+                                        <span className="material-symbols-outlined text-sm">
+                                            {formData.vehicle_ids.includes(vehicle.id) ? 'check_box' : 'check_box_outline_blank'}
+                                        </span>
+                                        <span className="text-sm font-medium">{vehicle.name}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-2">

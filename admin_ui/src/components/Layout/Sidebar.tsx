@@ -111,6 +111,17 @@ const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({ isOpen,
                         <span className="material-symbols-outlined text-xl">article</span>
                         <span className="font-medium">Catalog</span>
                     </NavLink>
+
+                    <NavLink
+                        to="/settings"
+                        onClick={onClose}
+                        className={({ isActive }) =>
+                            `flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${isActive ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-700 hover:bg-slate-100'}`
+                        }
+                    >
+                        <span className="material-symbols-outlined text-xl">settings</span>
+                        <span className="font-medium">Cài đặt</span>
+                    </NavLink>
                 </nav>
 
                 {/* User - Click to open profile modal */}
