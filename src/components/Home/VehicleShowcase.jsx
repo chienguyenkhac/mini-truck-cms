@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { supabase } from '../../services/supabase'
 
+// Fallback image for vehicles without thumbnail
+const DEFAULT_TRUCK_IMAGE = '/images/default-truck.png'
+
 const VehicleShowcase = () => {
     const [vehicles, setVehicles] = useState([])
     const [loading, setLoading] = useState(true)
@@ -10,13 +13,12 @@ const VehicleShowcase = () => {
     useEffect(() => {
         const loadVehicles = async () => {
             try {
-                // Fetch visible vehicle categories with thumbnails
+                // Fetch ALL visible vehicle categories (with or without thumbnails)
                 const { data, error } = await supabase
                     .from('categories')
                     .select('*')
                     .eq('is_visible', true)
                     .eq('is_vehicle_name', true)
-                    .not('thumbnail', 'is', null)
                     .order('name')
                     .limit(6)
 
@@ -46,7 +48,7 @@ const VehicleShowcase = () => {
     }
 
     if (vehicles.length === 0) {
-        return null // Don't render if no vehicle categories with thumbnails
+        return null // Don't render if no vehicle categories
     }
 
     return (
@@ -83,20 +85,14 @@ const VehicleShowcase = () => {
                                 rel="noopener noreferrer"
                                 className="group block bg-slate-50 rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/30"
                             >
-                                {/* Image */}
-                                <div className="aspect-[16/10] relative overflow-hidden">
-                                    {vehicle.thumbnail ? (
-                                        <img
-                                            src={vehicle.thumbnail}
-                                            alt={vehicle.name}
-                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                            onError={(e) => { e.target.style.display = 'none' }}
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
-                                            <span className="material-symbols-outlined text-6xl text-slate-300">local_shipping</span>
-                                        </div>
-                                    )}
+                                {/* Image - use thumbnail or fallback */}
+                                <div className="aspect-[16/10] relative overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
+                                    <img
+                                        src={vehicle.thumbnail || DEFAULT_TRUCK_IMAGE}
+                                        alt={vehicle.name}
+                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                        onError={(e) => { e.target.src = DEFAULT_TRUCK_IMAGE }}
+                                    />
                                     {/* Overlay */}
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
 
