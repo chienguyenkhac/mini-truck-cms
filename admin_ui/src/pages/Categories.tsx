@@ -101,13 +101,13 @@ const Categories: React.FC = () => {
 
     const handleAddCategory = async () => {
         if (!newForm.name.trim()) {
-            notification.warning('Vui lòng nhập tên danh mục');
+            notification.warning(newForm.type === 'vehicle' ? 'Vui lòng nhập mã xe' : 'Vui lòng nhập tên danh mục');
             return;
         }
 
         // Validate: If type is 'vehicle', thumbnail is required
         if (newForm.type === 'vehicle' && !newForm.thumbnail) {
-            notification.warning('Vui lòng upload ảnh đại diện cho danh mục xe');
+            notification.warning('Vui lòng upload ảnh đại diện cho xe');
             return;
         }
 
@@ -119,7 +119,7 @@ const Categories: React.FC = () => {
                 is_visible: newForm.is_visible,
                 thumbnail: newForm.thumbnail || undefined
             });
-            notification.success(`Đã thêm danh mục "${newForm.name}"`);
+            notification.success(`Đã thêm ${newForm.type === 'vehicle' ? 'xe' : 'danh mục'} "${newForm.name}"`);
             setNewForm({ name: '', code: '', type: 'part', is_visible: true, thumbnail: '' });
             setIsAdding(false);
             loadCategories();
@@ -144,7 +144,7 @@ const Categories: React.FC = () => {
 
         // Validate: If type is 'vehicle', thumbnail is required
         if (editForm.type === 'vehicle' && !editForm.thumbnail) {
-            notification.warning('Vui lòng upload ảnh đại diện cho danh mục xe');
+            notification.warning('Vui lòng upload ảnh đại diện cho xe');
             return;
         }
 
@@ -175,10 +175,10 @@ const Categories: React.FC = () => {
     };
 
     const handleDeleteCategory = async (category: CategoryWithExtras) => {
-        if (confirm(`Bạn có chắc muốn xóa danh mục "${category.name}"?`)) {
+        if (confirm(`Bạn có chắc muốn xóa "${category.name}"?`)) {
             try {
                 await categoryService.delete(category.id);
-                notification.success(`Đã xóa danh mục "${category.name}"`);
+                notification.success(`Đã xóa "${category.name}"`);
                 loadCategories();
             } catch (error: any) {
                 notification.error(error.message || 'Có lỗi xảy ra');
@@ -224,17 +224,17 @@ const Categories: React.FC = () => {
                     )}
                     <input
                         type="text"
-                        placeholder="Tên"
+                        placeholder={editForm.type === 'vehicle' ? 'Mã xe' : 'Tên'}
                         value={editForm.name}
                         onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                         className="input py-1.5 px-2 text-sm w-32"
                     />
                     <input
                         type="text"
-                        placeholder="Mã"
+                        placeholder={editForm.type === 'vehicle' ? 'Hãng xe' : 'Mã'}
                         value={editForm.code}
                         onChange={(e) => setEditForm({ ...editForm, code: e.target.value })}
-                        className="input py-1.5 px-2 text-sm w-20"
+                        className="input py-1.5 px-2 text-sm w-24"
                     />
                     {/* Type dropdown */}
                     <select
@@ -270,7 +270,9 @@ const Categories: React.FC = () => {
                         <div className="flex items-center gap-2">
                             <span className={`font-medium ${isVehicle ? 'text-blue-700' : 'text-slate-700'}`}>{cat.name}</span>
                             {cat.code && (
-                                <span className="text-xs bg-white px-1.5 py-0.5 rounded border border-slate-200 text-slate-500 font-mono">{cat.code}</span>
+                                <span className="text-xs bg-white px-1.5 py-0.5 rounded border border-slate-200 text-slate-500 font-mono">
+                                    {isVehicle ? `Hãng: ${cat.code}` : cat.code}
+                                </span>
                             )}
                             <span className={`text-xs px-1.5 py-0.5 rounded ${isVehicle ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500'}`}>
                                 {isVehicle ? 'Xe' : 'Phụ tùng'}
@@ -321,12 +323,27 @@ const Categories: React.FC = () => {
                 <div className="card">
                     <h3 className="font-bold text-slate-800 mb-4">Thêm danh mục mới</h3>
 
+                    {/* Type Dropdown - First */}
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Loại danh mục *</label>
+                        <select
+                            value={newForm.type}
+                            onChange={(e) => setNewForm({ ...newForm, type: e.target.value as 'vehicle' | 'part' })}
+                            className="input w-40"
+                        >
+                            <option value="part">Phụ tùng</option>
+                            <option value="vehicle">Xe</option>
+                        </select>
+                    </div>
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Tên danh mục *</label>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">
+                                {newForm.type === 'vehicle' ? 'Mã xe *' : 'Tên danh mục *'}
+                            </label>
                             <input
                                 type="text"
-                                placeholder="VD: ĐỘNG CƠ hoặc HOWO"
+                                placeholder={newForm.type === 'vehicle' ? 'VD: ACX, F123, NBSA' : 'VD: ĐỘNG CƠ, PHANH'}
                                 value={newForm.name}
                                 onChange={(e) => setNewForm({ ...newForm, name: e.target.value })}
                                 className="input w-full"
@@ -334,10 +351,12 @@ const Categories: React.FC = () => {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Mã danh mục</label>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">
+                                {newForm.type === 'vehicle' ? 'Hãng xe' : 'Mã danh mục'}
+                            </label>
                             <input
                                 type="text"
-                                placeholder="VD: DC, HOWO (tùy chọn)"
+                                placeholder={newForm.type === 'vehicle' ? 'VD: HOWO, CHENGLONG, SITRAK' : 'VD: DC, PHK (tùy chọn)'}
                                 value={newForm.code}
                                 onChange={(e) => setNewForm({ ...newForm, code: e.target.value })}
                                 className="input w-full"
@@ -345,35 +364,11 @@ const Categories: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-4 mb-4">
-                        {/* Type Dropdown */}
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Loại danh mục *</label>
-                            <select
-                                value={newForm.type}
-                                onChange={(e) => setNewForm({ ...newForm, type: e.target.value as 'vehicle' | 'part' })}
-                                className="input w-40"
-                            >
-                                <option value="part">Phụ tùng</option>
-                                <option value="vehicle">Xe</option>
-                            </select>
-                        </div>
-                        <label className="flex items-center gap-2 cursor-pointer p-3 bg-green-50 rounded-xl border border-green-200 hover:border-green-400 transition-colors self-end">
-                            <input
-                                type="checkbox"
-                                checked={newForm.is_visible}
-                                onChange={(e) => setNewForm({ ...newForm, is_visible: e.target.checked })}
-                                className="w-4 h-4 rounded border-slate-300 text-green-600 focus:ring-green-500"
-                            />
-                            <span className="font-medium text-green-700 text-sm">Hiển thị trên website</span>
-                        </label>
-                    </div>
-
                     {/* Thumbnail Upload - Only show when type is 'vehicle' */}
                     {newForm.type === 'vehicle' && (
                         <div className="mb-4 p-4 bg-blue-50 rounded-xl border border-blue-200">
                             <label className="block text-sm font-medium text-blue-700 mb-2">
-                                Ảnh đại diện * <span className="text-red-500">(Bắt buộc cho danh mục Xe)</span>
+                                Ảnh xe * <span className="text-red-500">(Bắt buộc)</span>
                             </label>
                             <div className="flex items-center gap-4">
                                 {newForm.thumbnail ? (
@@ -416,6 +411,18 @@ const Categories: React.FC = () => {
                             </div>
                         </div>
                     )}
+
+                    <div className="flex flex-wrap gap-4 mb-4">
+                        <label className="flex items-center gap-2 cursor-pointer p-3 bg-green-50 rounded-xl border border-green-200 hover:border-green-400 transition-colors">
+                            <input
+                                type="checkbox"
+                                checked={newForm.is_visible}
+                                onChange={(e) => setNewForm({ ...newForm, is_visible: e.target.checked })}
+                                className="w-4 h-4 rounded border-slate-300 text-green-600 focus:ring-green-500"
+                            />
+                            <span className="font-medium text-green-700 text-sm">Hiển thị trên website</span>
+                        </label>
+                    </div>
 
                     <div className="flex gap-2">
                         <button
