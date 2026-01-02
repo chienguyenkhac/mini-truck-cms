@@ -109,7 +109,7 @@ const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({ isOpen,
                         }
                     >
                         <span className="material-symbols-outlined text-xl">article</span>
-                        <span className="font-medium">Catalog</span>
+                        <span className="font-medium">Bài viết</span>
                     </NavLink>
 
                     <NavLink

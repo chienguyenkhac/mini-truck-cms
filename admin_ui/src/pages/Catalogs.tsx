@@ -20,6 +20,7 @@ const Catalogs: React.FC = () => {
     const [showHelp, setShowHelp] = useState(false);
     const editorRef = useRef<EditorJS | null>(null);
     const editorContainerRef = useRef<HTMLDivElement>(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const loadArticles = async () => {
         setLoading(true);
@@ -272,7 +273,7 @@ const Catalogs: React.FC = () => {
         <div className="space-y-6">
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <h1 className="text-2xl md:text-3xl font-bold text-slate-800 tracking-tight uppercase">Catalog / Bài viết</h1>
+                <h1 className="text-2xl md:text-3xl font-bold text-slate-800 tracking-tight uppercase">Bài viết</h1>
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => setShowHelp(true)}
@@ -291,6 +292,28 @@ const Catalogs: React.FC = () => {
                 </div>
             </div>
 
+            {/* Search Box */}
+            <div className="card">
+                <div className="relative">
+                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                    <input
+                        type="text"
+                        placeholder="Tìm kiếm bài viết theo tiêu đề..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="input w-full pl-10"
+                    />
+                    {searchTerm && (
+                        <button
+                            onClick={() => setSearchTerm('')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        >
+                            <span className="material-symbols-outlined text-lg">close</span>
+                        </button>
+                    )}
+                </div>
+            </div>
+
             {/* Articles List */}
             <div className="card p-0 overflow-hidden">
                 <table className="admin-table w-full">
@@ -303,49 +326,54 @@ const Catalogs: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {articles.length > 0 ? articles.map(article => (
-                            <tr key={article.id} className="hover:bg-slate-50/80 transition-colors">
-                                <td>
-                                    <p className="font-bold text-slate-800">{article.title}</p>
-                                    <p className="text-xs text-slate-400">/{article.slug}</p>
-                                </td>
-                                <td>
-                                    <span className={`badge ${article.is_published ? 'badge-green' : 'badge-gray'}`}>
-                                        {article.is_published ? 'Đã xuất bản' : 'Bản nháp'}
-                                    </span>
-                                </td>
-                                <td className="text-sm text-slate-500">
-                                    {new Date(article.created_at).toLocaleDateString('vi-VN')}
-                                </td>
-                                <td className="text-right px-4">
-                                    <div className="flex items-center justify-end gap-1">
-                                        <button
-                                            onClick={() => handleTogglePublish(article)}
-                                            className={`p-2 rounded-lg transition-colors ${article.is_published ? 'text-orange-500 hover:bg-orange-50' : 'text-green-600 hover:bg-green-50'}`}
-                                            title={article.is_published ? 'Ẩn' : 'Xuất bản'}
-                                        >
-                                            <span className="material-symbols-outlined text-base">
-                                                {article.is_published ? 'visibility_off' : 'publish'}
-                                            </span>
-                                        </button>
-                                        <button
-                                            onClick={() => handleEditArticle(article)}
-                                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                            title="Sửa"
-                                        >
-                                            <span className="material-symbols-outlined text-base">edit</span>
-                                        </button>
-                                        <button
-                                            onClick={() => setDeleteArticle(article)}
-                                            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                            title="Xóa"
-                                        >
-                                            <span className="material-symbols-outlined text-base">delete</span>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        )) : (
+                        {articles.length > 0 ? articles
+                            .filter(article =>
+                                article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                article.slug.toLowerCase().includes(searchTerm.toLowerCase())
+                            )
+                            .map(article => (
+                                <tr key={article.id} className="hover:bg-slate-50/80 transition-colors">
+                                    <td>
+                                        <p className="font-bold text-slate-800">{article.title}</p>
+                                        <p className="text-xs text-slate-400">/{article.slug}</p>
+                                    </td>
+                                    <td>
+                                        <span className={`badge ${article.is_published ? 'badge-green' : 'badge-gray'}`}>
+                                            {article.is_published ? 'Đã xuất bản' : 'Bản nháp'}
+                                        </span>
+                                    </td>
+                                    <td className="text-sm text-slate-500">
+                                        {new Date(article.created_at).toLocaleDateString('vi-VN')}
+                                    </td>
+                                    <td className="text-right px-4">
+                                        <div className="flex items-center justify-end gap-1">
+                                            <button
+                                                onClick={() => handleTogglePublish(article)}
+                                                className={`p-2 rounded-lg transition-colors ${article.is_published ? 'text-orange-500 hover:bg-orange-50' : 'text-green-600 hover:bg-green-50'}`}
+                                                title={article.is_published ? 'Ẩn' : 'Xuất bản'}
+                                            >
+                                                <span className="material-symbols-outlined text-base">
+                                                    {article.is_published ? 'visibility_off' : 'publish'}
+                                                </span>
+                                            </button>
+                                            <button
+                                                onClick={() => handleEditArticle(article)}
+                                                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                title="Sửa"
+                                            >
+                                                <span className="material-symbols-outlined text-base">edit</span>
+                                            </button>
+                                            <button
+                                                onClick={() => setDeleteArticle(article)}
+                                                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                title="Xóa"
+                                            >
+                                                <span className="material-symbols-outlined text-base">delete</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            )) : (
                             <tr>
                                 <td colSpan={4} className="py-16 text-center">
                                     <div className="flex flex-col items-center gap-2 opacity-50">

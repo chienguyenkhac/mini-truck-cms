@@ -4,6 +4,7 @@ import { useNotification } from '../components/shared/Notification';
 import ConfirmDeleteModal from '../components/shared/ConfirmDeleteModal';
 import AddProductModal from '../components/AddProductModal';
 import EditProductModal from '../components/EditProductModal';
+import ImportExcelModal from '../components/ImportExcelModal';
 import * as XLSX from 'xlsx';
 
 import { productService, categoryService, Product, Category } from '../services/supabase';
@@ -20,6 +21,7 @@ const Products: React.FC = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [_loading, setLoading] = useState(true);
     const [deleteProduct, setDeleteProduct] = useState<Product | null>(null);
+    const [showImportModal, setShowImportModal] = useState(false);
 
     // Get category and cursor from URL params  
     const categoryFilter = searchParams.get('category') || 'ALL';
@@ -135,45 +137,9 @@ const Products: React.FC = () => {
         notification.success('Đã xuất danh mục sản phẩm (Excel) thành công');
     };
 
-    const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        try {
-            const data = await file.arrayBuffer();
-            const workbook = XLSX.read(data);
-            const sheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[sheetName];
-            const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-            let imported = 0;
-            for (const row of jsonData as any[]) {
-                // Map Excel columns to product fields
-                const product = {
-                    code: row.code || row.Code || row['Mã'] || '',
-                    name: row.name || row.Name || row['Tên'] || row['Tên sản phẩm'] || '',
-                    description: row.description || row.Description || row['Mô tả'] || '',
-                    category_id: row.category_id || row['Danh mục'] || null,
-                    image: row.image || row.Image || row['Ảnh'] || null,
-                    show_on_homepage: row.show_on_homepage !== false,
-                };
-
-                if (product.name && product.code) {
-                    try {
-                        await productService.create(product);
-                        imported++;
-                    } catch (err) {
-                        console.error('Error importing row:', err);
-                    }
-                }
-            }
-
-            notification.success(`Đã nhập ${imported} sản phẩm từ Excel`);
-            loadData();
-        } catch (error: any) {
-            notification.error('Lỗi đọc file Excel: ' + (error.message || 'Không xác định'));
-        }
-        e.target.value = ''; // Reset input
+    const handleImportComplete = () => {
+        loadData();
+        setShowImportModal(false);
     };
 
     const handleEdit = (product: Product) => {
@@ -227,16 +193,14 @@ const Products: React.FC = () => {
                 </div>
                 <div className="flex gap-2 w-full sm:w-auto">
                     {/* Import Excel */}
-                    <label className="btn btn-secondary flex-1 sm:flex-none flex items-center justify-center gap-2 cursor-pointer">
-                        <input
-                            type="file"
-                            accept=".xlsx,.xls"
-                            onChange={handleImportExcel}
-                            className="hidden"
-                        />
+                    <button
+                        onClick={() => setShowImportModal(true)}
+                        className="btn btn-secondary flex-1 sm:flex-none flex items-center justify-center gap-2"
+                        title="Nhập sản phẩm từ Excel"
+                    >
                         <span className="material-symbols-outlined">upload</span>
                         <span className="hidden sm:inline">Nhập Excel</span>
-                    </label>
+                    </button>
                     <button
                         onClick={handleExportExcel}
                         className="btn btn-secondary flex-1 sm:flex-none flex items-center justify-center gap-2"
@@ -514,6 +478,13 @@ const Products: React.FC = () => {
                 message="Bạn có chắc chắn muốn xóa sản phẩm này?"
                 itemName={deleteProduct?.name}
             />
+
+            {showImportModal && (
+                <ImportExcelModal
+                    onClose={() => setShowImportModal(false)}
+                    onImportComplete={handleImportComplete}
+                />
+            )}
         </div>
     );
 };

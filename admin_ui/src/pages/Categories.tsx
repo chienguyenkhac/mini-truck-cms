@@ -22,6 +22,7 @@ const Categories: React.FC = () => {
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const editFileInputRef = useRef<HTMLInputElement>(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     // New category form - use 'type' field: 'vehicle' or 'part'
     const [newForm, setNewForm] = useState({
@@ -186,8 +187,14 @@ const Categories: React.FC = () => {
         }
     };
 
-    const vehicleCategories = categories.filter(c => c.is_vehicle_name);
-    const partCategories = categories.filter(c => !c.is_vehicle_name);
+    // Filter categories by search term
+    const filteredCategories = categories.filter(c =>
+        c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (c.code?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
+    );
+
+    const vehicleCategories = filteredCategories.filter(c => c.is_vehicle_name);
+    const partCategories = filteredCategories.filter(c => !c.is_vehicle_name);
 
     const renderCategoryCard = (cat: CategoryWithExtras, isVehicle: boolean) => (
         <div key={cat.id} className={`flex items-center gap-3 px-4 py-3 rounded-xl border ${cat.is_visible === false ? 'bg-slate-100 border-slate-200 opacity-60' :
@@ -316,6 +323,28 @@ const Categories: React.FC = () => {
                     <span className="material-symbols-outlined text-xl">add</span>
                     Thêm danh mục
                 </button>
+            </div>
+
+            {/* Search Box */}
+            <div className="card">
+                <div className="relative">
+                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                    <input
+                        type="text"
+                        placeholder="Tìm kiếm danh mục theo tên hoặc mã..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="input w-full pl-10"
+                    />
+                    {searchTerm && (
+                        <button
+                            onClick={() => setSearchTerm('')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        >
+                            <span className="material-symbols-outlined text-lg">close</span>
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Add Category Form */}
