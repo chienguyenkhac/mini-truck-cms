@@ -299,16 +299,14 @@ const Products = () => {
                     <div className="flex gap-2 mt-auto">
                       <Link
                         to={`/product/${product.id}`}
-                        className="flex-1 py-2 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-1"
+                        className="flex-1 py-2 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:border-primary hover:text-primary transition-all flex items-center justify-center"
                       >
-                        <span className="material-symbols-outlined text-base">visibility</span>
                         Chi Tiết
                       </Link>
                       <a
                         href="tel:0382890990"
-                        className="flex-1 py-2 bg-primary text-white font-medium text-sm rounded-xl hover:bg-primary/90 transition-all flex items-center justify-center gap-1"
+                        className="flex-1 py-2 bg-primary text-white font-medium text-sm rounded-xl hover:bg-primary/90 transition-all flex items-center justify-center"
                       >
-                        <span className="material-symbols-outlined text-base">call</span>
                         Đặt Hàng
                       </a>
                     </div>
