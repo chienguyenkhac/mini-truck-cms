@@ -280,15 +280,15 @@ const Products = () => {
                       <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent opacity-60"></div>
                     </div>
                   </Link>
-                  <div className="p-4 flex flex-col flex-1">
+                  <div className="p-3 flex flex-col flex-1">
                     <Link to={`/product/${product.id}`}>
-                      <h3 className="text-slate-800 font-bold text-base group-hover:text-primary transition-colors line-clamp-2 min-h-[3rem]">
+                      <h3 className="text-slate-800 font-bold text-base group-hover:text-primary transition-colors line-clamp-2 min-h-[2.8rem]">
                         {product.name}
                       </h3>
                     </Link>
-                    <p className="text-slate-400 text-xs line-clamp-1 mt-1">{product.description || 'Phụ tùng chính hãng'}</p>
+                    <p className="text-slate-400 text-xs line-clamp-1 mt-0.5">{product.description || 'Phụ tùng chính hãng'}</p>
 
-                    <div className="mt-2 mb-3 min-h-[2.5rem]">
+                    <div className="mt-1.5 mb-2 min-h-[2rem]">
                       {product.price > 0 && (
                         <p className="text-xs text-slate-600">
                           Giá sỉ: <span className="font-bold text-primary">{formatPrice(product.price)}</span>
