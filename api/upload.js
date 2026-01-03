@@ -84,40 +84,39 @@ export default async function handler(req, res) {
 
         // Add watermark overlay if enabled
         if (watermarkSettings.enabled && !skipWatermark) {
-            // Cloudinary text overlay requires specific escaping:
-            // - Spaces should be %20
-            // - Commas should be %2C
-            // - Slashes should be %2F
-            // The Node SDK often handles this, but for Unicode/Vietnamese, 
-            // explicit encodeURIComponent is safer, BUT we must NOT double escape %.
             const escapedText = encodeURIComponent(watermarkSettings.text);
 
-            // Note: We avoid 'tiled' for now as it can cause canvas distortion if not matched with proper dimensions
-            // We'll use a diagonal overlay by placing it in the center with an angle
+            // 1. Diagonal center watermark
+            // We use width: 0.7 (70%) and crop: 'fit' to ensure it never expands the image
             transformations.push({
                 overlay: {
                     font_family: 'Arial',
-                    font_size: 45,
+                    font_size: 40,
                     font_weight: 'bold',
                     text: escapedText
                 },
+                width: 0.7,
+                crop: 'fit',
                 gravity: 'center',
                 angle: 45,
-                opacity: Math.floor(watermarkSettings.opacity * 0.4),
+                opacity: Math.floor(watermarkSettings.opacity * 0.3),
                 color: 'white'
             });
 
-            // Prominent corner watermark
+            // 2. Corner watermark
+            // We use width: 0.3 (30%) to keep it small in the corner
             transformations.push({
                 overlay: {
                     font_family: 'Arial',
-                    font_size: 50,
+                    font_size: 30,
                     font_weight: 'bold',
                     text: escapedText
                 },
+                width: 0.3,
+                crop: 'fit',
                 gravity: 'south_east',
-                x: 20,
-                y: 20,
+                x: 15,
+                y: 15,
                 opacity: watermarkSettings.opacity,
                 color: 'white',
                 border: '2px_solid_black'
