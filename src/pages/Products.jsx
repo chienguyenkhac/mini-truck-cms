@@ -257,7 +257,7 @@ const Products = () => {
                   transition={{ delay: Math.min(index * 0.05, 0.3) }}
                   viewport={{ once: true }}
                   whileHover={{ y: -5 }}
-                  className="group bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-lg"
+                  className="group bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-lg flex flex-col h-full"
                 >
                   <Link to={`/product/${product.id}`}>
                     <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
@@ -280,40 +280,35 @@ const Products = () => {
                       <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent opacity-60"></div>
                     </div>
                   </Link>
-                  <div className="p-6 space-y-4">
+                  <div className="p-4 flex flex-col flex-1">
                     <Link to={`/product/${product.id}`}>
-                      <h3 className="text-slate-800 font-bold text-lg group-hover:text-primary transition-colors line-clamp-2">
+                      <h3 className="text-slate-800 font-bold text-base group-hover:text-primary transition-colors line-clamp-2 min-h-[3rem]">
                         {product.name}
                       </h3>
                     </Link>
-                    <p className="text-slate-400 text-sm">{product.description || 'Phụ tùng chính hãng'}</p>
+                    <p className="text-slate-400 text-xs line-clamp-1 mt-1">{product.description || 'Phụ tùng chính hãng'}</p>
 
-                    <div className="space-y-1">
+                    <div className="mt-2 mb-3 min-h-[2.5rem]">
                       {product.price > 0 && (
-                        <p className="text-sm text-slate-600">
-                          Giá lẻ: <span className="font-bold text-slate-800">{formatPrice(product.price)}</span>
-                        </p>
-                      )}
-                      {product.price_bulk > 0 && (
-                        <p className="text-sm text-slate-600">
-                          Giá sỉ: <span className="font-bold text-green-600">{formatPrice(product.price_bulk)}</span>
+                        <p className="text-xs text-slate-600">
+                          Giá sỉ: <span className="font-bold text-primary">{formatPrice(product.price)}</span>
                         </p>
                       )}
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 mt-auto">
                       <Link
                         to={`/product/${product.id}`}
-                        className="flex-1 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2"
+                        className="flex-1 py-2 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-1"
                       >
-                        <span className="material-symbols-outlined text-lg">visibility</span>
+                        <span className="material-symbols-outlined text-base">visibility</span>
                         Chi Tiết
                       </Link>
                       <a
                         href="tel:0382890990"
-                        className="flex-1 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-all flex items-center justify-center gap-2"
+                        className="flex-1 py-2 bg-primary text-white font-medium text-sm rounded-xl hover:bg-primary/90 transition-all flex items-center justify-center gap-1"
                       >
-                        <span className="material-symbols-outlined text-lg">call</span>
+                        <span className="material-symbols-outlined text-base">call</span>
                         Đặt Hàng
                       </a>
                     </div>
