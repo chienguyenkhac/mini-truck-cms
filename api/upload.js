@@ -86,8 +86,7 @@ export default async function handler(req, res) {
         if (watermarkSettings.enabled && !skipWatermark) {
             const escapedText = encodeURIComponent(watermarkSettings.text);
 
-            // 1. Diagonal center watermark
-            // We use width: 0.7 (70%) and crop: 'fit' to ensure it never expands the image
+            // Just the diagonal center watermark
             transformations.push({
                 overlay: {
                     font_family: 'Arial',
@@ -95,31 +94,10 @@ export default async function handler(req, res) {
                     font_weight: 'bold',
                     text: escapedText
                 },
-                width: 0.7,
-                crop: 'fit',
                 gravity: 'center',
                 angle: 45,
-                opacity: Math.floor(watermarkSettings.opacity * 0.3),
+                opacity: Math.floor(watermarkSettings.opacity * 0.4),
                 color: 'white'
-            });
-
-            // 2. Corner watermark
-            // We use width: 0.3 (30%) to keep it small in the corner
-            transformations.push({
-                overlay: {
-                    font_family: 'Arial',
-                    font_size: 30,
-                    font_weight: 'bold',
-                    text: escapedText
-                },
-                width: 0.3,
-                crop: 'fit',
-                gravity: 'south_east',
-                x: 15,
-                y: 15,
-                opacity: watermarkSettings.opacity,
-                color: 'white',
-                border: '2px_solid_black'
             });
         }
 
