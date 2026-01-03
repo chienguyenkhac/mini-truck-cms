@@ -8,9 +8,9 @@ export default {
         extend: {
             colors: {
                 // Matching frontend current theme (light theme with sky blue)
-                primary: '#0ea5e9',
-                'primary-dark': '#0284c7',
-                'primary-light': '#7dd3fc',
+                primary: '#18535d',
+                'primary-dark': '#124149',
+                'primary-light': '#247a88',
                 background: '#f9fafb',
                 surface: '#f1f5f9',
                 'surface-dark': '#e2e8f0',

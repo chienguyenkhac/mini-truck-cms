@@ -12,12 +12,12 @@ const Home = () => {
     <div className="bg-background">
       <Hero />
       <StatsSection />
+      <VehicleShowcase />
       <CategoryShowcase />
       <VideoSection />
       <ProductGrid />
       <AboutSection />
       <CategorySection />
-      <VehicleShowcase />
     </div>
   )
 }

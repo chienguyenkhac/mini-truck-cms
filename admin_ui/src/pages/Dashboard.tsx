@@ -35,7 +35,7 @@ const Dashboard: React.FC = () => {
                     return acc;
                 }, {});
 
-                const colors = ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#94a3b8', '#ec4899', '#14b8a6', '#f97316'];
+                const colors = ['#18535d', '#10b981', '#f59e0b', '#8b5cf6', '#94a3b8', '#ec4899', '#14b8a6', '#f97316'];
                 const distribution = Object.keys(catsMap).map((cat, i) => ({
                     name: cat,
                     value: catsMap[cat],

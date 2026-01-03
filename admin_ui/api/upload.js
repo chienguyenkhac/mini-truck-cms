@@ -75,21 +75,23 @@ export default async function handler(req, res) {
 
         // Add watermark overlay if enabled
         if (watermarkSettings.enabled && !skipWatermark) {
+            // Background shadow/glow for better contrast
             transformations.push({
                 overlay: {
                     font_family: 'Arial',
-                    font_size: 50,
+                    font_size: 52,
                     font_weight: 'bold',
                     text: watermarkSettings.text
                 },
                 gravity: 'south_east',
-                x: 10,
-                y: 10,
-                opacity: watermarkSettings.opacity,
-                color: 'white'
+                x: 22,
+                y: 22,
+                opacity: Math.floor(watermarkSettings.opacity * 0.4),
+                color: 'black',
+                effect: 'blur:200'
             });
 
-            // Add shadow for better visibility
+            // Main text
             transformations.push({
                 overlay: {
                     font_family: 'Arial',
@@ -98,10 +100,11 @@ export default async function handler(req, res) {
                     text: watermarkSettings.text
                 },
                 gravity: 'south_east',
-                x: 12,
-                y: 12,
-                opacity: Math.floor(watermarkSettings.opacity * 0.5),
-                color: 'black'
+                x: 20,
+                y: 20,
+                opacity: watermarkSettings.opacity,
+                color: 'white',
+                border: '2px_solid_black'
             });
         }
 

@@ -105,7 +105,7 @@ const Hero = () => {
   ), [])
 
   return (
-    <section className="relative w-full min-h-screen flex items-center overflow-hidden bg-background">
+    <section className="relative w-full h-[70vh] flex items-center overflow-hidden bg-background">
       {/* Background Image Slideshow */}
       <div className="absolute inset-0 z-0">
         <AnimatePresence mode="wait">
@@ -140,9 +140,9 @@ const Hero = () => {
         </Canvas>
       </div>
 
-      {/* Light overlays */}
-      <div className="absolute inset-0 z-[3] pointer-events-none bg-gradient-to-r from-white via-white/90 to-white/60"></div>
-      <div className="absolute inset-0 z-[3] pointer-events-none bg-gradient-to-t from-white via-white/50 to-transparent"></div>
+      {/* Light overlays - made more transparent for clarity */}
+      <div className="absolute inset-0 z-[3] pointer-events-none bg-gradient-to-r from-white/80 via-white/40 to-white/20"></div>
+      <div className="absolute inset-0 z-[3] pointer-events-none bg-gradient-to-t from-white/60 via-white/20 to-transparent"></div>
 
       {/* Banner indicators */}
       <div className="absolute bottom-24 right-10 z-20 hidden md:flex gap-2">
@@ -175,7 +175,7 @@ const Hero = () => {
               <br />
               <span
                 className="text-primary inline-block hover:scale-105 transition-transform duration-300 cursor-default animate-pulse-subtle"
-                style={{ textShadow: '0 0 8px rgba(14, 165, 233, 0.6), 0 0 20px rgba(14, 165, 233, 0.4)' }}
+                style={{ textShadow: '0 0 8px rgba(24, 83, 93, 0.6), 0 0 20px rgba(24, 83, 93, 0.4)' }}
               >
                 {subtitleChars}
               </span>

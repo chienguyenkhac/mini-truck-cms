@@ -49,7 +49,7 @@ const TruckIcon3D = () => {
             {/* Cabin */}
             <mesh position={[0, 0.5, 0.8]}>
                 <boxGeometry args={[1.2, 1, 1]} />
-                <meshStandardMaterial color="#0ea5e9" metalness={0.7} roughness={0.3} />
+                <meshStandardMaterial color="#18535d" metalness={0.7} roughness={0.3} />
             </mesh>
             {/* Cargo */}
             <mesh position={[0, 0.6, -0.5]}>
@@ -72,14 +72,14 @@ const Scene3D = () => {
     return (
         <>
             <ambientLight intensity={0.4} />
-            <pointLight position={[10, 10, 10]} intensity={1} color="#0ea5e9" />
+            <pointLight position={[10, 10, 10]} intensity={1} color="#18535d" />
             <pointLight position={[-10, -10, -10]} intensity={0.5} color="#fff" />
 
             <TruckIcon3D />
 
-            <FloatingSphere position={[-3, 1, -2]} color="#0ea5e9" size={0.5} speed={0.8} />
-            <FloatingSphere position={[3, -1, -2]} color="#0ea5e9" size={0.3} speed={1.2} />
-            <FloatingSphere position={[2, 2, -3]} color="#7dd3fc" size={0.4} speed={1} />
+            <FloatingSphere position={[-3, 1, -2]} color="#18535d" size={0.5} speed={0.8} />
+            <FloatingSphere position={[3, -1, -2]} color="#18535d" size={0.3} speed={1.2} />
+            <FloatingSphere position={[2, 2, -3]} color="#247a88" size={0.4} speed={1} />
         </>
     )
 }
