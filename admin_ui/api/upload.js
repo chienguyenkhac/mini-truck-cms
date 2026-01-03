@@ -69,19 +69,30 @@ export default async function handler(req, res) {
 
         // Get watermark settings
         const watermarkSettings = await getWatermarkSettings();
+        console.log('Watermark Settings:', watermarkSettings);
 
         // Build transformation array
         const transformations = [];
 
         // Add watermark overlay if enabled
         if (watermarkSettings.enabled && !skipWatermark) {
+            // Cloudinary text needs specific escaping
+            // 1. Text must be encodeURIComponent
+            // 2. Commas and slashes must be double escaped for some reason in certain SDK versions
+            const escapedText = encodeURIComponent(watermarkSettings.text)
+                .replace(/%/g, '%25') // Double escape for Cloudinary
+                .replace(/\(/g, '%28')
+                .replace(/\)/g, '%29');
+
+            console.log('Escaped Watermark Text:', escapedText);
+
             // Tiled watermark for maximum visibility
             transformations.push({
                 overlay: {
                     font_family: 'Arial',
                     font_size: 40,
                     font_weight: 'bold',
-                    text: watermarkSettings.text
+                    text: escapedText
                 },
                 flags: 'tiled',
                 angle: 45,
@@ -95,7 +106,7 @@ export default async function handler(req, res) {
                     font_family: 'Arial',
                     font_size: 50,
                     font_weight: 'bold',
-                    text: watermarkSettings.text
+                    text: escapedText
                 },
                 gravity: 'south_east',
                 x: 20,
@@ -106,10 +117,13 @@ export default async function handler(req, res) {
             });
         }
 
+        console.log('Final Transformations:', JSON.stringify(transformations));
+
         const result = await cloudinary.uploader.upload(image, {
             folder: 'sinotruk-admin/products',
             transformation: transformations.length > 0 ? transformations : undefined
         });
+        console.log('Upload Result URL:', result.secure_url);
 
         return res.status(200).json({
             secure_url: result.secure_url,
