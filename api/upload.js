@@ -86,14 +86,18 @@ export default async function handler(req, res) {
         if (watermarkSettings.enabled && !skipWatermark) {
             const escapedText = encodeURIComponent(watermarkSettings.text);
 
-            // Just the diagonal center watermark
+            // Single diagonal center watermark
+            // Relative width (0.8 = 80% of image width) ensures it scales with the image
+            // crop: 'fit' ensures the overlay itself is scaled without stretching the base image
             transformations.push({
                 overlay: {
                     font_family: 'Arial',
-                    font_size: 40,
+                    font_size: 100, // Large base size, will be scaled by 'width'
                     font_weight: 'bold',
                     text: escapedText
                 },
+                width: 0.8,
+                crop: 'fit',
                 gravity: 'center',
                 angle: 45,
                 opacity: Math.floor(watermarkSettings.opacity * 0.4),
