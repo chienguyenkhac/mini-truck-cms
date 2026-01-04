@@ -288,7 +288,7 @@ const Products = () => {
                     </Link>
                     <p className="text-slate-400 text-xs line-clamp-1 mt-0.5">{product.description || 'Phụ tùng chính hãng'}</p>
 
-                    <div className="mt-1.5 mb-2 min-h-[2rem]">
+                    <div className="mt-1.5 mb-1 min-h-[2rem]">
                       {product.price > 0 && (
                         <p className="text-xs text-slate-600">
                           Giá sỉ: <span className="font-bold text-primary">{formatPrice(product.price)}</span>
