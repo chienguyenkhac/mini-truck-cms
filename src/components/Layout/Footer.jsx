@@ -37,20 +37,12 @@ const Footer = () => {
           <div className="lg:col-span-4 space-y-8">
             <Link to="/" className="flex items-center gap-3 group cursor-pointer">
               {siteSettings.company_logo ? (
-                <img src={siteSettings.company_logo} alt="Logo" className="h-10 w-auto object-contain" />
+                <img src={siteSettings.company_logo} alt="Logo" className="h-10 w-auto object-contain transition-transform group-hover:scale-105" />
               ) : (
-                <div className="w-10 h-10 text-primary">
+                <div className="w-10 h-10 text-primary transition-transform group-hover:scale-110">
                   <span className="material-symbols-outlined text-4xl font-bold">local_shipping</span>
                 </div>
               )}
-              <div className="flex flex-col">
-                <span className="text-slate-800 text-2xl font-bold leading-none uppercase">
-                  {siteSettings.company_name ? siteSettings.company_name.split(' ')[0] : 'Sinotruk'}
-                </span>
-                <span className="text-primary text-xs font-bold tracking-[0.2em] leading-none uppercase">
-                  {siteSettings.company_name ? siteSettings.company_name.split(' ').slice(1).join(' ') : 'Hà Nội'}
-                </span>
-              </div>
             </Link>
 
             <p className="text-slate-500 leading-relaxed text-sm max-w-sm">
@@ -127,7 +119,7 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="border-t border-slate-200 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-slate-500 text-sm">© 2024 {siteSettings.company_name || 'SINOTRUK HÀ NỘI'} - Phụ Tùng Chính Hãng.</p>
+          <p className="text-slate-500 text-sm">© 2024 Phụ Tùng Chính Hãng.</p>
           <div className="flex gap-10 text-xs text-slate-500 uppercase tracking-widest font-bold">
             <Link to="/about" className="hover:text-primary transition-colors">Điều khoản</Link>
             <Link to="/about" className="hover:text-primary transition-colors">Bảo mật</Link>
