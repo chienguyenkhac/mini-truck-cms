@@ -11,16 +11,12 @@ export const Footer: React.FC = () => {
               <div className="size-10 text-primary">
                 <span className="material-symbols-outlined text-4xl font-bold">local_shipping</span>
               </div>
-              <div className="flex flex-col">
-                <span className="text-white text-2xl font-bold leading-none uppercase">Sinotruk</span>
-                <span className="text-primary text-xs font-bold tracking-[0.2em] leading-none uppercase">Hà Nội</span>
-              </div>
             </div>
-            
+
             <p className="text-gray-400 leading-relaxed text-sm max-w-sm">
               Đơn vị ủy quyền chính thức phân phối các dòng xe tải nặng Sinotruk tại Việt Nam. Cam kết chất lượng cao, phụ tùng chính hãng và dịch vụ 24/7.
             </p>
-            
+
             <div className="flex gap-4">
               {['public', 'mail', 'location_on'].map((icon, i) => (
                 <a key={i} href="#" className="size-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-primary hover:border-primary transition-all duration-300">
@@ -52,8 +48,8 @@ export const Footer: React.FC = () => {
           <div className="lg:col-span-3 space-y-8">
             <h4 className="text-white font-bold text-lg uppercase tracking-widest text-sm">Đăng Ký Nhận Tin</h4>
             <div className="flex gap-2">
-              <input 
-                type="email" 
+              <input
+                type="email"
                 placeholder="Email của bạn"
                 className="flex-grow bg-white/5 border border-border rounded-xl px-5 py-3 text-white text-sm focus:outline-none focus:border-primary transition-all"
               />
@@ -72,7 +68,7 @@ export const Footer: React.FC = () => {
         </div>
 
         <div className="border-t border-border pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-gray-600 text-sm">© 2024 SINOTRUK HÀ NỘI. Phát triển bởi AI Studio.</p>
+          <p className="text-gray-600 text-sm">© 2024 Phụ Tùng Chính Hãng.</p>
           <div className="flex gap-10 text-xs text-gray-600 uppercase tracking-widest font-bold">
             <a href="#" className="hover:text-white transition-colors">Điều khoản</a>
             <a href="#" className="hover:text-white transition-colors">Bảo mật</a>

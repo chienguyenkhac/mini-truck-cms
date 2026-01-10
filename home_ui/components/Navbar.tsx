@@ -13,10 +13,6 @@ export const Navbar: React.FC<NavbarProps> = ({ isScrolled }) => {
           <div className="w-10 h-10 text-primary transition-transform group-hover:scale-110">
             <span className="material-symbols-outlined text-4xl font-bold">local_shipping</span>
           </div>
-          <div className="flex flex-col">
-            <span className="text-white text-xl font-bold tracking-tight leading-none uppercase">Sinotruk</span>
-            <span className="text-primary text-[10px] font-bold tracking-[0.2em] leading-none uppercase">Hà Nội</span>
-          </div>
         </div>
 
         <nav className="hidden lg:flex items-center gap-10">

@@ -14,7 +14,6 @@ import { AnimatePresence } from 'framer-motion';
 
 const App: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,25 +25,17 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <AnimatePresence>
-        {isLoading && <SplashLoader onComplete={() => setIsLoading(false)} />}
-      </AnimatePresence>
-
-      {!isLoading && (
-        <>
-          <Navbar isScrolled={isScrolled} />
-          <main className="flex-grow">
-            <Hero />
-            <StatsSection />
-            <VideoSection />
-            <ProductGrid />
-            <AboutSection />
-            <CategorySection />
-          </main>
-          <Footer />
-          <GeminiConsultant />
-        </>
-      )}
+      <Navbar isScrolled={isScrolled} />
+      <main className="flex-grow">
+        <Hero />
+        <StatsSection />
+        <VideoSection />
+        <ProductGrid />
+        <AboutSection />
+        <CategorySection />
+      </main>
+      <Footer />
+      <GeminiConsultant />
     </div>
   );
 };
