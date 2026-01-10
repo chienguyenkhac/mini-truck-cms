@@ -111,22 +111,14 @@ const Navbar = ({ isScrolled }) => {
         <header className={`fixed top-0 z-50 w-full transition-all duration-300 ${isScrolled ? 'bg-background/95 backdrop-blur-md border-b border-border py-3 shadow-lg' : 'bg-transparent py-5'}`}>
             <div className="container mx-auto px-4 md:px-10 lg:px-20 flex items-center justify-between">
                 {/* Logo */}
-                <Link ref={logoRef} to="/" className="flex items-center gap-3 group cursor-pointer">
+                <Link ref={logoRef} to="/" className="group cursor-pointer">
                     {siteSettings.company_logo ? (
-                        <img src={siteSettings.company_logo} alt="Logo" className="h-10 w-auto object-contain" />
+                        <img src={siteSettings.company_logo} alt="Logo" className="h-12 w-auto object-contain transition-transform group-hover:scale-110 duration-300" />
                     ) : (
-                        <div className="w-10 h-10 text-primary transition-transform group-hover:scale-110 group-hover:rotate-12 duration-300">
-                            <span className="material-symbols-outlined text-4xl font-bold">local_shipping</span>
+                        <div className="w-12 h-12 text-primary transition-transform group-hover:scale-110 group-hover:rotate-12 duration-300">
+                            <span className="material-symbols-outlined text-5xl font-bold">local_shipping</span>
                         </div>
                     )}
-                    <div className="flex flex-col">
-                        <span className="text-slate-800 text-xl font-bold tracking-tight leading-none uppercase">
-                            {siteSettings.company_name ? siteSettings.company_name.split(' ')[0] : 'Sinotruk'}
-                        </span>
-                        <span className="text-primary text-[10px] font-bold tracking-[0.2em] leading-none uppercase">
-                            {siteSettings.company_name ? siteSettings.company_name.split(' ').slice(1).join(' ') : 'Hà Nội'}
-                        </span>
-                    </div>
                 </Link>
 
                 {/* Desktop Navigation */}
