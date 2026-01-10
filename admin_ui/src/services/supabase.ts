@@ -8,8 +8,28 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export const getImageUrl = (image: string | null | undefined): string => {
     if (!image) return 'https://res.cloudinary.com/dgv7d7n6q/image/upload/v1734944400/product_placeholder.png';
-    if (image.startsWith('http') || image.startsWith('/')) return image;
-    return `https://irncljhvsjtohiqllnsv.supabase.co/storage/v1/object/public/products/${image}`;
+
+    // If already proxied
+    if (image.startsWith('/api/image')) return image;
+
+    // If it's a relative path
+    if (!image.startsWith('http') && !image.startsWith('/')) {
+        return `/api/image?path=${image}`;
+    }
+
+    // If it's a full URL from our own Supabase storage
+    if (image.includes('/storage/v1/object/public/')) {
+        const parts = image.split('/');
+        const filename = parts[parts.length - 1];
+        return `/api/image?path=${filename}`;
+    }
+
+    // If it's Cloudinary, proxy it
+    if (image.includes('cloudinary.com')) {
+        return `/api/image?url=${encodeURIComponent(image)}`;
+    }
+
+    return image;
 };
 
 // Types

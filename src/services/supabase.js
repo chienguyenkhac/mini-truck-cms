@@ -10,9 +10,28 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export const getImageUrl = (image) => {
     if (!image) return 'https://res.cloudinary.com/dgv7d7n6q/image/upload/v1734944400/product_placeholder.png';
-    if (image.startsWith('http') || image.startsWith('/')) return image;
-    // Fallback for legacy filenames in the 'products' bucket
-    return `https://irncljhvsjtohiqllnsv.supabase.co/storage/v1/object/public/products/${image}`;
+
+    // If already proxied
+    if (image.startsWith('/api/image')) return image;
+
+    // If it's a relative path (likely from new system or just a filename)
+    if (!image.startsWith('http') && !image.startsWith('/')) {
+        return `/api/image?path=${image}`;
+    }
+
+    // If it's a full URL from our own Supabase storage (any bucket)
+    if (image.includes('/storage/v1/object/public/')) {
+        const parts = image.split('/');
+        const filename = parts[parts.length - 1];
+        return `/api/image?path=${filename}`;
+    }
+
+    // If it's Cloudinary, proxy it to apply watermark
+    if (image.includes('cloudinary.com')) {
+        return `/api/image?url=${encodeURIComponent(image)}`;
+    }
+
+    return image;
 };
 
 export const getProducts = async (limit = 12, onlyHomepage = false, options = {}) => {

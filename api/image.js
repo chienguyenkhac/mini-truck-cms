@@ -8,36 +8,61 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SU
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default async function handler(req, res) {
-    const { path } = req.query;
+    const { path, url } = req.query;
 
-    if (!path) {
-        return res.status(400).send('Image path is required');
+    if (!path && !url) {
+        return res.status(400).send('Image path or URL is required');
     }
 
     try {
+        const cacheName = path || Buffer.from(url).toString('base64').substring(0, 50) + '.jpg';
+
         // 1. Try to fetch from watermarked cache bucket
         const { data: cachedImage, error: cacheError } = await supabase
             .storage
             .from('watermarked')
-            .download(path);
+            .download(cacheName);
 
         if (cachedImage && !cacheError) {
-            console.log(`Serving cached image: ${path}`);
+            console.log(`Serving cached image: ${cacheName}`);
             const buffer = await cachedImage.arrayBuffer();
             res.setHeader('Content-Type', 'image/jpeg');
             res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
             return res.send(Buffer.from(buffer));
         }
 
-        // 2. Not in cache, fetch from original bucket
-        const { data: originalImage, error: originalError } = await supabase
-            .storage
-            .from('original')
-            .download(path);
+        // 2. Fetch original image
+        let originalBuffer;
+        let originalType = 'image/jpeg';
 
-        if (originalError || !originalImage) {
-            console.error(`Original image not found: ${path}`, originalError);
-            return res.status(404).send('Original image not found');
+        if (path) {
+            // Try 'original' bucket first
+            let { data: imgData, error: imgError } = await supabase
+                .storage
+                .from('original')
+                .download(path);
+
+            if (imgError || !imgData) {
+                // Fallback to legacy 'products' bucket
+                console.log(`Falling back to products bucket for: ${path}`);
+                const { data: legacyData, error: legacyError } = await supabase
+                    .storage
+                    .from('products')
+                    .download(path);
+
+                if (legacyError || !legacyData) {
+                    return res.status(404).send('Original image not found in any bucket');
+                }
+                imgData = legacyData;
+            }
+            originalBuffer = Buffer.from(await imgData.arrayBuffer());
+            originalType = imgData.type || 'image/jpeg';
+        } else if (url) {
+            // Fetch from external URL
+            const response = await fetch(decodeURIComponent(url));
+            if (!response.ok) throw new Error(`Failed to fetch from URL: ${url}`);
+            originalBuffer = Buffer.from(await response.arrayBuffer());
+            originalType = response.headers.get('content-type') || 'image/jpeg';
         }
 
         // 3. Get watermark settings from site_settings
@@ -55,12 +80,11 @@ export default async function handler(req, res) {
         const watermarkText = getSetting('watermark_text', 'SINOTRUK Hà Nội');
         const watermarkOpacity = parseInt(getSetting('watermark_opacity', '40')) / 100;
 
-        const originalBuffer = await originalImage.arrayBuffer();
         let finalBuffer;
 
-        if (isEnabled) {
+        if (isEnabled && originalType.startsWith('image/')) {
             // 4. Apply watermark using sharp
-            const metadata = await sharp(Buffer.from(originalBuffer)).metadata();
+            const metadata = await sharp(originalBuffer).metadata();
             const width = metadata.width || 800;
             const height = metadata.height || 600;
 
@@ -92,32 +116,32 @@ export default async function handler(req, res) {
                 </svg>
             `;
 
-            finalBuffer = await sharp(Buffer.from(originalBuffer))
-                .composite([{
-                    input: Buffer.from(svg),
-                    top: 0,
-                    left: 0,
-                }])
-                .jpeg({ quality: 85 })
-                .toBuffer();
+            try {
+                finalBuffer = await sharp(originalBuffer)
+                    .composite([{
+                        input: Buffer.from(svg),
+                        top: 0,
+                        left: 0,
+                    }])
+                    .jpeg({ quality: 85 })
+                    .toBuffer();
+            } catch (sharpError) {
+                console.error('Sharp failed, returning original:', sharpError);
+                finalBuffer = originalBuffer;
+            }
         } else {
-            finalBuffer = Buffer.from(originalBuffer);
+            finalBuffer = originalBuffer;
         }
 
-        // 5. Save processed image to cache bucket for future requests
-        // Use upsert: true to overwrite if it somehow exists now
-        const { error: uploadError } = await supabase
+        // 5. Save processed image to cache bucket
+        await supabase
             .storage
             .from('watermarked')
-            .upload(path, finalBuffer, {
+            .upload(cacheName, finalBuffer, {
                 contentType: 'image/jpeg',
                 cacheControl: '31536000',
                 upsert: true
             });
-
-        if (uploadError) {
-            console.error('Error caching watermarked image:', uploadError);
-        }
 
         // 6. Return the watermarked image
         res.setHeader('Content-Type', 'image/jpeg');
