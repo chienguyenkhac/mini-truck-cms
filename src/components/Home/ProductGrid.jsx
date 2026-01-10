@@ -2,7 +2,7 @@ import { useRef, useEffect, useMemo, useCallback, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
-import { getProducts } from '../../services/supabase'
+import { getProducts, getImageUrl } from '../../services/supabase'
 
 // Fallback products for spare parts
 const fallbackProducts = [
