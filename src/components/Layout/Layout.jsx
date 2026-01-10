@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import Navbar from './Navbar'
 import Footer from './Footer'
-import Cursor from './Cursor'
 
 const Layout = ({ children }) => {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -18,9 +17,6 @@ const Layout = ({ children }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* Custom Cursor */}
-      <Cursor />
-
       <Navbar isScrolled={isScrolled} />
       <main className="flex-grow pt-20">
         {children}
