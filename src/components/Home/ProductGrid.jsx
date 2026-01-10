@@ -140,9 +140,10 @@ const ProductGrid = () => {
     const displayProducts = products.length > 0 ? products : fallbackProducts
 
     const productCards = useMemo(() => displayProducts.map((p, idx) => (
-        <TiltCard
+        <Link
             key={p.id || idx}
-            className="product-card group relative bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-primary/40 transition-colors duration-300 shadow-sm hover:shadow-lg opacity-0"
+            to={`/product/${p.id}`}
+            className="product-card group relative bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-primary/40 transition-colors duration-300 shadow-sm hover:shadow-lg opacity-0 flex flex-col h-full will-change-transform"
         >
             <div className="aspect-[16/10] overflow-hidden relative bg-gradient-to-br from-gray-100 to-gray-200">
                 {p.image ? (
@@ -159,55 +160,24 @@ const ProductGrid = () => {
                     </div>
                 )}
                 <div className="absolute top-5 left-5 bg-primary text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">
-                    {p.code || 'Mới'}
+                    {p.manufacturer_code || p.code || 'Mới'}
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent opacity-50"></div>
             </div>
 
-            <div className="p-6 space-y-4">
-                <div>
-                    <Link
-                        to={`/product/${p.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block"
-                    >
-                        <h3 className="text-slate-800 text-xl font-bold group-hover:text-primary transition-colors">{p.name}</h3>
-                    </Link>
-                    <p className="text-slate-400 text-sm mt-1">{p.description || 'Phụ tùng chính hãng'}</p>
+            <div className="p-6 space-y-3 flex flex-col flex-1">
+                <div className="flex-1">
+                    <h3 className="text-slate-800 text-xl font-bold group-hover:text-primary transition-colors line-clamp-2 min-h-[3.5rem]">{p.name}</h3>
+                    <p className="text-slate-400 text-sm mt-2 line-clamp-3">{p.description || 'Phụ tùng chính hãng'}</p>
                 </div>
 
-                <div className="space-y-2">
-                    {p.price > 0 && (
-                        <div className="flex items-center gap-2 text-slate-500 text-xs">
-                            <div className="w-1 h-1 bg-primary rounded-full"></div>
-                            Giá lẻ: <span className="text-slate-800 font-bold">{formatPrice(p.price)}</span>
-                        </div>
-                    )}
-                    {p.price_bulk > 0 && (
-                        <div className="flex items-center gap-2 text-slate-500 text-xs">
-                            <div className="w-1 h-1 bg-green-500 rounded-full"></div>
-                            Giá sỉ: <span className="text-green-600 font-bold">{formatPrice(p.price_bulk)}</span>
-                        </div>
-                    )}
-                </div>
-
-                <div className="flex gap-2 pt-2">
-                    <Link
-                        to="/contact"
-                        className="flex-grow py-3 rounded-xl bg-primary text-white font-bold text-xs uppercase tracking-wide hover:brightness-110 transition-colors text-center"
-                    >
-                        Đặt Hàng
-                    </Link>
-                    <a
-                        href="tel:0382890990"
-                        className="w-11 h-11 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 hover:text-primary hover:border-primary/50 transition-colors"
-                    >
-                        <span className="material-symbols-outlined text-lg">call</span>
-                    </a>
+                <div className="flex gap-2 pt-2 mt-auto">
+                    <div className="flex-1 py-3 rounded-xl bg-primary text-white font-bold text-xs uppercase tracking-wide hover:brightness-110 transition-colors text-center">
+                        Xem Chi Tiết
+                    </div>
                 </div>
             </div>
-        </TiltCard>
+        </Link>
     )), [displayProducts])
 
     return (

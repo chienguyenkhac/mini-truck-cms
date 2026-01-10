@@ -86,7 +86,7 @@ const VehicleShowcase = () => {
     }
 
     return (
-        <section className="py-12 bg-gray-50">
+        <section className="py-6 bg-gray-50">
             <div className="container mx-auto px-4 md:px-10 lg:px-20">
                 {/* Header */}
                 <motion.div
@@ -109,8 +109,8 @@ const VehicleShowcase = () => {
                         <button
                             onClick={() => setSelectedBrand('all')}
                             className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedBrand === 'all'
-                                    ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                                    : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                                ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                                : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                                 }`}
                         >
                             Tất cả
@@ -120,8 +120,8 @@ const VehicleShowcase = () => {
                                 key={brand}
                                 onClick={() => setSelectedBrand(brand)}
                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedBrand === brand
-                                        ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                                        : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                                    ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                                    : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                                     }`}
                             >
                                 {brand}
@@ -206,8 +206,8 @@ const VehicleShowcase = () => {
                                 key={i}
                                 onClick={() => setCurrentPage(i)}
                                 className={`w-2 h-2 rounded-full transition-all ${currentPage === i
-                                        ? 'bg-primary w-6'
-                                        : 'bg-slate-300 hover:bg-slate-400'
+                                    ? 'bg-primary w-6'
+                                    : 'bg-slate-300 hover:bg-slate-400'
                                     }`}
                             />
                         ))}

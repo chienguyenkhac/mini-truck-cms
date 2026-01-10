@@ -1,6 +1,34 @@
 import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { supabase } from '../../services/supabase'
 
 const Footer = () => {
+  const [siteSettings, setSiteSettings] = useState({
+    company_logo: '',
+    company_name: 'SINOTRUK Hà Nội',
+    hotline: '0382890990',
+    address: ''
+  })
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('site_settings')
+          .select('*')
+        if (!error && data) {
+          const settings = {}
+          data.forEach(s => {
+            settings[s.key] = s.value
+          })
+          setSiteSettings(settings)
+        }
+      } catch (err) {
+        console.error('Error loading settings:', err)
+      }
+    }
+    loadSettings()
+  }, [])
   return (
     <footer className="bg-gray-200 border-t border-gray-300 pt-24 pb-12">
       <div className="container mx-auto px-4 md:px-10 lg:px-20">
@@ -8,12 +36,20 @@ const Footer = () => {
           {/* Brand Column */}
           <div className="lg:col-span-4 space-y-8">
             <Link to="/" className="flex items-center gap-3 group cursor-pointer">
-              <div className="w-10 h-10 text-primary">
-                <span className="material-symbols-outlined text-4xl font-bold">local_shipping</span>
-              </div>
+              {siteSettings.company_logo ? (
+                <img src={siteSettings.company_logo} alt="Logo" className="h-10 w-auto object-contain" />
+              ) : (
+                <div className="w-10 h-10 text-primary">
+                  <span className="material-symbols-outlined text-4xl font-bold">local_shipping</span>
+                </div>
+              )}
               <div className="flex flex-col">
-                <span className="text-slate-800 text-2xl font-bold leading-none uppercase">Sinotruk</span>
-                <span className="text-primary text-xs font-bold tracking-[0.2em] leading-none uppercase">Hà Nội</span>
+                <span className="text-slate-800 text-2xl font-bold leading-none uppercase">
+                  {siteSettings.company_name ? siteSettings.company_name.split(' ')[0] : 'Sinotruk'}
+                </span>
+                <span className="text-primary text-xs font-bold tracking-[0.2em] leading-none uppercase">
+                  {siteSettings.company_name ? siteSettings.company_name.split(' ').slice(1).join(' ') : 'Hà Nội'}
+                </span>
               </div>
             </Link>
 
@@ -72,11 +108,11 @@ const Footer = () => {
           {/* Contact Column */}
           <div className="lg:col-span-3 space-y-8">
             <h4 className="text-slate-800 font-bold uppercase tracking-widest text-sm">Liên Hệ Ngay</h4>
-            <a href="tel:0382890990" className="flex items-center gap-4 p-5 rounded-2xl bg-primary/5 border border-primary/10 hover:bg-primary/10 transition-colors">
+            <a href={`tel:${siteSettings.hotline || '0382890990'}`} className="flex items-center gap-4 p-5 rounded-2xl bg-primary/5 border border-primary/10 hover:bg-primary/10 transition-colors">
               <span className="material-symbols-outlined text-primary text-3xl">call</span>
               <div>
                 <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Hotline 24/7</p>
-                <span className="text-slate-800 font-bold text-lg">0382.890.990</span>
+                <span className="text-slate-800 font-bold text-lg">{siteSettings.hotline || '0382.890.990'}</span>
               </div>
             </a>
             <a href="mailto:hnsinotruk@gmail.com" className="flex items-center gap-4 p-5 rounded-2xl bg-gray-300 border border-gray-400 hover:border-primary/30 transition-colors">
@@ -91,7 +127,7 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="border-t border-slate-200 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-slate-500 text-sm">© 2024 SINOTRUK HÀ NỘI - Phụ Tùng Chính Hãng.</p>
+          <p className="text-slate-500 text-sm">© 2024 {siteSettings.company_name || 'SINOTRUK HÀ NỘI'} - Phụ Tùng Chính Hãng.</p>
           <div className="flex gap-10 text-xs text-slate-500 uppercase tracking-widest font-bold">
             <Link to="/about" className="hover:text-primary transition-colors">Điều khoản</Link>
             <Link to="/about" className="hover:text-primary transition-colors">Bảo mật</Link>

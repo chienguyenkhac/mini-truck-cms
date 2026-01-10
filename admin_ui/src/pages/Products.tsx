@@ -173,7 +173,7 @@ const Products: React.FC = () => {
     };
 
     const handleCopyLink = (product: Product) => {
-        const url = `https://sinotruk-hanoi.vercel.app/products/${product.id}`;
+        const url = `https://sinotruk-hanoi.vercel.app/product/${product.id}`;
         navigator.clipboard.writeText(url);
         notification.success('Đã copy link sản phẩm');
     };

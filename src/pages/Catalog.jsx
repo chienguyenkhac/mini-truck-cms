@@ -70,6 +70,7 @@ const Catalog = () => {
   const [articles, setArticles] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedArticle, setSelectedArticle] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
 
   // Load articles from database
   useEffect(() => {
@@ -100,7 +101,7 @@ const Catalog = () => {
             <span className="text-primary font-bold text-xs md:text-sm tracking-[0.2em] md:tracking-[0.3em] uppercase mb-2 md:mb-4 block">
               SINOTRUK HÀ NỘI
             </span>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-8xl font-bold text-slate-800 tracking-tighter mb-3 md:mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-800 tracking-tighter mb-3 md:mb-6">
               CATA<span className="text-primary">LOG</span>
             </h1>
             <p className="text-slate-600 text-sm md:text-lg max-w-xl mx-auto">
@@ -111,6 +112,21 @@ const Catalog = () => {
       </div>
 
       <div className="container mx-auto px-4 md:px-10 lg:px-20 py-8 md:py-16">
+        {/* Search Box */}
+        {!selectedArticle && articles.length > 0 && (
+          <div className="mb-8">
+            <div className="relative max-w-2xl mx-auto">
+              <input
+                type="text"
+                placeholder="Tìm kiếm bài viết..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary transition-all shadow-sm"
+              />
+              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+            </div>
+          </div>
+        )}
         {loading ? (
           <div className="flex justify-center py-20">
             <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full"></div>
@@ -153,35 +169,39 @@ const Catalog = () => {
         ) : (
           // Articles List
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {articles.map((article, index) => (
-              <motion.div
-                key={article.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl transition-all group cursor-pointer"
-                onClick={() => setSelectedArticle(article)}
-              >
-                {/* Thumbnail */}
-                <div className="aspect-video bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center relative overflow-hidden">
-                  {article.thumbnail ? (
-                    <img src={article.thumbnail} alt={article.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="material-symbols-outlined text-6xl text-slate-300 group-hover:text-primary/50 transition-colors">article</span>
-                  )}
-                </div>
+            {articles
+              .filter(article =>
+                article.title.toLowerCase().includes(searchTerm.toLowerCase())
+              )
+              .map((article, index) => (
+                <motion.div
+                  key={article.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl transition-all group cursor-pointer"
+                  onClick={() => setSelectedArticle(article)}
+                >
+                  {/* Thumbnail */}
+                  <div className="aspect-video bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center relative overflow-hidden">
+                    {article.thumbnail ? (
+                      <img src={article.thumbnail} alt={article.title} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="material-symbols-outlined text-6xl text-slate-300 group-hover:text-primary/50 transition-colors">article</span>
+                    )}
+                  </div>
 
-                {/* Content */}
-                <div className="p-6">
-                  <h3 className="font-bold text-slate-800 text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                    {article.title}
-                  </h3>
-                  <p className="text-sm text-slate-400">
-                    {new Date(article.created_at).toLocaleDateString('vi-VN')}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
+                  {/* Content */}
+                  <div className="p-6">
+                    <h3 className="font-bold text-slate-800 text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                      {article.title}
+                    </h3>
+                    <p className="text-sm text-slate-400">
+                      {new Date(article.created_at).toLocaleDateString('vi-VN')}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
           </div>
         )}
 

@@ -9,27 +9,41 @@ const Navbar = ({ isScrolled }) => {
     const [openDropdown, setOpenDropdown] = useState(null)
     const [vehicleCategories, setVehicleCategories] = useState([])
     const [partCategories, setPartCategories] = useState([])
+    const [siteSettings, setSiteSettings] = useState({ company_logo: '', company_name: 'SINOTRUK Hà Nội' })
     const location = useLocation()
     const logoRef = useRef(null)
     const navRef = useRef(null)
 
-    // Load categories from database
+    // Load categories and site settings from database
     useEffect(() => {
-        const loadCategories = async () => {
+        const loadData = async () => {
             try {
-                const { data, error } = await supabase
+                // Load categories
+                const { data: catData, error: catError } = await supabase
                     .from('categories')
                     .select('*')
                     .order('name')
-                if (!error && data) {
-                    setVehicleCategories(data.filter(c => c.is_vehicle_name))
-                    setPartCategories(data.filter(c => !c.is_vehicle_name))
+                if (!catError && catData) {
+                    setVehicleCategories(catData.filter(c => c.is_vehicle_name))
+                    setPartCategories(catData.filter(c => !c.is_vehicle_name))
+                }
+
+                // Load site settings
+                const { data: settingsData, error: settingsError } = await supabase
+                    .from('site_settings')
+                    .select('*')
+                if (!settingsError && settingsData) {
+                    const settings = {}
+                    settingsData.forEach(s => {
+                        settings[s.key] = s.value
+                    })
+                    setSiteSettings(settings)
                 }
             } catch (err) {
-                console.error('Error loading categories:', err)
+                console.error('Error loading data:', err)
             }
         }
-        loadCategories()
+        loadData()
     }, [])
 
     const menuItems = [
@@ -98,12 +112,20 @@ const Navbar = ({ isScrolled }) => {
             <div className="container mx-auto px-4 md:px-10 lg:px-20 flex items-center justify-between">
                 {/* Logo */}
                 <Link ref={logoRef} to="/" className="flex items-center gap-3 group cursor-pointer">
-                    <div className="w-10 h-10 text-primary transition-transform group-hover:scale-110 group-hover:rotate-12 duration-300">
-                        <span className="material-symbols-outlined text-4xl font-bold">local_shipping</span>
-                    </div>
+                    {siteSettings.company_logo ? (
+                        <img src={siteSettings.company_logo} alt="Logo" className="h-10 w-auto object-contain" />
+                    ) : (
+                        <div className="w-10 h-10 text-primary transition-transform group-hover:scale-110 group-hover:rotate-12 duration-300">
+                            <span className="material-symbols-outlined text-4xl font-bold">local_shipping</span>
+                        </div>
+                    )}
                     <div className="flex flex-col">
-                        <span className="text-slate-800 text-xl font-bold tracking-tight leading-none uppercase">Sinotruk</span>
-                        <span className="text-primary text-[10px] font-bold tracking-[0.2em] leading-none uppercase">Hà Nội</span>
+                        <span className="text-slate-800 text-xl font-bold tracking-tight leading-none uppercase">
+                            {siteSettings.company_name ? siteSettings.company_name.split(' ')[0] : 'Sinotruk'}
+                        </span>
+                        <span className="text-primary text-[10px] font-bold tracking-[0.2em] leading-none uppercase">
+                            {siteSettings.company_name ? siteSettings.company_name.split(' ').slice(1).join(' ') : 'Hà Nội'}
+                        </span>
                     </div>
                 </Link>
 

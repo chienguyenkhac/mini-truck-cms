@@ -1,7 +1,9 @@
-import { Suspense, useRef } from 'react'
+import { Suspense, useRef, useState, useEffect } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Float, MeshDistortMaterial, PresentationControls } from '@react-three/drei'
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
+import { supabase } from '../services/supabase'
 
 // 3D Truck Model
 const TruckModel = () => {
@@ -110,6 +112,29 @@ const Scene3D = () => {
 }
 
 const About = () => {
+  const [categories, setCategories] = useState([])
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('categories')
+          .select('*')
+          .eq('is_visible', true)
+          .eq('is_vehicle_name', true)
+          .order('name')
+
+        if (!error && data) {
+          setCategories(data)
+        }
+      } catch (err) {
+        console.error('Error loading categories:', err)
+      }
+    }
+
+    loadCategories()
+  }, [])
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section - Clean gradient without 3D */}
@@ -127,7 +152,7 @@ const About = () => {
             <span className="text-primary font-bold text-sm tracking-[0.3em] uppercase mb-4 block">
               SINOTRUK HÀ NỘI
             </span>
-            <h1 className="text-5xl md:text-8xl font-bold text-slate-800 tracking-tighter mb-6">
+            <h1 className="text-3xl md:text-5xl font-bold text-slate-800 tracking-tighter mb-6">
               GIỚI <span className="text-primary">THIỆU</span>
             </h1>
             <p className="text-slate-600 text-lg max-w-xl mx-auto">
@@ -165,30 +190,62 @@ const About = () => {
           viewport={{ once: true }}
           className="bg-white border border-slate-200 rounded-3xl p-8 md:p-12 shadow-sm"
         >
-          <h2 className="text-2xl md:text-3xl font-bold text-slate-800 mb-6">
+          <h2 className="text-xl md:text-2xl font-bold text-slate-800 mb-6 text-center">
             CÔNG TY CỔ PHẦN SINOTRUK HÀ NỘI
           </h2>
           <div className="text-slate-500 space-y-4 leading-relaxed">
             <p>
-              Chúng tôi xin gửi lời cảm ơn chân thành đến Quý khách hàng đã
-              tin tưởng và đồng hành cùng chúng tôi trong suốt thời gian qua.
+              CÔNG TY CỔ PHẦN SINOTRUK HÀ NỘI xin gửi lời chào trân trọng cùng lời chúc sức khoẻ, tới toàn thể Quý Khách Hàng đã quan tâm và sử dụng các sản phẩm mà Công ty chúng tôi phân phối trên thị trường trong suốt thời gian qua.
             </p>
             <p>
-              Công ty Cổ phần SINOTRUK HÀ NỘI chuyên nhập khẩu và phân phối
-              phụ tùng xe tải hạng nặng, xe chuyên dụng và máy công trình từ
-              Trung Quốc (HOWO/SINOTRUK, CHENGLONG). Chúng tôi cung cấp dịch
-              vụ bảo hành và thay thế phụ tùng cho các dòng xe Sinotruk như:
-              HOWO A7, 420, 375, 380, Howo 336-371 xe trộn bê tông/xe ben,
-              và sơ mi rơ moóc CIMC.
+              CÔNG TY CỔ PHẦN SINOTRUK HÀ NỘI là công ty chuyên nhập khẩu và phân phối phụ tùng cho xe tải hạng nặng, xe chuyên dụng, xe máy công trình do Trung Quốc sản xuất: HOWO/SINOTRUK, CHENGLONG. Chúng tôi chuyên cung cấp phụ tùng để bảo hành, thay thế cho xe của hãng Sinotruk với các chủng loại HOWO A7, 420, 375, 380 , Xe trộn bê tông/ Xe ben Howo 336-371 và các chủng loại sơ mi rơ mooc CIMC.
             </p>
             <p>
-              Với mong muốn trở thành đối tác tin cậy trên toàn quốc, chúng
-              tôi tự hào về sự hiểu biết sâu sắc về xe tải hạng nặng Trung
-              Quốc, dịch vụ chuyên nghiệp, giá cả cạnh tranh và chính sách
-              bảo hành sản phẩm.
+              Với sự hiểu biết sâu sắc về các chủng loại xe tải nặng do Trung Quốc sản xuất, phong cách phục vụ chuyên nghiệp và giá cả cạnh tranh cùng chế độ bảo hành cho sản phẩm, chúng tôi mong rằng sẽ trở thành đối tác tin cậy của Quý khách hàng trên toàn quốc.
             </p>
           </div>
         </motion.section>
+
+        {/* Category Showcase - No Title */}
+        {categories.length > 0 && (
+          <motion.section
+            initial={{ y: 30, opacity: 0 }}
+            whileInView={{ y: 0, opacity: 1 }}
+            viewport={{ once: true }}
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
+          >
+            {categories.map((vehicle, index) => (
+              <motion.div
+                key={vehicle.id}
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <Link
+                  to={`/products?vehicle=${vehicle.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group block text-center"
+                >
+                  <div className="aspect-square relative mb-3 bg-white rounded-lg p-2 border border-slate-100 hover:border-primary/30 hover:shadow-lg transition-all duration-300">
+                    <img
+                      src={vehicle.thumbnail || '/images/default-truck.png'}
+                      alt={vehicle.name}
+                      className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                      onError={(e) => { e.target.src = '/images/default-truck.png' }}
+                    />
+                  </div>
+                  <h3 className="text-sm font-bold text-slate-700 group-hover:text-primary transition-colors uppercase leading-tight line-clamp-2">
+                    {vehicle.name}
+                  </h3>
+                  {vehicle.code && (
+                    <p className="text-xs text-slate-400 mt-0.5 uppercase">{vehicle.code}</p>
+                  )}
+                </Link>
+              </motion.div>
+            ))}
+          </motion.section>
+        )}
 
         {/* Warranty Policy */}
         <motion.section
@@ -202,7 +259,7 @@ const About = () => {
             <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary border border-primary/30">
               <span className="material-symbols-outlined text-3xl">verified_user</span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-800">
+            <h2 className="text-xl md:text-2xl font-bold text-slate-800">
               CHÍNH SÁCH BẢO HÀNH
             </h2>
           </div>
@@ -257,7 +314,7 @@ const About = () => {
             <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary border border-primary/30">
               <span className="material-symbols-outlined text-3xl">inventory_2</span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-800">
+            <h2 className="text-xl md:text-2xl font-bold text-slate-800">
               CHÍNH SÁCH CUNG CẤP
             </h2>
           </div>
@@ -282,7 +339,7 @@ const About = () => {
             <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary border border-primary/30">
               <span className="material-symbols-outlined text-3xl">payments</span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-800">
+            <h2 className="text-xl md:text-2xl font-bold text-slate-800">
               PHƯƠNG THỨC THANH TOÁN
             </h2>
           </div>

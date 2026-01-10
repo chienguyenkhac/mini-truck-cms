@@ -136,7 +136,7 @@ const Products = () => {
             animate={{ y: 0, opacity: 1 }}
             className="text-center"
           >
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-slate-800 tracking-tighter mb-3 md:mb-4">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-800 tracking-tighter mb-3 md:mb-4">
               SẢN <span className="text-primary">PHẨM</span>
             </h1>
             <p className="text-slate-500 text-sm md:text-lg max-w-xl mx-auto px-4">
@@ -275,7 +275,7 @@ const Products = () => {
                         </div>
                       )}
                       <div className="absolute top-4 left-4 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                        {product.code || 'Mới'}
+                        {product.manufacturer_code || product.code || 'Mới'}
                       </div>
                       <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent opacity-60"></div>
                     </div>

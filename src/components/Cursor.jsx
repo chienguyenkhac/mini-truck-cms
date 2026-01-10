@@ -42,7 +42,6 @@ const Cursor = () => {
             const target = e.target
             if (target.closest('a, button, [data-cursor], input, textarea, select')) {
                 isHovering.current = true
-                cursor.style.borderColor = '#ea2a33'
                 dot.style.opacity = '0'
             }
         }
@@ -51,7 +50,6 @@ const Cursor = () => {
             const target = e.target
             if (target.closest('a, button, [data-cursor], input, textarea, select')) {
                 isHovering.current = false
-                cursor.style.borderColor = 'rgba(255,255,255,0.5)'
                 dot.style.opacity = '1'
             }
         }

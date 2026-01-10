@@ -194,9 +194,9 @@ const ProductDetail = () => {
                             </div>
                         )}
 
-                        {product.code && (
+                        {product.manufacturer_code && (
                             <div className="absolute top-6 left-6 bg-primary text-white text-xs font-bold px-4 py-2 rounded-full uppercase tracking-wider shadow-lg">
-                                {product.code}
+                                {product.manufacturer_code}
                             </div>
                         )}
                     </motion.div>
