@@ -21,7 +21,7 @@ const TruckModel = () => {
       {/* Cabin */}
       <mesh position={[0, 0.8, 1.2]}>
         <boxGeometry args={[2, 1.6, 1.5]} />
-        <meshStandardMaterial color="#18535d" metalness={0.8} roughness={0.2} />
+        <meshStandardMaterial color="#1e9ba8" metalness={0.8} roughness={0.2} />
       </mesh>
       {/* Cabin window */}
       <mesh position={[0, 1.1, 1.95]}>
@@ -89,8 +89,8 @@ const Scene3D = () => {
     <>
       <ambientLight intensity={0.3} />
       <directionalLight position={[5, 5, 5]} intensity={1} color="#fff" />
-      <pointLight position={[-5, 5, 5]} intensity={0.8} color="#18535d" />
-      <pointLight position={[5, -5, -5]} intensity={0.4} color="#247a88" />
+      <pointLight position={[-5, 5, 5]} intensity={0.8} color="#1e9ba8" />
+      <pointLight position={[5, -5, -5]} intensity={0.4} color="#2dbbc9" />
 
       <PresentationControls
         global
@@ -103,9 +103,9 @@ const Scene3D = () => {
         <TruckModel />
       </PresentationControls>
 
-      <FloatingSphere position={[-4, 2, -3]} color="#18535d" size={0.6} />
-      <FloatingSphere position={[4, -1, -4]} color="#18535d" size={0.4} />
-      <FloatingSphere position={[3, 3, -5]} color="#247a88" size={0.5} />
+      <FloatingSphere position={[-4, 2, -3]} color="#1e9ba8" size={0.6} />
+      <FloatingSphere position={[4, -1, -4]} color="#1e9ba8" size={0.4} />
+      <FloatingSphere position={[3, 3, -5]} color="#2dbbc9" size={0.5} />
       <FloatingSphere position={[-3, -2, -4]} color="#38bdf8" size={0.3} />
     </>
   )
