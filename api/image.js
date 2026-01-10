@@ -90,23 +90,18 @@ export default async function handler(req, res) {
                 const fontSize = Math.floor(targetWidth / watermarkText.length * 1.5);
 
                 const svg = `
-                    <svg width="${width}" height="${height}">
-                        <style>
-                            .watermark { 
-                                fill: white; 
-                                fill-opacity: ${watermarkOpacity * 0.6}; 
-                                font-family: Arial, sans-serif; 
-                                font-weight: bold;
-                                font-size: ${fontSize}px;
-                                text-transform: uppercase;
-                            }
-                        </style>
+                    <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
                         <text 
                             x="50%" 
                             y="50%" 
                             text-anchor="middle" 
-                            class="watermark"
-                            alignment-baseline="middle"
+                            dominant-baseline="middle"
+                            fill="white" 
+                            fill-opacity="${watermarkOpacity * 0.6}"
+                            font-family="Arial, sans-serif"
+                            font-weight="bold"
+                            font-size="${fontSize}px"
+                            style="text-transform: uppercase;"
                         >
                             ${watermarkText}
                         </text>
@@ -116,7 +111,7 @@ export default async function handler(req, res) {
                 try {
                     finalBuffer = await sharp(originalBuffer)
                         .composite([{
-                            input: Buffer.from(svg),
+                            input: Buffer.from(svg, 'utf-8'),
                             top: 0,
                             left: 0,
                         }])
