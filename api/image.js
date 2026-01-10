@@ -85,23 +85,32 @@ export default async function handler(req, res) {
                 const width = metadata.width || 800;
                 const height = metadata.height || 600;
 
-                // Small horizontal center watermark (approx 30% of width)
-                const targetWidth = Math.floor(width * 0.3);
-                const fontSize = Math.floor(targetWidth / watermarkText.length * 1.5);
+                // Create a simple watermark bar across the center
+                const barHeight = Math.floor(height * 0.08);
+                const barWidth = Math.floor(width * 0.6);
+                const barX = Math.floor((width - barWidth) / 2);
+                const barY = Math.floor((height - barHeight) / 2);
 
+                // Create a semi-transparent white rectangle with text
                 const svg = `
                     <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+                        <rect 
+                            x="${barX}" 
+                            y="${barY}" 
+                            width="${barWidth}" 
+                            height="${barHeight}"
+                            fill="white"
+                            fill-opacity="${watermarkOpacity * 0.4}"
+                        />
                         <text 
                             x="50%" 
                             y="50%" 
                             text-anchor="middle" 
                             dominant-baseline="middle"
-                            fill="white" 
-                            fill-opacity="${watermarkOpacity * 0.6}"
-                            font-family="Arial, sans-serif"
+                            fill="rgba(0,0,0,0.8)"
+                            font-size="${Math.floor(barHeight * 0.5)}px"
                             font-weight="bold"
-                            font-size="${fontSize}px"
-                            style="text-transform: uppercase;"
+                            font-family="Arial, Helvetica, sans-serif"
                         >
                             ${watermarkText}
                         </text>
