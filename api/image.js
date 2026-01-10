@@ -8,14 +8,15 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SU
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default async function handler(req, res) {
-    const { path, url } = req.query;
+    const { path, url, watermark } = req.query;
 
     if (!path && !url) {
         return res.status(400).send('Image path or URL is required');
     }
 
     try {
-        const cacheName = path || Buffer.from(url).toString('base64').substring(0, 50) + '.jpg';
+        const isWatermarkRequested = watermark === 'true';
+        const cacheName = (isWatermarkRequested ? 'wm_' : 'clean_') + (path || Buffer.from(url).toString('base64').substring(0, 50) + '.jpg');
 
         // 1. Try to fetch from watermarked cache bucket
         const { data: cachedImage, error: cacheError } = await supabase
@@ -28,6 +29,9 @@ export default async function handler(req, res) {
             const buffer = await cachedImage.arrayBuffer();
             res.setHeader('Content-Type', 'image/jpeg');
             res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+            if (isWatermarkRequested) {
+                res.setHeader('Content-Disposition', `attachment; filename="watermarked_${path || 'image'}.jpg"`);
+            }
             return res.send(Buffer.from(buffer));
         }
 
@@ -36,68 +40,62 @@ export default async function handler(req, res) {
         let originalType = 'image/jpeg';
 
         if (path) {
-            // Try 'original' bucket first
             let { data: imgData, error: imgError } = await supabase
                 .storage
                 .from('original')
                 .download(path);
 
             if (imgError || !imgData) {
-                // Fallback to legacy 'products' bucket
-                console.log(`Falling back to products bucket for: ${path}`);
                 const { data: legacyData, error: legacyError } = await supabase
                     .storage
                     .from('products')
                     .download(path);
 
                 if (legacyError || !legacyData) {
-                    return res.status(404).send('Original image not found in any bucket');
+                    return res.status(404).send('Original image not found');
                 }
                 imgData = legacyData;
             }
             originalBuffer = Buffer.from(await imgData.arrayBuffer());
             originalType = imgData.type || 'image/jpeg';
         } else if (url) {
-            // Fetch from external URL
             const response = await fetch(decodeURIComponent(url));
-            if (!response.ok) throw new Error(`Failed to fetch from URL: ${url}`);
+            if (!response.ok) throw new Error(`Failed to fetch: ${url}`);
             originalBuffer = Buffer.from(await response.arrayBuffer());
             originalType = response.headers.get('content-type') || 'image/jpeg';
         }
 
-        // 3. Get watermark settings from site_settings
-        const { data: settings } = await supabase
-            .from('site_settings')
-            .select('key, value')
-            .in('key', ['watermark_text', 'watermark_opacity', 'watermark_enabled']);
+        let finalBuffer = originalBuffer;
 
-        const getSetting = (key, defaultValue) => {
-            const item = settings?.find(s => s.key === key);
-            return item ? item.value : defaultValue;
-        };
+        // 3. Apply watermark if requested
+        if (isWatermarkRequested && originalType.startsWith('image/')) {
+            const { data: settings } = await supabase
+                .from('site_settings')
+                .select('key, value')
+                .in('key', ['watermark_text', 'watermark_opacity']);
 
-        const isEnabled = getSetting('watermark_enabled', 'true') === 'true';
-        const watermarkText = getSetting('watermark_text', 'SINOTRUK Hà Nội');
-        const watermarkOpacity = parseInt(getSetting('watermark_opacity', '40')) / 100;
+            const getSetting = (key, defaultValue) => {
+                const item = settings?.find(s => s.key === key);
+                return item ? item.value : defaultValue;
+            };
 
-        let finalBuffer;
+            const watermarkText = getSetting('watermark_text', 'SINOTRUK Hà Nội');
+            const watermarkOpacity = parseInt(getSetting('watermark_opacity', '40')) / 100;
 
-        if (isEnabled && originalType.startsWith('image/')) {
-            // 4. Apply watermark using sharp
             const metadata = await sharp(originalBuffer).metadata();
             const width = metadata.width || 800;
             const height = metadata.height || 600;
 
-            // Simple SVG watermark
-            const svgWidth = Math.floor(width * 0.8);
-            const fontSize = Math.floor(svgWidth / watermarkText.length * 1.5);
+            // Small horizontal center watermark (approx 30% of width)
+            const targetWidth = Math.floor(width * 0.3);
+            const fontSize = Math.floor(targetWidth / watermarkText.length * 1.5);
 
             const svg = `
                 <svg width="${width}" height="${height}">
                     <style>
                         .watermark { 
                             fill: white; 
-                            fill-opacity: ${watermarkOpacity * 0.5}; 
+                            fill-opacity: ${watermarkOpacity * 0.6}; 
                             font-family: Arial, sans-serif; 
                             font-weight: bold;
                             font-size: ${fontSize}px;
@@ -109,7 +107,7 @@ export default async function handler(req, res) {
                         y="50%" 
                         text-anchor="middle" 
                         class="watermark"
-                        transform="rotate(-45, ${width / 2}, ${height / 2})"
+                        alignment-baseline="middle"
                     >
                         ${watermarkText}
                     </text>
@@ -123,17 +121,14 @@ export default async function handler(req, res) {
                         top: 0,
                         left: 0,
                     }])
-                    .jpeg({ quality: 85 })
+                    .jpeg({ quality: 90 })
                     .toBuffer();
-            } catch (sharpError) {
-                console.error('Sharp failed, returning original:', sharpError);
-                finalBuffer = originalBuffer;
+            } catch (e) {
+                console.error('Sharp error:', e);
             }
-        } else {
-            finalBuffer = originalBuffer;
         }
 
-        // 5. Save processed image to cache bucket
+        // 4. Cache the result (even for clean images to speed up future requests)
         await supabase
             .storage
             .from('watermarked')
@@ -143,13 +138,15 @@ export default async function handler(req, res) {
                 upsert: true
             });
 
-        // 6. Return the watermarked image
         res.setHeader('Content-Type', 'image/jpeg');
         res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        if (isWatermarkRequested) {
+            res.setHeader('Content-Disposition', `attachment; filename="watermarked_${path || 'image'}.jpg"`);
+        }
         return res.send(finalBuffer);
 
     } catch (error) {
-        console.error('Image processing error:', error);
-        return res.status(500).send('Internal server error during image processing');
+        console.error('API Error:', error);
+        return res.status(500).send('Internal server error');
     }
 }

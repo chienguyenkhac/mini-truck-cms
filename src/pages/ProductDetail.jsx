@@ -237,22 +237,30 @@ const ProductDetail = () => {
                         )}
 
                         {/* CTA Buttons */}
-                        <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <a
                                 href="tel:0382890990"
-                                className="flex-1 py-4 px-8 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 shadow-lg"
+                                className="py-4 px-8 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 shadow-lg"
                             >
                                 <span className="material-symbols-outlined">call</span>
-                                Đặt Hàng Ngay
+                                Đặt Hàng
                             </a>
                             <a
                                 href="https://zalo.me/0382890990"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex-1 py-4 px-8 bg-white border border-slate-200 text-slate-800 font-bold rounded-xl hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-2"
+                                className="py-4 px-8 bg-[#0068ff] text-white font-bold rounded-xl hover:bg-[#0052cc] transition-colors flex items-center justify-center gap-2 shadow-lg"
                             >
                                 <span className="material-symbols-outlined">chat</span>
                                 Chat Zalo
+                            </a>
+                            <a
+                                href={images[currentImageIndex] + (images[currentImageIndex]?.includes('?') ? '&' : '?') + 'watermark=true'}
+                                download
+                                className="sm:col-span-2 py-4 px-8 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900 transition-colors flex items-center justify-center gap-2"
+                            >
+                                <span className="material-symbols-outlined">download</span>
+                                Tải Ảnh (Có Watermark)
                             </a>
                         </div>
 
@@ -274,42 +282,44 @@ const ProductDetail = () => {
                 </div>
 
                 {/* Related Products */}
-                {relatedProducts.length > 0 && (
-                    <div className="mt-20">
-                        <h2 className="text-2xl font-bold text-slate-800 mb-8">Sản Phẩm Liên Quan</h2>
-                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {relatedProducts.map((p) => (
-                                <Link
-                                    key={p.id}
-                                    to={`/product/${p.id}`}
-                                    className="group bg-white border border-slate-200 rounded-2xl overflow-hidden hover:border-primary/50 transition-all shadow-sm hover:shadow-lg"
-                                >
-                                    <div className="aspect-[4/3] relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
-                                        {p.image ? (
-                                            <img
-                                                src={p.image.startsWith('http') ? p.image : `https://irncljhvsjtohiqllnsv.supabase.co/storage/v1/object/public/products/${p.image}`}
-                                                alt={p.name}
-                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                                onError={(e) => { e.target.style.display = 'none' }}
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center">
-                                                <span className="material-symbols-outlined text-6xl text-gray-300">settings</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="p-5">
-                                        <h3 className="text-slate-800 font-bold group-hover:text-primary transition-colors line-clamp-2">
-                                            {p.name}
-                                        </h3>
-                                    </div>
-                                </Link>
-                            ))}
+                {
+                    relatedProducts.length > 0 && (
+                        <div className="mt-20">
+                            <h2 className="text-2xl font-bold text-slate-800 mb-8">Sản Phẩm Liên Quan</h2>
+                            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {relatedProducts.map((p) => (
+                                    <Link
+                                        key={p.id}
+                                        to={`/product/${p.id}`}
+                                        className="group bg-white border border-slate-200 rounded-2xl overflow-hidden hover:border-primary/50 transition-all shadow-sm hover:shadow-lg"
+                                    >
+                                        <div className="aspect-[4/3] relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                                            {p.image ? (
+                                                <img
+                                                    src={supabase.getImageUrl ? supabase.getImageUrl(p.image) : (p.image.startsWith('http') ? p.image : `https://irncljhvsjtohiqllnsv.supabase.co/storage/v1/object/public/products/${p.image}`)}
+                                                    alt={p.name}
+                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                    onError={(e) => { e.target.style.display = 'none' }}
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center">
+                                                    <span className="material-symbols-outlined text-6xl text-gray-300">settings</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="p-5">
+                                            <h3 className="text-slate-800 font-bold group-hover:text-primary transition-colors line-clamp-2">
+                                                {p.name}
+                                            </h3>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                )}
-            </div>
-        </div>
+                    )
+                }
+            </div >
+        </div >
     )
 }
 
