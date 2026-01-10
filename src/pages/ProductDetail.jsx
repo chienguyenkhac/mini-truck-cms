@@ -237,30 +237,22 @@ const ProductDetail = () => {
                         )}
 
                         {/* CTA Buttons */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="flex flex-col sm:flex-row gap-4">
                             <a
                                 href="tel:0382890990"
-                                className="py-4 px-8 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 shadow-lg"
+                                className="flex-1 py-4 px-8 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 shadow-lg"
                             >
                                 <span className="material-symbols-outlined">call</span>
-                                Đặt Hàng
+                                Đặt Hàng Ngay
                             </a>
                             <a
                                 href="https://zalo.me/0382890990"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="py-4 px-8 bg-[#0068ff] text-white font-bold rounded-xl hover:bg-[#0052cc] transition-colors flex items-center justify-center gap-2 shadow-lg"
+                                className="flex-1 py-4 px-8 bg-white border border-slate-200 text-slate-800 font-bold rounded-xl hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-2"
                             >
                                 <span className="material-symbols-outlined">chat</span>
                                 Chat Zalo
-                            </a>
-                            <a
-                                href={images[currentImageIndex] + (images[currentImageIndex]?.includes('?') ? '&' : '?') + 'watermark=true'}
-                                download
-                                className="sm:col-span-2 py-4 px-8 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900 transition-colors flex items-center justify-center gap-2"
-                            >
-                                <span className="material-symbols-outlined">download</span>
-                                Tải Ảnh (Có Watermark)
                             </a>
                         </div>
 
