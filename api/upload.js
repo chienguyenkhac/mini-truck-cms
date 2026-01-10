@@ -1,11 +1,9 @@
-import { v2 as cloudinary } from 'cloudinary';
+import { createClient } from '@supabase/supabase-js';
 
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-    secure: true
-});
+const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://irncljhvsjtohiqllnsv.supabase.co';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export const config = {
     api: {
@@ -15,107 +13,55 @@ export const config = {
     },
 };
 
-// Get watermark settings from Supabase (cached for performance)
-let watermarkCache = {
-    enabled: true,
-    text: 'SINOTRUK Hà Nội',
-    opacity: 40,
-    lastFetch: 0
-};
-
-async function getWatermarkSettings() {
-    // Cache for 5 minutes
-    const now = Date.now();
-    if (now - watermarkCache.lastFetch < 5 * 60 * 1000) {
-        return watermarkCache;
-    }
-
-    try {
-        // Fetch from Supabase REST API
-        const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://irncljhvsjtohiqllnsv.supabase.co';
-        const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
-
-        if (supabaseKey) {
-            const response = await fetch(
-                `${supabaseUrl}/rest/v1/site_settings?key=in.(watermark_enabled,watermark_text,watermark_opacity)`,
-                {
-                    headers: {
-                        'apikey': supabaseKey,
-                        'Authorization': `Bearer ${supabaseKey}`
-                    }
-                }
-            );
-
-            if (response.ok) {
-                const settings = await response.json();
-                settings.forEach(s => {
-                    if (s.key === 'watermark_enabled') watermarkCache.enabled = s.value === 'true';
-                    if (s.key === 'watermark_text') watermarkCache.text = s.value || 'SINOTRUK Hà Nội';
-                    if (s.key === 'watermark_opacity') watermarkCache.opacity = parseInt(s.value) || 40;
-                });
-            }
-        }
-
-        watermarkCache.lastFetch = now;
-    } catch (error) {
-        console.error('Error fetching watermark settings:', error);
-    }
-
-    return watermarkCache;
-}
-
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({ message: 'Method not allowed' });
     }
 
     try {
-        const { image, skipWatermark = false } = req.body;
+        const { image, fileName } = req.body;
 
         if (!image) {
             return res.status(400).json({ message: 'No image provided' });
         }
 
-        // Get watermark settings
-        const watermarkSettings = await getWatermarkSettings();
-
-        // Build transformation array
-        const transformations = [];
-
-        // Add watermark overlay if enabled
-        if (watermarkSettings.enabled && !skipWatermark) {
-            const escapedText = encodeURIComponent(watermarkSettings.text);
-
-            // Single diagonal center watermark
-            // Relative width (0.8 = 80% of image width) ensures it scales with the image
-            // crop: 'fit' ensures the overlay itself is scaled without stretching the base image
-            transformations.push({
-                overlay: {
-                    font_family: 'Arial',
-                    font_size: 100, // Large base size, will be scaled by 'width'
-                    font_weight: 'bold',
-                    text: escapedText
-                },
-                width: 0.8,
-                crop: 'fit',
-                gravity: 'center',
-                angle: 45,
-                opacity: Math.floor(watermarkSettings.opacity * 0.4),
-                color: 'white'
-            });
+        // Handle base64 image data
+        const matches = image.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+        if (!matches || matches.length !== 3) {
+            return res.status(400).json({ message: 'Invalid image format. Expected base64 with data URI scheme.' });
         }
 
-        const result = await cloudinary.uploader.upload(image, {
-            folder: 'sinotruk_products',
-            transformation: transformations.length > 0 ? transformations : undefined
-        });
+        const contentType = matches[1];
+        const buffer = Buffer.from(matches[2], 'base64');
+        const extension = contentType.split('/')[1] || 'jpg';
+        const name = fileName ? `${Date.now()}_${fileName}` : `${Date.now()}.${extension}`;
+
+        // Upload to 'original' bucket in Supabase Storage
+        // Make sure this bucket is created in your Supabase dashboard
+        const { data, error: uploadError } = await supabase
+            .storage
+            .from('original')
+            .upload(name, buffer, {
+                contentType,
+                upsert: true
+            });
+
+        if (uploadError) {
+            console.error('Supabase Storage upload error:', uploadError);
+            throw uploadError;
+        }
+
+        // The secure_url will now point to our on-demand watermarking proxy
+        const proxyUrl = `/api/image?path=${name}`;
 
         return res.status(200).json({
-            ...result,
-            watermark_applied: watermarkSettings.enabled && !skipWatermark
+            secure_url: proxyUrl, // Kept for compatibility with existing frontend
+            path: name,
+            success: true
         });
     } catch (error) {
-        console.error('Cloudinary upload error:', error);
+        console.error('Upload error:', error);
         return res.status(500).json({ message: 'Upload failed', error: error.message });
     }
 }
+

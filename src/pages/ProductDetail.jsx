@@ -56,10 +56,7 @@ const ProductDetail = () => {
                 if (productImages.length > 0) {
                     setImages(productImages)
                 } else if (productData.image) {
-                    const legacyImage = productData.image.startsWith('http')
-                        ? productData.image
-                        : `https://irncljhvsjtohiqllnsv.supabase.co/storage/v1/object/public/products/${productData.image}`
-                    setImages([legacyImage])
+                    setImages([getImageUrl(productData.image)])
                 }
 
                 // Fetch category

@@ -6,6 +6,12 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+export const getImageUrl = (image: string | null | undefined): string => {
+    if (!image) return 'https://res.cloudinary.com/dgv7d7n6q/image/upload/v1734944400/product_placeholder.png';
+    if (image.startsWith('http') || image.startsWith('/')) return image;
+    return `https://irncljhvsjtohiqllnsv.supabase.co/storage/v1/object/public/products/${image}`;
+};
+
 // Types
 export interface Product {
     id: number;
@@ -276,7 +282,12 @@ export const productImageService = {
             .eq('product_id', productId)
             .order('sort_order', { ascending: true });
         if (error) throw error;
-        return data || [];
+
+        // Format URLs
+        return (data || []).map(pi => ({
+            ...pi,
+            image: pi.image ? { ...pi.image, url: getImageUrl(pi.image.url) } : pi.image
+        }));
     },
 
     // Add image to product

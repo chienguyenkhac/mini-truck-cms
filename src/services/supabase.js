@@ -8,6 +8,13 @@ console.log('Supabase Key exists:', !!supabaseAnonKey);
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+export const getImageUrl = (image) => {
+    if (!image) return 'https://res.cloudinary.com/dgv7d7n6q/image/upload/v1734944400/product_placeholder.png';
+    if (image.startsWith('http') || image.startsWith('/')) return image;
+    // Fallback for legacy filenames in the 'products' bucket
+    return `https://irncljhvsjtohiqllnsv.supabase.co/storage/v1/object/public/products/${image}`;
+};
+
 export const getProducts = async (limit = 12, onlyHomepage = false, options = {}) => {
     const { orderBy = 'created_at', ascending = false } = options;
 
@@ -61,8 +68,8 @@ export const getProductImages = async (productId) => {
         return [];
     }
 
-    // Extract image URLs
-    return (data || []).map(pi => pi.image?.url).filter(Boolean);
+    // Extract image URLs and format them
+    return (data || []).map(pi => getImageUrl(pi.image?.url)).filter(Boolean);
 };
 
 // Get published catalog articles

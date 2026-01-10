@@ -148,7 +148,7 @@ const ProductGrid = () => {
             <div className="aspect-[16/10] overflow-hidden relative bg-gradient-to-br from-gray-100 to-gray-200">
                 {p.image ? (
                     <img
-                        src={p.image.startsWith('http') ? p.image : `https://irncljhvsjtohiqllnsv.supabase.co/storage/v1/object/public/products/${p.image}`}
+                        src={getImageUrl(p.image)}
                         alt={p.name}
                         loading="lazy"
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
