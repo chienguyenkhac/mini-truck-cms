@@ -7,6 +7,7 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SU
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// Image Proxy Handler - Process Once, Cache Always
 export default async function handler(req, res) {
     const { path, url, watermark } = req.query;
 
