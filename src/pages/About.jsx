@@ -138,7 +138,7 @@ const About = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section - Clean gradient without 3D */}
-      <div className="relative h-[40vh] md:h-[50vh] overflow-hidden">
+      <div className="relative h-[25vh] md:h-[30vh] overflow-hidden">
         {/* Gradient background */}
         <div className="absolute inset-0 z-0 bg-gradient-to-br from-primary/10 via-white to-sky-50" />
 

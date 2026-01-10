@@ -90,7 +90,7 @@ const Catalog = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="relative h-[30vh] md:h-[40vh] lg:h-[50vh] overflow-hidden">
+      <div className="relative h-[25vh] md:h-[30vh] overflow-hidden">
         <div className="absolute inset-0 z-0 bg-gradient-to-br from-primary/10 via-white to-sky-50" />
         <div className="absolute inset-0 z-10 flex items-center justify-center px-4">
           <motion.div
@@ -111,7 +111,7 @@ const Catalog = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 md:px-10 lg:px-20 py-8 md:py-16">
+      <div className="container mx-auto px-4 md:px-10 lg:px-20 py-4 md:py-8">
         {/* Search Box */}
         {!selectedArticle && articles.length > 0 && (
           <div className="mb-8">
