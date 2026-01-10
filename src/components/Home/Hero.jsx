@@ -155,8 +155,8 @@ const Hero = () => {
         ))}
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 md:px-10 lg:px-20 py-20">
-        <div className="max-w-3xl space-y-8">
+      <div className="relative z-10 container mx-auto px-4 md:px-10 lg:px-20 py-12 md:py-16">
+        <div className="max-w-3xl space-y-4 md:space-y-6">
           <motion.div
             initial={{ x: -30, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
@@ -168,7 +168,7 @@ const Hero = () => {
           </motion.div>
 
           <div ref={titleRef} className="overflow-hidden">
-            <h1 className="text-slate-800 text-4xl sm:text-5xl md:text-7xl lg:text-9xl font-bold leading-[0.9] tracking-tighter drop-shadow-sm">
+            <h1 className="text-slate-800 text-4xl sm:text-5xl md:text-6xl font-bold leading-[0.9] tracking-tighter drop-shadow-sm">
               <span className="inline-block hover:scale-105 transition-transform duration-300 cursor-default">
                 {titleChars}
               </span>
@@ -186,7 +186,7 @@ const Hero = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="text-slate-600 text-lg md:text-xl max-w-xl leading-relaxed font-light"
+            className="text-slate-600 text-base md:text-lg max-w-xl leading-relaxed font-light"
           >
             Chuyên cung cấp phụ tùng chính hãng cho xe tải HOWO & SITRAK. Đầy đủ linh kiện từ động cơ, hộp số, phanh đến các chi tiết nhỏ nhất. Cam kết giá tốt nhất thị trường.
           </motion.p>
@@ -195,23 +195,23 @@ const Hero = () => {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.6 }}
-            className="flex flex-col sm:flex-row gap-3 sm:gap-5 pt-4"
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2"
           >
             <Link
               ref={btn1Ref}
               to="/products"
-              className="flex items-center justify-center h-12 sm:h-14 px-6 sm:px-10 bg-primary hover:brightness-110 rounded-xl text-white font-bold text-sm sm:text-base transition-colors shadow-xl shadow-primary/30 group will-change-transform"
+              className="flex items-center justify-center h-11 sm:h-12 px-6 sm:px-8 bg-primary hover:brightness-110 rounded-xl text-white font-bold text-sm sm:text-base transition-colors shadow-xl shadow-primary/30 group will-change-transform"
             >
               Khám Phá Ngay
-              <span className="material-symbols-outlined ml-2 text-lg sm:text-xl group-hover:rotate-180 transition-transform duration-500">view_in_ar</span>
+              <span className="material-symbols-outlined ml-2 text-lg group-hover:rotate-180 transition-transform duration-500">view_in_ar</span>
             </Link>
             <Link
               ref={btn2Ref}
               to="/contact"
-              className="flex items-center justify-center h-12 sm:h-14 px-6 sm:px-10 border border-slate-300 hover:border-primary hover:bg-primary/5 rounded-xl text-slate-700 font-bold text-sm sm:text-base transition-all group will-change-transform backdrop-blur-sm"
+              className="flex items-center justify-center h-11 sm:h-12 px-6 sm:px-8 border border-slate-300 hover:border-primary hover:bg-primary/5 rounded-xl text-slate-700 font-bold text-sm sm:text-base transition-all group will-change-transform backdrop-blur-sm"
             >
               Tư Vấn Ngay
-              <span className="material-symbols-outlined ml-2 text-lg sm:text-xl group-hover:translate-x-1 transition-transform">chat_bubble</span>
+              <span className="material-symbols-outlined ml-2 text-lg group-hover:translate-x-1 transition-transform">chat_bubble</span>
             </Link>
           </motion.div>
         </div>
