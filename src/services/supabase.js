@@ -8,11 +8,13 @@ console.log('Supabase Key exists:', !!supabaseAnonKey);
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export const getProducts = async (limit = 12, onlyHomepage = false) => {
+export const getProducts = async (limit = 12, onlyHomepage = false, options = {}) => {
+    const { orderBy = 'created_at', ascending = false } = options;
+
     let query = supabase
         .from('products')
         .select('*')
-        .order('name')
+        .order(orderBy, { ascending })
         .limit(limit);
 
     // Filter by show_on_homepage if requested

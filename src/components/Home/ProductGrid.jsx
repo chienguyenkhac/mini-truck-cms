@@ -103,7 +103,7 @@ const ProductGrid = () => {
     useEffect(() => {
         const loadProducts = async () => {
             try {
-                const data = await getProducts(6)
+                const data = await getProducts(20, false, { orderBy: 'created_at', ascending: false })
                 setProducts(data.length > 0 ? data : fallbackProducts)
             } catch (err) {
                 console.error('Error loading products:', err)
@@ -181,7 +181,7 @@ const ProductGrid = () => {
     )), [displayProducts])
 
     return (
-        <section className="py-20 bg-background relative overflow-hidden">
+        <section className="py-10 bg-background relative overflow-hidden">
             <div className="container mx-auto px-4 md:px-10 lg:px-20 relative z-10">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
                     <div>

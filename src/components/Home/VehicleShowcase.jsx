@@ -86,7 +86,7 @@ const VehicleShowcase = () => {
     }
 
     return (
-        <section className="py-6 bg-gray-50">
+        <section className="py-2 bg-gray-50">
             <div className="container mx-auto px-4 md:px-10 lg:px-20">
                 {/* Header */}
                 <motion.div
