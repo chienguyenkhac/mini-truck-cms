@@ -70,11 +70,15 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ onClose, onAdd }) => 
 
         setIsUploading(true);
 
+        let successCount = 0;
+        let failCount = 0;
+
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
 
             if (file.size > 5 * 1024 * 1024) {
                 notification.error(`Ảnh ${file.name} quá lớn. Tối đa 5MB.`);
+                failCount++;
                 continue;
             }
 
@@ -91,25 +95,33 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ onClose, onAdd }) => 
                 const response = await fetch('/api/upload', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image: base64Image }),
+                    body: JSON.stringify({ image: base64Image, fileName: file.name }),
                 });
 
+                const result = await response.json();
+
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('Upload failed with status:', response.status, 'Body:', errorText);
-                    throw new Error(`Upload failed: ${errorText || response.statusText}`);
+                    console.error('Upload failed:', result);
+                    const errorMsg = result.error || result.message || response.statusText;
+                    const bucketInfo = result.availableBuckets ? ` (Buckets: ${result.availableBuckets})` : '';
+                    throw new Error(`${errorMsg}${bucketInfo}`);
                 }
 
-                const result = await response.json();
                 setImages(prev => [...prev, { url: result.secure_url, isNew: true }]);
+                successCount++;
             } catch (error: any) {
                 console.error('Error uploading image:', error);
                 notification.error(`Lỗi tải ảnh ${file.name}: ${error.message}`);
+                failCount++;
             }
         }
 
         setIsUploading(false);
-        notification.success('Đã tải ảnh lên');
+        if (successCount > 0 && failCount === 0) {
+            notification.success('Đã tải bộ ảnh lên thành công');
+        } else if (successCount > 0 && failCount > 0) {
+            notification.success(`Đã tải ${successCount} ảnh, ${failCount} ảnh thất bại`);
+        }
         e.target.value = ''; // Reset input
     };
 

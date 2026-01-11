@@ -19,12 +19,19 @@ export default async function handler(req, res) {
     }
 
     try {
+        if (!req.body) {
+            return res.status(400).json({ message: 'Request body is missing. Ensure Content-Type is application/json' });
+        }
+
         const { image, fileName } = req.body;
 
         if (!supabaseKey) {
             console.error('CRITICAL: Supabase key is missing in environment variables');
             return res.status(500).json({ message: 'Server configuration error: missing credentials' });
         }
+
+        const isServiceRole = !!process.env.SUPABASE_SERVICE_ROLE_KEY && supabaseKey === process.env.SUPABASE_SERVICE_ROLE_KEY;
+        console.log(`Upload attempt: using ${isServiceRole ? 'SERVICE_ROLE' : 'ANON'} key`);
 
         if (!image) {
             return res.status(400).json({ message: 'No image provided' });
@@ -70,22 +77,24 @@ export default async function handler(req, res) {
         if (uploadError) {
             console.error('Supabase Storage upload error details:', JSON.stringify(uploadError, null, 2));
 
-            // diagnostic: list available buckets to help user identify the correct one
+            // diagnostic: list available buckets and their public status
             let availableBuckets = 'Unknown';
             try {
-                const { data: buckets } = await supabase.storage.listBuckets();
-                availableBuckets = buckets?.map(b => b.name).join(', ') || 'none';
+                const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+                if (listError) throw listError;
+                availableBuckets = buckets?.map(b => `${b.name}(${b.public ? 'public' : 'private'})`).join(', ') || 'none';
                 console.log('Available buckets:', availableBuckets);
             } catch (e) {
                 console.error('Failed to list buckets during diagnostic:', e.message);
-                availableBuckets = `Error: ${e.message}`;
+                availableBuckets = `Error listing: ${e.message}`;
             }
 
             return res.status(500).json({
                 message: 'Supabase upload failed',
                 error: uploadError.message,
                 details: uploadError,
-                availableBuckets: availableBuckets
+                availableBuckets,
+                usingKey: isServiceRole ? 'SERVICE_ROLE' : 'ANON'
             });
         }
 

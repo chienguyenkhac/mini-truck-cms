@@ -56,12 +56,14 @@ const Catalogs: React.FC = () => {
                 body: JSON.stringify({ image: base64Image }),
             });
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Catalog image upload failed with status:', response.status, 'Body:', errorText);
-                throw new Error(`Upload failed: ${errorText || response.statusText}`);
-            }
             const result = await response.json();
+
+            if (!response.ok) {
+                console.error('Catalog upload failed:', result);
+                const errorMsg = result.error || result.message || response.statusText;
+                const bucketInfo = result.availableBuckets ? ` (Buckets: ${result.availableBuckets})` : '';
+                throw new Error(`${errorMsg}${bucketInfo}`);
+            }
 
             return {
                 success: 1,
