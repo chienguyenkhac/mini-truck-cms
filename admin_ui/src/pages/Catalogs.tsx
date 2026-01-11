@@ -56,15 +56,20 @@ const Catalogs: React.FC = () => {
                 body: JSON.stringify({ image: base64Image }),
             });
 
-            if (!response.ok) throw new Error('Upload failed');
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Catalog image upload failed with status:', response.status, 'Body:', errorText);
+                throw new Error(`Upload failed: ${errorText || response.statusText}`);
+            }
             const result = await response.json();
 
             return {
                 success: 1,
                 file: { url: result.secure_url }
             };
-        } catch (error) {
-            notification.error('Không thể tải ảnh lên');
+        } catch (error: any) {
+            console.error('Error uploading catalog image:', error);
+            notification.error(`Không thể tải ảnh lên: ${error.message}`);
             return { success: 0 };
         }
     };

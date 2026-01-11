@@ -95,14 +95,18 @@ const Settings: React.FC = () => {
                 body: JSON.stringify({ image: base64Image }),
             });
 
-            if (!response.ok) throw new Error('Upload failed');
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Logo upload failed with status:', response.status, 'Body:', errorText);
+                throw new Error(`Upload failed: ${errorText || response.statusText}`);
+            }
 
             const result = await response.json();
             handleChange('company_logo', result.secure_url);
             notification.success('Đã tải logo lên');
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error uploading logo:', err);
-            notification.error('Không thể tải logo');
+            notification.error(`Không thể tải logo: ${err.message}`);
         }
     };
 

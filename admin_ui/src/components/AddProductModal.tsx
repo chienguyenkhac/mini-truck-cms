@@ -94,13 +94,17 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ onClose, onAdd }) => 
                     body: JSON.stringify({ image: base64Image }),
                 });
 
-                if (!response.ok) throw new Error('Upload failed');
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Upload failed with status:', response.status, 'Body:', errorText);
+                    throw new Error(`Upload failed: ${errorText || response.statusText}`);
+                }
 
                 const result = await response.json();
                 setImages(prev => [...prev, { url: result.secure_url, isNew: true }]);
             } catch (error: any) {
                 console.error('Error uploading image:', error);
-                notification.error(`Không thể tải ảnh ${file.name}`);
+                notification.error(`Lỗi tải ảnh ${file.name}: ${error.message}`);
             }
         }
 

@@ -92,8 +92,20 @@ export default async function handler(req, res) {
                 const barY = Math.floor((height - barHeight) / 2);
 
                 // Create a semi-transparent white rectangle with text
+                const escapedText = watermarkText
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&apos;');
+
                 const svg = `
                     <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <style type="text/css">
+                                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700&amp;display=swap');
+                            </style>
+                        </defs>
                         <rect 
                             x="${barX}" 
                             y="${barY}" 
@@ -110,9 +122,9 @@ export default async function handler(req, res) {
                             fill="rgba(0,0,0,0.8)"
                             font-size="${Math.floor(barHeight * 0.5)}px"
                             font-weight="bold"
-                            font-family="Arial, Helvetica, sans-serif"
+                            font-family="Inter, Arial, Helvetica, sans-serif"
                         >
-                            ${watermarkText}
+                            ${escapedText}
                         </text>
                     </svg>
                 `;
