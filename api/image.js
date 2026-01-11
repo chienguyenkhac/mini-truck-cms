@@ -85,47 +85,43 @@ export default async function handler(req, res) {
                 const width = metadata.width || 800;
                 const height = metadata.height || 600;
 
-                // Create a simple watermark bar across the center
-                const barHeight = Math.floor(height * 0.08);
-                const barWidth = Math.floor(width * 0.6);
-                const barX = Math.floor((width - barWidth) / 2);
-                const barY = Math.floor((height - barHeight) / 2);
+                // Convert Vietnamese text to ASCII-safe version for SVG rendering
+                // Sharp's librsvg doesn't support @import fonts, so we use system fonts
+                const safeText = watermarkText
+                    .replace(/[àáạảãâầấậẩẫăằắặẳẵ]/gi, 'a')
+                    .replace(/[èéẹẻẽêềếệểễ]/gi, 'e')
+                    .replace(/[ìíịỉĩ]/gi, 'i')
+                    .replace(/[òóọỏõôồốộổỗơờớợởỡ]/gi, 'o')
+                    .replace(/[ùúụủũưừứựửữ]/gi, 'u')
+                    .replace(/[ỳýỵỷỹ]/gi, 'y')
+                    .replace(/đ/gi, 'd')
+                    .replace(/[^\x00-\x7F]/g, ''); // Remove any remaining non-ASCII
 
-                // Create a semi-transparent white rectangle with text
-                const escapedText = watermarkText
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&apos;');
+                // Calculate diagonal text size
+                const fontSize = Math.floor(Math.min(width, height) * 0.08);
+                const diagonalLength = Math.sqrt(width * width + height * height);
+                const angle = -Math.atan2(height, width) * (180 / Math.PI);
 
+                // Create diagonal watermark pattern
                 const svg = `
                     <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
                         <defs>
-                            <style type="text/css">
-                                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700&amp;display=swap');
-                            </style>
+                            <pattern id="watermark" patternUnits="userSpaceOnUse" width="${width}" height="${height}">
+                                <text 
+                                    x="50%" 
+                                    y="50%" 
+                                    text-anchor="middle" 
+                                    dominant-baseline="middle"
+                                    fill="white"
+                                    fill-opacity="${watermarkOpacity}"
+                                    font-size="${fontSize}px"
+                                    font-weight="bold"
+                                    font-family="Arial, Helvetica, sans-serif"
+                                    transform="rotate(${angle}, ${width / 2}, ${height / 2})"
+                                >${safeText}</text>
+                            </pattern>
                         </defs>
-                        <rect 
-                            x="${barX}" 
-                            y="${barY}" 
-                            width="${barWidth}" 
-                            height="${barHeight}"
-                            fill="white"
-                            fill-opacity="${watermarkOpacity * 0.4}"
-                        />
-                        <text 
-                            x="50%" 
-                            y="50%" 
-                            text-anchor="middle" 
-                            dominant-baseline="middle"
-                            fill="rgba(0,0,0,0.8)"
-                            font-size="${Math.floor(barHeight * 0.5)}px"
-                            font-weight="bold"
-                            font-family="Inter, Arial, Helvetica, sans-serif"
-                        >
-                            ${escapedText}
-                        </text>
+                        <rect width="100%" height="100%" fill="url(#watermark)"/>
                     </svg>
                 `;
 
@@ -139,7 +135,7 @@ export default async function handler(req, res) {
                         .jpeg({ quality: 90 })
                         .toBuffer();
                 } catch (e) {
-                    console.error('Sharp error:', e);
+                    console.error('Sharp watermark error:', e);
                     finalBuffer = originalBuffer;
                 }
             }
