@@ -13,6 +13,25 @@ const ProductDetail = () => {
     const [images, setImages] = useState([])
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
+    // Right-click protection: intercept and serve watermarked image
+    const handleImageRightClick = useCallback((e, imageUrl) => {
+        e.preventDefault()
+
+        // Add watermark=true parameter to the image URL
+        const watermarkedUrl = imageUrl.includes('?')
+            ? `${imageUrl}&watermark=true`
+            : `${imageUrl}?watermark=true`
+
+        // Create a temporary link and trigger download
+        const link = document.createElement('a')
+        link.href = watermarkedUrl
+        link.download = `${product?.name || 'image'}_watermarked.jpg`
+        link.style.display = 'none'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+    }, [product?.name])
+
     // Auto-slide images every 7 seconds
     useEffect(() => {
         if (images.length <= 1) return
@@ -136,6 +155,8 @@ const ProductDetail = () => {
                                         exit={{ opacity: 0, x: -50 }}
                                         transition={{ duration: 0.3 }}
                                         onError={(e) => { e.target.style.display = 'none' }}
+                                        onContextMenu={(e) => handleImageRightClick(e, images[currentImageIndex])}
+                                        draggable={false}
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center">
@@ -185,7 +206,13 @@ const ProductDetail = () => {
                                         className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-colors ${idx === currentImageIndex ? 'border-primary' : 'border-gray-200'
                                             }`}
                                     >
-                                        <img src={img} alt={`${product.name} ${idx + 1}`} className="w-full h-full object-cover" />
+                                        <img
+                                            src={img}
+                                            alt={`${product.name} ${idx + 1}`}
+                                            className="w-full h-full object-cover"
+                                            onContextMenu={(e) => handleImageRightClick(e, img)}
+                                            draggable={false}
+                                        />
                                     </button>
                                 ))}
                             </div>
@@ -288,10 +315,12 @@ const ProductDetail = () => {
                                         <div className="aspect-[4/3] relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
                                             {p.image ? (
                                                 <img
-                                                    src={supabase.getImageUrl ? supabase.getImageUrl(p.image) : (p.image.startsWith('http') ? p.image : `https://irncljhvsjtohiqllnsv.supabase.co/storage/v1/object/public/products/${p.image}`)}
+                                                    src={getImageUrl(p.image)}
                                                     alt={p.name}
                                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                                     onError={(e) => { e.target.style.display = 'none' }}
+                                                    onContextMenu={(e) => handleImageRightClick(e, getImageUrl(p.image))}
+                                                    draggable={false}
                                                 />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center">
