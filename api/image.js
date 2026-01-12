@@ -104,15 +104,18 @@ export default async function handler(req, res) {
 
                     const logoBuffer = Buffer.from(await logoResponse.arrayBuffer());
 
-                    // Calculate logo size (30% of the smaller dimension)
-                    const logoSize = Math.floor(Math.min(width, height) * 0.3);
+                    // Calculate logo size (15% of the smaller dimension for 5x5 grid)
+                    const logoSize = Math.floor(Math.min(width, height) * 0.15);
+
+                    // Fixed 30% opacity for watermark
+                    const fixedOpacity = 0.30;
 
                     // Resize and reduce opacity of logo
-                    const processedLogo = await sharp(logoBuffer)
+                    const resizedLogo = await sharp(logoBuffer)
                         .resize(logoSize, logoSize, { fit: 'inside' })
                         .ensureAlpha()
                         .composite([{
-                            input: Buffer.from([255, 255, 255, Math.floor(255 * watermarkOpacity)]),
+                            input: Buffer.from([255, 255, 255, Math.floor(255 * fixedOpacity)]),
                             raw: { width: 1, height: 1, channels: 4 },
                             tile: true,
                             blend: 'dest-in'
@@ -120,22 +123,34 @@ export default async function handler(req, res) {
                         .png()
                         .toBuffer();
 
-                    // Get processed logo dimensions for tiling
-                    const logoMeta = await sharp(processedLogo).metadata();
+                    // Get processed logo dimensions
+                    const logoMeta = await sharp(resizedLogo).metadata();
                     const logoW = logoMeta.width || logoSize;
                     const logoH = logoMeta.height || logoSize;
 
-                    // Create tiled watermark pattern (3x3 grid)
-                    const composites = [];
-                    const spacingX = width / 3;
-                    const spacingY = height / 3;
+                    // Rotate logo -45 degrees (lower part on left side)
+                    const rotatedLogo = await sharp(resizedLogo)
+                        .rotate(-45, { background: { r: 0, g: 0, b: 0, alpha: 0 } })
+                        .png()
+                        .toBuffer();
 
-                    for (let row = 0; row < 3; row++) {
-                        for (let col = 0; col < 3; col++) {
-                            const x = Math.floor(col * spacingX + (spacingX - logoW) / 2);
-                            const y = Math.floor(row * spacingY + (spacingY - logoH) / 2);
+                    // Get rotated logo dimensions (will be larger due to rotation)
+                    const rotatedMeta = await sharp(rotatedLogo).metadata();
+                    const rotatedW = rotatedMeta.width || logoW;
+                    const rotatedH = rotatedMeta.height || logoH;
+
+                    // Create tiled watermark pattern (5x5 grid)
+                    const composites = [];
+                    const gridSize = 5;
+                    const spacingX = width / gridSize;
+                    const spacingY = height / gridSize;
+
+                    for (let row = 0; row < gridSize; row++) {
+                        for (let col = 0; col < gridSize; col++) {
+                            const x = Math.floor(col * spacingX + (spacingX - rotatedW) / 2);
+                            const y = Math.floor(row * spacingY + (spacingY - rotatedH) / 2);
                             composites.push({
-                                input: processedLogo,
+                                input: rotatedLogo,
                                 top: Math.max(0, y),
                                 left: Math.max(0, x),
                             });
