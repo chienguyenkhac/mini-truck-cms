@@ -89,7 +89,6 @@ export default async function handler(req, res) {
             };
 
             const isEnabled = getSetting('watermark_enabled', 'true') === 'true';
-            const watermarkText = getSetting('watermark_text', 'SINOTRUK Ha Noi');
             const watermarkOpacity = parseInt(getSetting('watermark_opacity', '40')) / 100;
 
             if (isEnabled) {
@@ -97,38 +96,41 @@ export default async function handler(req, res) {
                 const width = metadata.width || 800;
                 const height = metadata.height || 600;
 
-                // Convert Vietnamese text to ASCII-safe version for SVG rendering
-                const safeText = watermarkText
-                    .replace(/[àáạảãâầấậẩẫăằắặẳẵ]/gi, 'a')
-                    .replace(/[èéẹẻẽêềếệểễ]/gi, 'e')
-                    .replace(/[ìíịỉĩ]/gi, 'i')
-                    .replace(/[òóọỏõôồốộổỗơờớợởỡ]/gi, 'o')
-                    .replace(/[ùúụủũưừứựửữ]/gi, 'u')
-                    .replace(/[ỳýỵỷỹ]/gi, 'y')
-                    .replace(/đ/gi, 'd')
-                    .replace(/[^\x00-\x7F]/g, '');
+                // Use simple geometric watermark that doesn't require fonts
+                // Create diagonal striped pattern as watermark
+                const patternSize = Math.min(width, height) * 0.15;
+                const numStripes = Math.ceil(Math.max(width, height) / patternSize) * 2;
 
-                const fontSize = Math.floor(Math.min(width, height) * 0.05);
-                const angle = -30;
+                // Generate diagonal lines pattern
+                let lines = '';
+                for (let i = -numStripes; i < numStripes * 2; i++) {
+                    const offset = i * patternSize;
+                    lines += `<line x1="${offset}" y1="0" x2="${offset + height}" y2="${height}" 
+                        stroke="rgba(255,255,255,${watermarkOpacity * 0.3})" stroke-width="2"/>`;
+                }
 
-                // Calculate center position with rotation offset
+                // Add company logo-style watermark using simple shapes
+                const logoSize = Math.min(width, height) * 0.3;
                 const centerX = width / 2;
                 const centerY = height / 2;
 
-                // Use minimal SVG with DejaVu Sans (commonly available on Linux/Vercel)
-                // or sans-serif as ultimate fallback
                 const svg = Buffer.from(`<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-                    <text 
-                        x="${centerX}" 
-                        y="${centerY}" 
-                        text-anchor="middle" 
-                        dominant-baseline="central"
-                        fill="rgba(255,255,255,${watermarkOpacity})"
-                        font-size="${fontSize}"
-                        font-weight="700"
-                        font-family="DejaVu Sans, Liberation Sans, FreeSans, sans-serif"
-                        transform="rotate(${angle} ${centerX} ${centerY})"
-                    >${safeText}</text>
+                    <!-- Diagonal stripes pattern -->
+                    <g transform="rotate(-30 ${centerX} ${centerY})">
+                        ${lines}
+                    </g>
+                    <!-- Central watermark circle -->
+                    <circle cx="${centerX}" cy="${centerY}" r="${logoSize * 0.4}" 
+                        fill="none" stroke="rgba(255,255,255,${watermarkOpacity})" stroke-width="${logoSize * 0.02}"/>
+                    <circle cx="${centerX}" cy="${centerY}" r="${logoSize * 0.35}" 
+                        fill="none" stroke="rgba(255,255,255,${watermarkOpacity * 0.7})" stroke-width="${logoSize * 0.01}"/>
+                    <!-- S letter using paths (SINOTRUK) -->
+                    <path d="M${centerX - logoSize * 0.12} ${centerY - logoSize * 0.15}
+                        Q${centerX - logoSize * 0.2} ${centerY - logoSize * 0.15} ${centerX - logoSize * 0.2} ${centerY - logoSize * 0.05}
+                        Q${centerX - logoSize * 0.2} ${centerY + logoSize * 0.05} ${centerX} ${centerY + logoSize * 0.05}
+                        Q${centerX + logoSize * 0.2} ${centerY + logoSize * 0.05} ${centerX + logoSize * 0.2} ${centerY + logoSize * 0.15}
+                        Q${centerX + logoSize * 0.2} ${centerY + logoSize * 0.25} ${centerX} ${centerY + logoSize * 0.25}"
+                        fill="none" stroke="rgba(255,255,255,${watermarkOpacity})" stroke-width="${logoSize * 0.03}" stroke-linecap="round"/>
                 </svg>`);
 
                 try {
