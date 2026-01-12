@@ -157,16 +157,26 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
                 show_on_homepage: formData.show_on_homepage,
             });
 
+            // Handle all images - update order and is_primary for existing, create new ones
             for (let i = 0; i < images.length; i++) {
                 const img = images[i];
+                const isPrimary = i === 0;
+
                 if (img.isNew) {
+                    // New image - create and link to product
                     const savedImage = await imageService.create(img.url);
                     await productImageService.addToProduct(
                         product.id,
                         savedImage.id,
-                        i === 0,
+                        isPrimary,
                         i
                     );
+                } else if (img.imageId) {
+                    // Existing image - update sort_order and is_primary
+                    await productImageService.updateOrder(product.id, img.imageId, i);
+                    if (isPrimary) {
+                        await productImageService.setPrimary(product.id, img.imageId);
+                    }
                 }
             }
 
