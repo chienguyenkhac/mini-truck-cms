@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { supabase, getProductImages } from '../services/supabase'
+import { supabase, getProductImages, getImageUrl } from '../services/supabase'
 
 const ProductDetail = () => {
     const { id } = useParams()
