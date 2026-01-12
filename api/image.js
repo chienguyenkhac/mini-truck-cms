@@ -7,32 +7,37 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SU
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Image Proxy Handler - Always applies watermark, caches result
+// Image Proxy Handler - Selective watermarking (only when ?watermark=true)
 export default async function handler(req, res) {
-    const { path, url } = req.query;
+    const { path, url, watermark } = req.query;
+    const applyWatermark = watermark === 'true';
 
     if (!path && !url) {
         return res.status(400).send('Image path or URL is required');
     }
 
     try {
-        const cacheName = path || Buffer.from(url).toString('base64').substring(0, 50) + '.jpg';
+        const baseName = path || Buffer.from(url).toString('base64').substring(0, 50) + '.jpg';
 
-        // 1. Try to fetch from watermarked cache bucket
-        const { data: cachedImage, error: cacheError } = await supabase
-            .storage
-            .from('watermarked')
-            .download(cacheName);
+        // If watermark requested, check cache first
+        if (applyWatermark) {
+            const cacheName = `wm_${baseName}`;
+            const { data: cachedImage, error: cacheError } = await supabase
+                .storage
+                .from('watermarked')
+                .download(cacheName);
 
-        if (cachedImage && !cacheError) {
-            console.log(`Serving cached watermarked image: ${cacheName}`);
-            const buffer = await cachedImage.arrayBuffer();
-            res.setHeader('Content-Type', 'image/jpeg');
-            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-            return res.send(Buffer.from(buffer));
+            if (cachedImage && !cacheError) {
+                console.log(`Serving cached watermarked image: ${cacheName}`);
+                const buffer = await cachedImage.arrayBuffer();
+                res.setHeader('Content-Type', 'image/jpeg');
+                res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+                res.setHeader('Content-Disposition', `attachment; filename="${baseName}"`);
+                return res.send(Buffer.from(buffer));
+            }
         }
 
-        // 2. Fetch original image
+        // Fetch original image
         let originalBuffer;
         let originalType = 'image/jpeg';
 
@@ -62,9 +67,16 @@ export default async function handler(req, res) {
             originalType = response.headers.get('content-type') || 'image/jpeg';
         }
 
+        // If no watermark requested, return clean image immediately
+        if (!applyWatermark) {
+            res.setHeader('Content-Type', originalType);
+            res.setHeader('Cache-Control', 'public, max-age=86400');
+            return res.send(originalBuffer);
+        }
+
+        // Apply watermark for download
         let finalBuffer = originalBuffer;
 
-        // 3. Apply watermark (ALWAYS, by default)
         if (originalType.startsWith('image/')) {
             const { data: settings } = await supabase
                 .from('site_settings')
@@ -77,7 +89,7 @@ export default async function handler(req, res) {
             };
 
             const isEnabled = getSetting('watermark_enabled', 'true') === 'true';
-            const watermarkText = getSetting('watermark_text', 'SINOTRUK Hà Nội');
+            const watermarkText = getSetting('watermark_text', 'SINOTRUK Ha Noi');
             const watermarkOpacity = parseInt(getSetting('watermark_opacity', '40')) / 100;
 
             if (isEnabled) {
@@ -86,7 +98,6 @@ export default async function handler(req, res) {
                 const height = metadata.height || 600;
 
                 // Convert Vietnamese text to ASCII-safe version for SVG rendering
-                // Sharp's librsvg doesn't support @import fonts, so we use system fonts
                 const safeText = watermarkText
                     .replace(/[àáạảãâầấậẩẫăằắặẳẵ]/gi, 'a')
                     .replace(/[èéẹẻẽêềếệểễ]/gi, 'e')
@@ -95,12 +106,10 @@ export default async function handler(req, res) {
                     .replace(/[ùúụủũưừứựửữ]/gi, 'u')
                     .replace(/[ỳýỵỷỹ]/gi, 'y')
                     .replace(/đ/gi, 'd')
-                    .replace(/[^\x00-\x7F]/g, ''); // Remove any remaining non-ASCII
+                    .replace(/[^\x00-\x7F]/g, '');
 
-                // Calculate diagonal text size
-                const fontSize = Math.floor(Math.min(width, height) * 0.08);
-                const diagonalLength = Math.sqrt(width * width + height * height);
-                const angle = -Math.atan2(height, width) * (180 / Math.PI);
+                const fontSize = Math.floor(Math.min(width, height) * 0.06);
+                const angle = -25;
 
                 // Create diagonal watermark pattern
                 const svg = `
@@ -141,7 +150,8 @@ export default async function handler(req, res) {
             }
         }
 
-        // 4. Cache the watermarked result
+        // Cache the watermarked result
+        const cacheName = `wm_${baseName}`;
         await supabase
             .storage
             .from('watermarked')
@@ -153,6 +163,7 @@ export default async function handler(req, res) {
 
         res.setHeader('Content-Type', 'image/jpeg');
         res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        res.setHeader('Content-Disposition', `attachment; filename="${baseName}"`);
         return res.send(finalBuffer);
 
     } catch (error) {
