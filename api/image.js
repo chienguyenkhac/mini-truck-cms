@@ -81,7 +81,7 @@ export default async function handler(req, res) {
             const { data: settings } = await supabase
                 .from('site_settings')
                 .select('key, value')
-                .in('key', ['watermark_text', 'watermark_opacity', 'watermark_enabled']);
+                .in('key', ['watermark_opacity', 'watermark_enabled', 'company_logo']);
 
             const getSetting = (key, defaultValue) => {
                 const item = settings?.find(s => s.key === key);
@@ -90,61 +90,79 @@ export default async function handler(req, res) {
 
             const isEnabled = getSetting('watermark_enabled', 'true') === 'true';
             const watermarkOpacity = parseInt(getSetting('watermark_opacity', '40')) / 100;
+            const logoUrl = getSetting('company_logo', '');
 
-            if (isEnabled) {
+            if (isEnabled && logoUrl) {
                 const metadata = await sharp(originalBuffer).metadata();
                 const width = metadata.width || 800;
                 const height = metadata.height || 600;
 
-                // Use simple geometric watermark that doesn't require fonts
-                // Create diagonal striped pattern as watermark
-                const patternSize = Math.min(width, height) * 0.15;
-                const numStripes = Math.ceil(Math.max(width, height) / patternSize) * 2;
-
-                // Generate diagonal lines pattern
-                let lines = '';
-                for (let i = -numStripes; i < numStripes * 2; i++) {
-                    const offset = i * patternSize;
-                    lines += `<line x1="${offset}" y1="0" x2="${offset + height}" y2="${height}" 
-                        stroke="rgba(255,255,255,${watermarkOpacity * 0.3})" stroke-width="2"/>`;
-                }
-
-                // Add company logo-style watermark using simple shapes
-                const logoSize = Math.min(width, height) * 0.3;
-                const centerX = width / 2;
-                const centerY = height / 2;
-
-                const svg = Buffer.from(`<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Diagonal stripes pattern -->
-                    <g transform="rotate(-30 ${centerX} ${centerY})">
-                        ${lines}
-                    </g>
-                    <!-- Central watermark circle -->
-                    <circle cx="${centerX}" cy="${centerY}" r="${logoSize * 0.4}" 
-                        fill="none" stroke="rgba(255,255,255,${watermarkOpacity})" stroke-width="${logoSize * 0.02}"/>
-                    <circle cx="${centerX}" cy="${centerY}" r="${logoSize * 0.35}" 
-                        fill="none" stroke="rgba(255,255,255,${watermarkOpacity * 0.7})" stroke-width="${logoSize * 0.01}"/>
-                    <!-- S letter using paths (SINOTRUK) -->
-                    <path d="M${centerX - logoSize * 0.12} ${centerY - logoSize * 0.15}
-                        Q${centerX - logoSize * 0.2} ${centerY - logoSize * 0.15} ${centerX - logoSize * 0.2} ${centerY - logoSize * 0.05}
-                        Q${centerX - logoSize * 0.2} ${centerY + logoSize * 0.05} ${centerX} ${centerY + logoSize * 0.05}
-                        Q${centerX + logoSize * 0.2} ${centerY + logoSize * 0.05} ${centerX + logoSize * 0.2} ${centerY + logoSize * 0.15}
-                        Q${centerX + logoSize * 0.2} ${centerY + logoSize * 0.25} ${centerX} ${centerY + logoSize * 0.25}"
-                        fill="none" stroke="rgba(255,255,255,${watermarkOpacity})" stroke-width="${logoSize * 0.03}" stroke-linecap="round"/>
-                </svg>`);
-
                 try {
-                    finalBuffer = await sharp(originalBuffer)
+                    // Fetch the logo image
+                    const logoResponse = await fetch(logoUrl);
+                    if (!logoResponse.ok) throw new Error('Failed to fetch logo');
+
+                    const logoBuffer = Buffer.from(await logoResponse.arrayBuffer());
+
+                    // Calculate logo size (30% of the smaller dimension)
+                    const logoSize = Math.floor(Math.min(width, height) * 0.3);
+
+                    // Resize and reduce opacity of logo
+                    const processedLogo = await sharp(logoBuffer)
+                        .resize(logoSize, logoSize, { fit: 'inside' })
+                        .ensureAlpha()
                         .composite([{
-                            input: svg,
-                            top: 0,
-                            left: 0,
+                            input: Buffer.from([255, 255, 255, Math.floor(255 * watermarkOpacity)]),
+                            raw: { width: 1, height: 1, channels: 4 },
+                            tile: true,
+                            blend: 'dest-in'
                         }])
+                        .png()
+                        .toBuffer();
+
+                    // Get processed logo dimensions for tiling
+                    const logoMeta = await sharp(processedLogo).metadata();
+                    const logoW = logoMeta.width || logoSize;
+                    const logoH = logoMeta.height || logoSize;
+
+                    // Create tiled watermark pattern (3x3 grid)
+                    const composites = [];
+                    const spacingX = width / 3;
+                    const spacingY = height / 3;
+
+                    for (let row = 0; row < 3; row++) {
+                        for (let col = 0; col < 3; col++) {
+                            const x = Math.floor(col * spacingX + (spacingX - logoW) / 2);
+                            const y = Math.floor(row * spacingY + (spacingY - logoH) / 2);
+                            composites.push({
+                                input: processedLogo,
+                                top: Math.max(0, y),
+                                left: Math.max(0, x),
+                            });
+                        }
+                    }
+
+                    finalBuffer = await sharp(originalBuffer)
+                        .composite(composites)
                         .jpeg({ quality: 90 })
                         .toBuffer();
-                } catch (e) {
-                    console.error('Sharp watermark error:', e);
-                    finalBuffer = originalBuffer;
+
+                } catch (logoError) {
+                    console.error('Logo watermark error:', logoError);
+                    // Fallback to simple diagonal lines if logo fails
+                    const svg = Buffer.from(`<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <pattern id="diag" width="100" height="100" patternUnits="userSpaceOnUse" patternTransform="rotate(-30)">
+                                <line x1="0" y1="50" x2="100" y2="50" stroke="rgba(255,255,255,${watermarkOpacity})" stroke-width="1"/>
+                            </pattern>
+                        </defs>
+                        <rect width="100%" height="100%" fill="url(#diag)"/>
+                    </svg>`);
+
+                    finalBuffer = await sharp(originalBuffer)
+                        .composite([{ input: svg, top: 0, left: 0 }])
+                        .jpeg({ quality: 90 })
+                        .toBuffer();
                 }
             }
         }
