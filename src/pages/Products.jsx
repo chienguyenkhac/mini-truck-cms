@@ -274,9 +274,11 @@ const Products = () => {
                           <span className="material-symbols-outlined text-8xl text-gray-300">settings</span>
                         </div>
                       )}
-                      <div className="absolute top-4 left-4 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                        {product.manufacturer_code || product.code || 'Mới'}
-                      </div>
+                      {product.manufacturer_code && (
+                        <div className="absolute top-4 left-4 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                          {product.manufacturer_code}
+                        </div>
+                      )}
                       <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent opacity-60"></div>
                     </div>
                   </Link>

@@ -159,9 +159,11 @@ const ProductGrid = () => {
                         <span className="material-symbols-outlined text-7xl text-gray-300">settings</span>
                     </div>
                 )}
-                <div className="absolute top-5 left-5 bg-primary text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">
-                    {p.manufacturer_code || p.code || 'Mới'}
-                </div>
+                {p.manufacturer_code && (
+                    <div className="absolute top-5 left-5 bg-primary text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">
+                        {p.manufacturer_code}
+                    </div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent opacity-50"></div>
             </div>
 
