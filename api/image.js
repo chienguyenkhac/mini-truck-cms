@@ -108,36 +108,33 @@ export default async function handler(req, res) {
                     .replace(/đ/gi, 'd')
                     .replace(/[^\x00-\x7F]/g, '');
 
-                const fontSize = Math.floor(Math.min(width, height) * 0.06);
-                const angle = -25;
+                const fontSize = Math.floor(Math.min(width, height) * 0.05);
+                const angle = -30;
 
-                // Create diagonal watermark pattern
-                const svg = `
-                    <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <pattern id="watermark" patternUnits="userSpaceOnUse" width="${width}" height="${height}">
-                                <text 
-                                    x="50%" 
-                                    y="50%" 
-                                    text-anchor="middle" 
-                                    dominant-baseline="middle"
-                                    fill="white"
-                                    fill-opacity="${watermarkOpacity}"
-                                    font-size="${fontSize}px"
-                                    font-weight="bold"
-                                    font-family="Arial, Helvetica, sans-serif"
-                                    transform="rotate(${angle}, ${width / 2}, ${height / 2})"
-                                >${safeText}</text>
-                            </pattern>
-                        </defs>
-                        <rect width="100%" height="100%" fill="url(#watermark)"/>
-                    </svg>
-                `;
+                // Calculate center position with rotation offset
+                const centerX = width / 2;
+                const centerY = height / 2;
+
+                // Use minimal SVG with DejaVu Sans (commonly available on Linux/Vercel)
+                // or sans-serif as ultimate fallback
+                const svg = Buffer.from(`<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+                    <text 
+                        x="${centerX}" 
+                        y="${centerY}" 
+                        text-anchor="middle" 
+                        dominant-baseline="central"
+                        fill="rgba(255,255,255,${watermarkOpacity})"
+                        font-size="${fontSize}"
+                        font-weight="700"
+                        font-family="DejaVu Sans, Liberation Sans, FreeSans, sans-serif"
+                        transform="rotate(${angle} ${centerX} ${centerY})"
+                    >${safeText}</text>
+                </svg>`);
 
                 try {
                     finalBuffer = await sharp(originalBuffer)
                         .composite([{
-                            input: Buffer.from(svg, 'utf-8'),
+                            input: svg,
                             top: 0,
                             left: 0,
                         }])
