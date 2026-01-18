@@ -209,136 +209,156 @@ const Products = () => {
                 ))}
               </div>
             </div>
-
-          </div>
-             </div>
-
-      {/* Manufacturer Code Filter */}
-      <div>
-        <h4 className="text-slate-800 font-bold mb-3 uppercase tracking-wider text-sm flex items-center gap-2">
-          <span className="material-symbols-outlined text-amber-500 text-lg">barcode</span>
-          MÃ NHÀ SẢN XUẤT
-        </h4>
-        <input
-          type="text"
-          placeholder="Ví dụ: HOWO, SINOTRUK..."
-          value={manufacturerTerm}
-          onChange={(e) => setManufacturerTerm(e.target.value)}
-          className="w-full max-w-md px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary transition-all"
-        />
-      </div>
-    </motion.div>
-  )
-}
-
-{/* Products Grid */ }
-{
-  loading ? (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      {[1, 2, 3, 4, 5, 6].map((i) => (
-        <div key={i} className="bg-white border border-slate-200 rounded-3xl overflow-hidden animate-pulse">
-          <div className="aspect-square bg-slate-200"></div>
-          <div className="p-6 space-y-4">
-            <div className="h-6 bg-slate-200 rounded w-3/4"></div>
-            <div className="h-4 bg-slate-200 rounded w-1/2"></div>
-            <div className="h-10 bg-slate-200 rounded"></div>
-          </div>
-        </div>
-      ))}
-    </div>
-  ) : products.length > 0 ? (
-    <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-        {products.map((product, index) => (
-          <motion.div
-            key={product.id}
-            initial={{ y: 30, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ delay: Math.min(index * 0.05, 0.3) }}
-            viewport={{ once: true }}
-            whileHover={{ y: -5 }}
-            className="group bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-lg flex flex-col h-full"
-          >
-            <Link to={`/product/${product.id}`}>
-              <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
-                {product.image ? (
-                  <img
-                    src={getImageUrl(product.image)}
-                    alt={product.name}
-                    loading="lazy"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    onError={(e) => { e.target.style.display = 'none' }}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <span className="material-symbols-outlined text-8xl text-gray-300">settings</span>
-                  </div>
+            {/* Vehicle Categories */}
+            <div>
+              <h4 className="text-slate-800 font-bold mb-3 uppercase tracking-wider text-sm flex items-center gap-2">
+                <span className="material-symbols-outlined text-blue-500 text-lg">local_shipping</span>
+                HÃNG XE
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {categories.filter(c => c.is_vehicle_name).map((cat) => (
+                  <button
+                    key={cat.id}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${selectedCategory === String(cat.id)
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-800 border border-blue-200'
+                      }`}
+                    onClick={() => setSelectedCategory(String(cat.id))}
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+                {categories.filter(c => c.is_vehicle_name).length === 0 && (
+                  <p className="text-slate-400 text-sm">Chưa có hãng xe</p>
                 )}
-                {product.manufacturer_code && (
-                  <div className="absolute top-4 left-4 bg-amber-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                    {product.manufacturer_code}
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent opacity-60"></div>
-              </div>
-            </Link>
-            <div className="p-3 flex flex-col flex-1">
-              <Link to={`/product/${product.id}`}>
-                <h3 className="text-slate-800 font-bold text-base group-hover:text-primary transition-colors line-clamp-2 min-h-[2.8rem]">
-                  {product.name}
-                </h3>
-              </Link>
-              <p className="text-slate-400 text-xs line-clamp-1 mt-0.5">{product.description || 'Phụ tùng chính hãng'}</p>
-
-              <div className="flex gap-2 mt-auto pt-3">
-                <Link
-                  to={`/product/${product.id}`}
-                  className="flex-1 py-2 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:border-primary hover:text-primary transition-all flex items-center justify-center"
-                >
-                  Chi Tiết
-                </Link>
-                <a
-                  href="tel:0382890990"
-                  className="flex-1 py-2 bg-amber-500 text-white font-medium text-sm rounded-xl hover:bg-amber-600 transition-all flex items-center justify-center"
-                >
-                  Đặt Hàng
-                </a>
               </div>
             </div>
-          </motion.div>
-        ))}
-      </div>
 
-      {/* Load More Button */}
-      {hasMore && (
-        <div className="mt-12 text-center">
-          <button
-            onClick={handleLoadMore}
-            disabled={loadingMore}
-            className="px-8 py-4 bg-white border border-slate-200 rounded-2xl text-slate-700 font-bold hover:border-primary hover:text-primary transition-all shadow-sm disabled:opacity-50 flex items-center gap-2 mx-auto"
-          >
-            {loadingMore ? (
-              <>
-                <span className="animate-spin material-symbols-outlined">refresh</span>
-                Đang tải...
-              </>
-            ) : (
-              <>
-                <span className="material-symbols-outlined">expand_more</span>
-                Xem thêm sản phẩm
-              </>
-            )}
-          </button>
-        </div>
-      )}
-    </>
-  ) : (
-    <div className="text-center py-20">
-      <span className="material-symbols-outlined text-6xl text-slate-300 mb-4">search_off</span>
-      <p className="text-slate-500 text-lg">Không tìm thấy sản phẩm nào phù hợp</p>
-    </div>
-  )
-}
+            {/* Manufacturer Code Filter */}
+            <div>
+              <h4 className="text-slate-800 font-bold mb-3 uppercase tracking-wider text-sm flex items-center gap-2">
+                <span className="material-symbols-outlined text-amber-500 text-lg">barcode</span>
+                MÃ NHÀ SẢN XUẤT
+              </h4>
+              <input
+                type="text"
+                placeholder="Ví dụ: HOWO, SINOTRUK..."
+                value={manufacturerTerm}
+                onChange={(e) => setManufacturerTerm(e.target.value)}
+                className="w-full max-w-md px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary transition-all"
+              />
+            </div>
+          </motion.div>
+        )}
+
+        {/* Products Grid */}
+        {
+          loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="bg-white border border-slate-200 rounded-3xl overflow-hidden animate-pulse">
+                  <div className="aspect-square bg-slate-200"></div>
+                  <div className="p-6 space-y-4">
+                    <div className="h-6 bg-slate-200 rounded w-3/4"></div>
+                    <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+                    <div className="h-10 bg-slate-200 rounded"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : products.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+                {products.map((product, index) => (
+                  <motion.div
+                    key={product.id}
+                    initial={{ y: 30, opacity: 0 }}
+                    whileInView={{ y: 0, opacity: 1 }}
+                    transition={{ delay: Math.min(index * 0.05, 0.3) }}
+                    viewport={{ once: true }}
+                    whileHover={{ y: -5 }}
+                    className="group bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-lg flex flex-col h-full"
+                  >
+                    <Link to={`/product/${product.id}`}>
+                      <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                        {product.image ? (
+                          <img
+                            src={getImageUrl(product.image)}
+                            alt={product.name}
+                            loading="lazy"
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            onError={(e) => { e.target.style.display = 'none' }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <span className="material-symbols-outlined text-8xl text-gray-300">settings</span>
+                          </div>
+                        )}
+                        {product.manufacturer_code && (
+                          <div className="absolute top-4 left-4 bg-amber-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                            {product.manufacturer_code}
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent opacity-60"></div>
+                      </div>
+                    </Link>
+                    <div className="p-3 flex flex-col flex-1">
+                      <Link to={`/product/${product.id}`}>
+                        <h3 className="text-slate-800 font-bold text-base group-hover:text-primary transition-colors line-clamp-2 min-h-[2.8rem]">
+                          {product.name}
+                        </h3>
+                      </Link>
+                      <p className="text-slate-400 text-xs line-clamp-1 mt-0.5">{product.description || 'Phụ tùng chính hãng'}</p>
+
+                      <div className="flex gap-2 mt-auto pt-3">
+                        <Link
+                          to={`/product/${product.id}`}
+                          className="flex-1 py-2 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:border-primary hover:text-primary transition-all flex items-center justify-center"
+                        >
+                          Chi Tiết
+                        </Link>
+                        <a
+                          href="tel:0382890990"
+                          className="flex-1 py-2 bg-amber-500 text-white font-medium text-sm rounded-xl hover:bg-amber-600 transition-all flex items-center justify-center"
+                        >
+                          Đặt Hàng
+                        </a>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Load More Button */}
+              {hasMore && (
+                <div className="mt-12 text-center">
+                  <button
+                    onClick={handleLoadMore}
+                    disabled={loadingMore}
+                    className="px-8 py-4 bg-white border border-slate-200 rounded-2xl text-slate-700 font-bold hover:border-primary hover:text-primary transition-all shadow-sm disabled:opacity-50 flex items-center gap-2 mx-auto"
+                  >
+                    {loadingMore ? (
+                      <>
+                        <span className="animate-spin material-symbols-outlined">refresh</span>
+                        Đang tải...
+                      </>
+                    ) : (
+                      <>
+                        <span className="material-symbols-outlined">expand_more</span>
+                        Xem thêm sản phẩm
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-20">
+              <span className="material-symbols-outlined text-6xl text-slate-300 mb-4">search_off</span>
+              <p className="text-slate-500 text-lg">Không tìm thấy sản phẩm nào phù hợp</p>
+            </div>
+          )
+        }
       </div >
     </div >
   )
