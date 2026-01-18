@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import Layout from "./components/Layout/Layout"
 import ScrollToTop from "./components/ScrollToTop"
-import ImageProtection from "./components/ImageProtection"
 import Home from "./pages/Home"
 import Products from "./pages/Products"
 import ProductDetail from "./pages/ProductDetail"
@@ -15,7 +14,6 @@ function App() {
   return (
     <Router>
       <ScrollToTop />
-      <ImageProtection />
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
