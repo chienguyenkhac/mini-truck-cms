@@ -128,93 +128,95 @@ const Hero = () => {
             </AnimatePresence>
           </div>
         </div>
+      </div>
 
-        {/* 3D Canvas overlay - hidden on mobile for performance */}
-        <div className="absolute inset-0 z-[2] opacity-60 mix-blend-screen pointer-events-none lg:pointer-events-auto hidden md:block">
-          <Canvas
-            shadows={false}
-            camera={{ position: [0, 2, 8], fov: 35 }}
-            dpr={[1, 1.5]}
-            performance={{ min: 0.5 }}
+
+      {/* 3D Canvas overlay - hidden on mobile for performance */}
+      <div className="absolute inset-0 z-[2] opacity-60 mix-blend-screen pointer-events-none lg:pointer-events-auto hidden md:block">
+        <Canvas
+          shadows={false}
+          camera={{ position: [0, 2, 8], fov: 35 }}
+          dpr={[1, 1.5]}
+          performance={{ min: 0.5 }}
+        >
+          <Suspense fallback={null}>
+            <AbstractTruckScene />
+          </Suspense>
+        </Canvas>
+      </div>
+
+      {/* Light overlays - made more transparent for clarity */}
+      <div className="absolute inset-0 z-[3] pointer-events-none bg-gradient-to-r from-white/80 via-white/40 to-white/20"></div>
+      <div className="absolute inset-0 z-[3] pointer-events-none bg-gradient-to-t from-white/60 via-white/20 to-transparent"></div>
+
+
+      <div className="relative z-10 container mx-auto px-6 md:px-16 lg:px-24 py-12 md:py-16 max-w-6xl">
+        <div className="max-w-3xl space-y-4 md:space-y-6">
+          <motion.div
+            initial={{ x: -30, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs font-bold uppercase tracking-widest backdrop-blur-sm"
           >
-            <Suspense fallback={null}>
-              <AbstractTruckScene />
-            </Suspense>
-          </Canvas>
-        </div>
+            <span className="material-symbols-outlined text-sm">verified</span>
+            Phụ tùng chính hãng 100%
+          </motion.div>
 
-        {/* Light overlays - made more transparent for clarity */}
-        <div className="absolute inset-0 z-[3] pointer-events-none bg-gradient-to-r from-white/80 via-white/40 to-white/20"></div>
-        <div className="absolute inset-0 z-[3] pointer-events-none bg-gradient-to-t from-white/60 via-white/20 to-transparent"></div>
-
-
-        <div className="relative z-10 container mx-auto px-6 md:px-16 lg:px-24 py-12 md:py-16 max-w-6xl">
-          <div className="max-w-3xl space-y-4 md:space-y-6">
-            <motion.div
-              initial={{ x: -30, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs font-bold uppercase tracking-widest backdrop-blur-sm"
-            >
-              <span className="material-symbols-outlined text-sm">verified</span>
-              Phụ tùng chính hãng 100%
-            </motion.div>
-
-            <div ref={titleRef} className="overflow-hidden">
-              <h1 className="text-slate-800 text-4xl sm:text-5xl md:text-6xl font-bold leading-[0.9] tracking-tighter drop-shadow-sm">
-                <span className="inline-block hover:scale-105 transition-transform duration-300 cursor-default" style={{ color: '#306269' }}>
-                  {titleChars}
-                </span>
-                <br />
-                <span
-                  className="inline-block hover:scale-105 transition-transform duration-300 cursor-default"
-                >
-                  {subtitleChars}
-                </span>
-              </h1>
-            </div>
-
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
-              className="text-slate-600 text-base md:text-lg max-w-xl leading-relaxed font-light"
-            >
-              Chuyên cung cấp phụ tùng chính hãng cho xe tải HOWO & SITRAK. Đầy đủ linh kiện từ động cơ, hộp số, phanh đến các chi tiết nhỏ nhất. Cam kết giá tốt nhất thị trường.
-            </motion.p>
-
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2"
-            >
-              <Link
-                ref={btn1Ref}
-                to="/products"
-                className="flex items-center justify-center h-11 sm:h-12 px-6 sm:px-8 bg-primary hover:brightness-110 rounded-xl text-white font-bold text-sm sm:text-base transition-colors shadow-xl shadow-primary/30 group will-change-transform"
+          <div ref={titleRef} className="overflow-hidden">
+            <h1 className="text-slate-800 text-4xl sm:text-5xl md:text-6xl font-bold leading-[0.9] tracking-tighter drop-shadow-sm">
+              <span className="inline-block hover:scale-105 transition-transform duration-300 cursor-default" style={{ color: '#306269' }}>
+                {titleChars}
+              </span>
+              <br />
+              <span
+                className="inline-block hover:scale-105 transition-transform duration-300 cursor-default"
               >
-                Khám Phá Ngay
-                <span className="material-symbols-outlined ml-2 text-lg group-hover:rotate-180 transition-transform duration-500">view_in_ar</span>
-              </Link>
-              <Link
-                ref={btn2Ref}
-                to="/contact"
-                className="flex items-center justify-center h-11 sm:h-12 px-6 sm:px-8 border border-slate-300 hover:border-primary hover:bg-primary/5 rounded-xl text-slate-700 font-bold text-sm sm:text-base transition-all group will-change-transform backdrop-blur-sm"
-              >
-                Tư Vấn Ngay
-                <span className="material-symbols-outlined ml-2 text-lg group-hover:translate-x-1 transition-transform">chat_bubble</span>
-              </Link>
-            </motion.div>
+                {subtitleChars}
+              </span>
+            </h1>
           </div>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            className="text-slate-600 text-base md:text-lg max-w-xl leading-relaxed font-light"
+          >
+            Chuyên cung cấp phụ tùng chính hãng cho xe tải HOWO & SITRAK. Đầy đủ linh kiện từ động cơ, hộp số, phanh đến các chi tiết nhỏ nhất. Cam kết giá tốt nhất thị trường.
+          </motion.p>
+
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2"
+          >
+            <Link
+              ref={btn1Ref}
+              to="/products"
+              className="flex items-center justify-center h-11 sm:h-12 px-6 sm:px-8 bg-primary hover:brightness-110 rounded-xl text-white font-bold text-sm sm:text-base transition-colors shadow-xl shadow-primary/30 group will-change-transform"
+            >
+              Khám Phá Ngay
+              <span className="material-symbols-outlined ml-2 text-lg group-hover:rotate-180 transition-transform duration-500">view_in_ar</span>
+            </Link>
+            <Link
+              ref={btn2Ref}
+              to="/contact"
+              className="flex items-center justify-center h-11 sm:h-12 px-6 sm:px-8 border border-slate-300 hover:border-primary hover:bg-primary/5 rounded-xl text-slate-700 font-bold text-sm sm:text-base transition-all group will-change-transform backdrop-blur-sm"
+            >
+              Tư Vấn Ngay
+              <span className="material-symbols-outlined ml-2 text-lg group-hover:translate-x-1 transition-transform">chat_bubble</span>
+            </Link>
+          </motion.div>
         </div>
+      </div>
 
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 animate-bounce">
-          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Cuộn</span>
-          <span className="material-symbols-outlined text-primary">keyboard_arrow_down</span>
-        </div>
+      {/* Scroll indicator */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 animate-bounce">
+        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Cuộn</span>
+        <span className="material-symbols-outlined text-primary">keyboard_arrow_down</span>
+      </div>
     </section>
   )
 }
