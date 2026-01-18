@@ -275,7 +275,7 @@ const Products = () => {
                         </div>
                       )}
                       {product.manufacturer_code && (
-                        <div className="absolute top-4 left-4 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                        <div className="absolute top-4 left-4 bg-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                           {product.manufacturer_code}
                         </div>
                       )}
@@ -290,15 +290,7 @@ const Products = () => {
                     </Link>
                     <p className="text-slate-400 text-xs line-clamp-1 mt-0.5">{product.description || 'Phụ tùng chính hãng'}</p>
 
-                    <div className="mt-1.5 mb-0 min-h-[2rem]">
-                      {product.price > 0 && (
-                        <p className="text-xs text-slate-600">
-                          Giá sỉ: <span className="font-bold text-primary">{formatPrice(product.price)}</span>
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex gap-2 mt-auto">
+                    <div className="flex gap-2 mt-auto pt-3">
                       <Link
                         to={`/product/${product.id}`}
                         className="flex-1 py-2 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:border-primary hover:text-primary transition-all flex items-center justify-center"
@@ -307,7 +299,7 @@ const Products = () => {
                       </Link>
                       <a
                         href="tel:0382890990"
-                        className="flex-1 py-2 bg-primary text-white font-medium text-sm rounded-xl hover:bg-primary/90 transition-all flex items-center justify-center"
+                        className="flex-1 py-2 bg-orange-500 text-white font-medium text-sm rounded-xl hover:bg-orange-600 transition-all flex items-center justify-center"
                       >
                         Đặt Hàng
                       </a>

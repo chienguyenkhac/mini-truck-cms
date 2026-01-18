@@ -145,7 +145,7 @@ const ProductGrid = () => {
             to={`/product/${p.id}`}
             className="product-card group relative bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-primary/40 transition-colors duration-300 shadow-sm hover:shadow-lg opacity-0 flex flex-col h-full will-change-transform"
         >
-            <div className="aspect-[16/10] overflow-hidden relative bg-gradient-to-br from-gray-100 to-gray-200">
+            <div className="aspect-square overflow-hidden relative bg-gradient-to-br from-gray-100 to-gray-200">
                 {p.image ? (
                     <img
                         src={getImageUrl(p.image)}
@@ -160,23 +160,30 @@ const ProductGrid = () => {
                     </div>
                 )}
                 {p.manufacturer_code && (
-                    <div className="absolute top-5 left-5 bg-primary text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">
+                    <div className="absolute top-4 left-4 bg-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">
                         {p.manufacturer_code}
                     </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent opacity-50"></div>
             </div>
 
-            <div className="p-6 space-y-3 flex flex-col flex-1">
+            <div className="p-3 flex flex-col flex-1">
                 <div className="flex-1">
-                    <h3 className="text-slate-800 text-xl font-bold group-hover:text-primary transition-colors line-clamp-2 min-h-[3.5rem]">{p.name}</h3>
-                    <p className="text-slate-400 text-sm mt-2 line-clamp-3">{p.description || 'Phụ tùng chính hãng'}</p>
+                    <h3 className="text-slate-800 font-bold text-base group-hover:text-primary transition-colors line-clamp-2 min-h-[2.8rem]">{p.name}</h3>
+                    <p className="text-slate-400 text-xs line-clamp-1 mt-0.5">{p.description || 'Phụ tùng chính hãng'}</p>
                 </div>
 
-                <div className="flex gap-2 pt-2 mt-auto">
-                    <div className="flex-1 py-3 rounded-xl bg-primary text-white font-bold text-xs uppercase tracking-wide hover:brightness-110 transition-colors text-center">
-                        Xem Chi Tiết
+                <div className="flex gap-2 mt-auto pt-3">
+                    <div className="flex-1 py-2 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:border-primary hover:text-primary transition-all flex items-center justify-center">
+                        Chi Tiết
                     </div>
+                    <a
+                        href="tel:0382890990"
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex-1 py-2 bg-orange-500 text-white font-medium text-sm rounded-xl hover:bg-orange-600 transition-all flex items-center justify-center"
+                    >
+                        Đặt Hàng
+                    </a>
                 </div>
             </div>
         </Link>
