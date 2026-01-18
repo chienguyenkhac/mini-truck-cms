@@ -157,9 +157,14 @@ export const deleteSupabaseProduct = async (id: number): Promise<boolean> => {
 export const getSiteSettings = async (): Promise<SiteSettings | null> => {
     const { data, error } = await supabase
         .from('site_settings')
-        .select('company_logo, company_name')
-        .single();
+        .select('*');
 
-    if (error) return null;
-    return data as SiteSettings;
+    if (error || !data) return null;
+
+    const settings: any = {};
+    data.forEach((s: any) => {
+        settings[s.key] = s.value;
+    });
+
+    return settings as SiteSettings;
 };
