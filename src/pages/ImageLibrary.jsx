@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { supabase } from '../services/supabase'
 
@@ -45,6 +45,112 @@ const ImageLibrary = () => {
     return `/api/image?path=${encodeURIComponent(path)}`
   }
 
+  // Right-click handler for watermark download (same as ProductDetail)
+  const handleImageRightClick = useCallback((e, imageUrl, imageName) => {
+    e.preventDefault()
+
+    // Remove existing menu if any
+    const existingMenu = document.getElementById('gallery-image-menu')
+    if (existingMenu) existingMenu.remove()
+
+    // Build watermarked URL
+    const watermarkedUrl = imageUrl.includes('?')
+      ? `${imageUrl}&watermark=true`
+      : `${imageUrl}?watermark=true`
+
+    // Create custom context menu
+    const menu = document.createElement('div')
+    menu.id = 'gallery-image-menu'
+    menu.style.cssText = `
+      position: fixed;
+      top: ${e.clientY}px;
+      left: ${e.clientX}px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      padding: 8px 0;
+      z-index: 99999;
+      min-width: 200px;
+      font-family: system-ui, -apple-system, sans-serif;
+      animation: menuFadeIn 0.15s ease-out;
+    `
+
+    // Add CSS animation if not exists
+    if (!document.getElementById('gallery-image-menu-styles')) {
+      const style = document.createElement('style')
+      style.id = 'gallery-image-menu-styles'
+      style.textContent = `
+        @keyframes menuFadeIn {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        #gallery-image-menu button {
+          width: 100%;
+          padding: 10px 16px;
+          text-align: left;
+          background: none;
+          border: none;
+          cursor: pointer;
+          font-size: 14px;
+          color: #374151;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          transition: background 0.1s;
+        }
+        #gallery-image-menu button:hover {
+          background: #f3f4f6;
+        }
+        #gallery-image-menu button .icon {
+          font-size: 18px;
+          color: #6b7280;
+        }
+      `
+      document.head.appendChild(style)
+    }
+
+    // Download button (with watermark)
+    const downloadBtn = document.createElement('button')
+    downloadBtn.innerHTML = `
+      <span class="material-symbols-outlined icon">download</span>
+      <span>Tải ảnh xuống</span>
+    `
+    downloadBtn.onclick = () => {
+      const link = document.createElement('a')
+      link.href = watermarkedUrl
+      link.download = `${imageName || 'image'}_watermarked.jpg`
+      link.style.display = 'none'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      menu.remove()
+    }
+
+    // Copy link button
+    const copyBtn = document.createElement('button')
+    copyBtn.innerHTML = `
+      <span class="material-symbols-outlined icon">link</span>
+      <span>Sao chép link</span>
+    `
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(window.location.href)
+      menu.remove()
+    }
+
+    menu.appendChild(downloadBtn)
+    menu.appendChild(copyBtn)
+    document.body.appendChild(menu)
+
+    // Close menu on outside click
+    const closeMenu = (event) => {
+      if (!menu.contains(event.target)) {
+        menu.remove()
+        document.removeEventListener('click', closeMenu)
+      }
+    }
+    setTimeout(() => document.addEventListener('click', closeMenu), 0)
+  }, [])
+
   return (
     <div className="min-h-screen bg-background">
       {/* Compact Header */}
@@ -90,6 +196,7 @@ const ImageLibrary = () => {
                       alt={img.title || 'Gallery image'}
                       loading="lazy"
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      onContextMenu={(e) => handleImageRightClick(e, getImageUrl(img.image_path), img.title)}
                     />
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -157,6 +264,7 @@ const ImageLibrary = () => {
               src={getImageUrl(selectedImage.image_path)}
               alt={selectedImage.title || 'Gallery image'}
               className="w-full rounded-xl shadow-2xl"
+              onContextMenu={(e) => handleImageRightClick(e, getImageUrl(selectedImage.image_path), selectedImage.title)}
             />
             {selectedImage.title && (
               <p className="mt-4 text-center text-white text-lg">{selectedImage.title}</p>
