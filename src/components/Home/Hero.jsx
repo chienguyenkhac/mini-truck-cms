@@ -107,23 +107,25 @@ const Hero = () => {
   return (
     <section className="relative w-full h-[500px] md:h-[500px] lg:h-[500px] flex items-center justify-center overflow-hidden bg-background">
       {/* Background Image Slideshow */}
-      <div className="absolute inset-0 z-0">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentBanner}
-            initial={{ opacity: 0, scale: 1.1 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1 }}
-            className="absolute inset-0"
-          >
-            <img
-              src={bannerImages[currentBanner]}
-              alt="Banner"
-              className="w-full h-full object-cover"
-            />
-          </motion.div>
-        </AnimatePresence>
+      <div className="absolute inset-0 z-0 flex items-center justify-center">
+        <div className="w-full max-w-7xl h-full">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentBanner}
+              initial={{ opacity: 0, scale: 1.1 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1 }}
+              className="absolute inset-0"
+            >
+              <img
+                src={bannerImages[currentBanner]}
+                alt="Banner"
+                className="w-full h-full object-cover"
+              />
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </div>
 
       {/* 3D Canvas overlay - hidden on mobile for performance */}
@@ -217,17 +219,6 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Floating hint */}
-      <div className="absolute right-10 bottom-28 hidden xl:block z-20 animate-float">
-        <div className="w-60 bg-white/90 backdrop-blur-lg border border-slate-200 rounded-2xl p-5 shadow-xl">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Interactive</span>
-          </div>
-          <h4 className="text-slate-800 font-bold text-sm mb-1">Xoay để khám phá</h4>
-          <p className="text-slate-500 text-[10px]">Dùng chuột để xoay mô hình 3D.</p>
-        </div>
-      </div>
 
       {/* Scroll indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 animate-bounce">
