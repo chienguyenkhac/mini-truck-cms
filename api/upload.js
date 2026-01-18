@@ -5,6 +5,26 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SU
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// Sanitize filename: remove Vietnamese diacritics and special characters
+const sanitizeFileName = (name) => {
+    if (!name) return 'image';
+
+    // Remove Vietnamese diacritics
+    const normalized = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+    // Replace đ/Đ with d/D
+    const noD = normalized.replace(/[đĐ]/g, 'd');
+
+    // Keep only alphanumeric, dash, underscore
+    const clean = noD.replace(/[^a-zA-Z0-9_-]/g, '_');
+
+    // Remove multiple underscores
+    const single = clean.replace(/_+/g, '_');
+
+    // Remove leading/trailing underscores
+    return single.replace(/^_+|_+$/g, '') || 'image';
+};
+
 export const config = {
     api: {
         bodyParser: {
@@ -46,7 +66,11 @@ export default async function handler(req, res) {
         const contentType = matches[1];
         const buffer = Buffer.from(matches[2], 'base64');
         const extension = contentType.split('/')[1] || 'jpg';
-        const name = fileName ? `${Date.now()}_${fileName}` : `${Date.now()}.${extension}`;
+
+        // Sanitize filename to remove Vietnamese characters and special chars
+        const safeName = sanitizeFileName(fileName);
+        const name = `${Date.now()}_${safeName}.${extension}`;
+
 
         console.log(`Attempting to upload to bucket "original" with name: ${name}`);
 
