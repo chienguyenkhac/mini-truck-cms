@@ -70,7 +70,7 @@ const Navbar = ({ isScrolled }) => {
             label: 'PHỤ TÙNG BỘ PHẬN',
             dropdownType: 'parts'
         },
-        { path: '/catalog', label: 'CATALOG' },
+        { path: '/catalog', label: 'BÀI VIẾT' },
         { path: '/image-library', label: 'THƯ VIỆN ẢNH' },
         { path: '/contact', label: 'LIÊN HỆ' },
     ]

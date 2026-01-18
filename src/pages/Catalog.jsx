@@ -99,7 +99,7 @@ const Catalog = () => {
             className="text-center"
           >
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-800 tracking-tighter mb-2">
-              CATA<span className="text-primary">LOG</span>
+              BÀI<span className="text-primary">VIẾT</span>
             </h1>
             <p className="text-slate-500 text-sm md:text-base max-w-xl mx-auto">
               Bài viết kỹ thuật và hướng dẫn sử dụng phụ tùng xe tải
