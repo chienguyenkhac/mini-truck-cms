@@ -189,6 +189,7 @@ const ImageLibrary = () => {
                   transition={{ delay: Math.min(index * 0.02, 0.5) }}
                   className="group relative rounded-xl overflow-hidden bg-white shadow-md cursor-pointer"
                   onClick={() => setSelectedImage(img)}
+                  onContextMenu={(e) => handleImageRightClick(e, getImageUrl(img.image_path), img.title)}
                 >
                   <div className="aspect-square">
                     <img
@@ -196,10 +197,11 @@ const ImageLibrary = () => {
                       alt={img.title || 'Gallery image'}
                       loading="lazy"
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                      onContextMenu={(e) => handleImageRightClick(e, getImageUrl(img.image_path), img.title)}
                     />
                   </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div
+                    className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                  >
                     {img.title && (
                       <div className="absolute bottom-0 left-0 right-0 p-3">
                         <p className="text-white font-bold text-sm line-clamp-2">{img.title}</p>
