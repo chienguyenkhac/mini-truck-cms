@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { supabase } from '../services/supabase'
-import { getCategories } from '../services/supabase'
+import { supabase, getCategories, getImageUrl } from '../services/supabase'
 
 const ITEMS_PER_PAGE = 9
 
@@ -263,7 +262,7 @@ const Products = () => {
                     <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
                       {product.image ? (
                         <img
-                          src={product.image.startsWith('http') ? product.image : `https://irncljhvsjtohiqllnsv.supabase.co/storage/v1/object/public/products/${product.image}`}
+                          src={getImageUrl(product.image)}
                           alt={product.name}
                           loading="lazy"
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
