@@ -11,12 +11,16 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [logo, setLogo] = useState<string | null>(null);
+    const [companyName, setCompanyName] = useState('Sinotruk');
 
     useEffect(() => {
         const fetchSettings = async () => {
             const settings = await getSiteSettings();
             if (settings?.company_logo) {
                 setLogo(settings.company_logo);
+            }
+            if (settings?.company_name) {
+                setCompanyName(settings.company_name);
             }
         };
         fetchSettings();
@@ -102,7 +106,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         )}
                     </div>
                     <div className="flex flex-col items-center">
-                        <span className="text-slate-800 text-5xl font-bold tracking-tight leading-none uppercase mb-2">Sinotruk</span>
+                        <span className="text-slate-800 text-5xl font-bold tracking-tight leading-none uppercase mb-2">{companyName}</span>
                         <span className="text-primary text-base font-bold tracking-[0.4em] leading-none uppercase">Admin Panel</span>
                     </div>
                 </div>
