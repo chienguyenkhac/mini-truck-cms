@@ -9,6 +9,7 @@ const ADMIN_AVATAR_KEY = 'sinotruk_admin_avatar';
 const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({ isOpen, onClose }) => {
     const [adminName, setAdminName] = useState(() => localStorage.getItem(ADMIN_NAME_KEY) || 'Admin');
     const [adminAvatar, setAdminAvatar] = useState(() => localStorage.getItem(ADMIN_AVATAR_KEY) || '');
+    const [adminUsername, setAdminUsername] = useState(() => localStorage.getItem('username') || '');
     const [showProfileModal, setShowProfileModal] = useState(false);
 
     // Load profile from Supabase on mount
@@ -20,7 +21,9 @@ const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({ isOpen,
                     const profile = await getProfile(parseInt(userId));
                     if (profile) {
                         setAdminName(profile.full_name);
+                        setAdminUsername(profile.username);
                         localStorage.setItem(ADMIN_NAME_KEY, profile.full_name);
+                        localStorage.setItem('username', profile.username);
                         if (profile.avatar) {
                             setAdminAvatar(profile.avatar);
                             localStorage.setItem(ADMIN_AVATAR_KEY, profile.avatar);
@@ -36,11 +39,13 @@ const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({ isOpen,
         loadProfile();
     }, []);
 
-    const handleSaveProfile = (name: string, avatar: string) => {
+    const handleSaveProfile = (name: string, avatar: string, username: string) => {
         setAdminName(name);
         setAdminAvatar(avatar);
+        setAdminUsername(username);
         localStorage.setItem(ADMIN_NAME_KEY, name);
         localStorage.setItem(ADMIN_AVATAR_KEY, avatar);
+        localStorage.setItem('username', username);
         window.dispatchEvent(new Event('profileUpdate'));
     };
 
@@ -179,6 +184,7 @@ const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({ isOpen,
             {showProfileModal && (
                 <ProfileModal
                     onClose={() => setShowProfileModal(false)}
+                    currentUsername={adminUsername}
                     currentName={adminName}
                     currentAvatar={adminAvatar}
                     onSave={handleSaveProfile}

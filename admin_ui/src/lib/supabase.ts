@@ -15,6 +15,7 @@ export interface AdminUser {
     phone: string;
     avatar: string | null;
     is_admin: boolean;
+    password?: string;
 }
 
 export interface Category {

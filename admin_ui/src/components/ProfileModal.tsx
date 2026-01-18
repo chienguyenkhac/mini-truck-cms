@@ -4,16 +4,21 @@ import { updateProfile } from '../lib/supabase';
 
 interface ProfileModalProps {
     onClose: () => void;
+    currentUsername: string;
     currentName: string;
     currentAvatar: string;
-    onSave: (name: string, avatar: string) => void;
+    onSave: (name: string, avatar: string, username: string) => void;
 }
 
-const ProfileModal: React.FC<ProfileModalProps> = ({ onClose, currentName, currentAvatar, onSave }) => {
+const ProfileModal: React.FC<ProfileModalProps> = ({ onClose, currentUsername, currentName, currentAvatar, onSave }) => {
+    const [username, setUsername] = useState(currentUsername);
     const [name, setName] = useState(currentName);
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [avatar, setAvatar] = useState(currentAvatar);
     const [isUploading, setIsUploading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -67,27 +72,59 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ onClose, currentName, curre
     };
 
     const handleSave = async () => {
+        setError(null);
+
+        if (!name.trim()) {
+            setError('Vui lòng nhập tên hiển thị');
+            return;
+        }
+
+        if (!username.trim()) {
+            setError('Vui lòng nhập tên đăng nhập');
+            return;
+        }
+
+        if (password) {
+            if (password !== confirmPassword) {
+                setError('Mật khẩu xác nhận không khớp');
+                return;
+            }
+            if (password.length < 6) {
+                setError('Mật khẩu phải có ít nhất 6 ký tự');
+                return;
+            }
+        }
+
         setIsSaving(true);
 
         try {
             const userId = localStorage.getItem('userId');
 
             if (userId) {
-                // Save to Supabase
-                await updateProfile(parseInt(userId), {
-                    full_name: name.trim() || 'Admin',
+                const updates: any = {
+                    full_name: name.trim(),
+                    username: username.trim(),
                     avatar: avatar || null
-                });
+                };
+
+                if (password) {
+                    updates.password = password;
+                }
+
+                // Save to Supabase
+                const result = await updateProfile(parseInt(userId), updates);
+
+                if (!result) {
+                    throw new Error('Không thể cập nhật hồ sơ');
+                }
             }
 
             // Also update localStorage for immediate UI update
-            onSave(name.trim() || 'Admin', avatar);
+            onSave(name.trim(), avatar, username.trim());
             onClose();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Save error:', error);
-            // Still update localStorage even if Supabase fails
-            onSave(name.trim() || 'Admin', avatar);
-            onClose();
+            setError(error.message || 'Có lỗi xảy ra khi lưu hồ sơ');
         } finally {
             setIsSaving(false);
         }
@@ -136,7 +173,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ onClose, currentName, curre
                         />
                     </div>
 
-                    {/* Name */}
+                    {/* Display Name */}
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-2">Tên hiển thị</label>
                         <input
@@ -147,6 +184,52 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ onClose, currentName, curre
                             className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                         />
                     </div>
+
+                    {/* Username */}
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Tên đăng nhập</label>
+                        <input
+                            type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            placeholder="Nhập tên đăng nhập..."
+                            className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        />
+                    </div>
+
+                    {/* Change Password */}
+                    <div className="pt-2 border-t border-slate-100">
+                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Đổi mật khẩu (Để trống nếu không đổi)</label>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs text-slate-500 mb-1.5 ml-1">Mật khẩu mới</label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="Nhập mật khẩu mới..."
+                                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs text-slate-500 mb-1.5 ml-1">Xác nhận mật khẩu mới</label>
+                                <input
+                                    type="password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    placeholder="Xác nhận lại mật khẩu..."
+                                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {error && (
+                        <div className="p-3 bg-red-50 border border-red-100 rounded-xl flex items-center gap-2 text-red-600 text-sm animate-shake">
+                            <span className="material-symbols-outlined text-lg">error</span>
+                            {error}
+                        </div>
+                    )}
                 </div>
 
                 {/* Actions */}
