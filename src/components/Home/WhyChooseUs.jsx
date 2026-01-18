@@ -35,7 +35,7 @@ const WhyChooseUs = () => {
 
   return (
     <section ref={sectionRef} className="why-choose-us section">
-      <div className="container">
+      <div className="container mx-auto px-6 md:px-16 lg:px-24 max-w-6xl">
         <h2 className="section-title">
           TẠI SAO CHỌN CHÚNG TÔI
         </h2>

@@ -72,7 +72,7 @@ const FeaturedProducts = () => {
 
   return (
     <section className="featured-products section">
-      <div className="container">
+      <div className="container mx-auto px-6 md:px-16 lg:px-24 max-w-6xl">
         <h2 className="section-title">
           SẢN PHẨM NỔI BẬT
         </h2>

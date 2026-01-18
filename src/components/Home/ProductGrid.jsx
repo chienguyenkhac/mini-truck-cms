@@ -191,7 +191,7 @@ const ProductGrid = () => {
 
     return (
         <section className="py-10 bg-background relative overflow-hidden">
-            <div className="container mx-auto px-4 md:px-10 lg:px-20 relative z-10">
+            <div className="container mx-auto px-6 md:px-16 lg:px-24 max-w-6xl relative z-10">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
                     <div>
                         <span className="text-primary font-bold tracking-widest text-sm uppercase mb-2 block">Danh mục phụ tùng</span>

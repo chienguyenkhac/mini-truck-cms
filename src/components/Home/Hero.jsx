@@ -147,7 +147,7 @@ const Hero = () => {
       <div className="absolute inset-0 z-[3] pointer-events-none bg-gradient-to-t from-white/60 via-white/20 to-transparent"></div>
 
 
-      <div className="relative z-10 container mx-auto px-4 md:px-10 lg:px-20 py-12 md:py-16">
+      <div className="relative z-10 container mx-auto px-6 md:px-16 lg:px-24 py-12 md:py-16 max-w-6xl">
         <div className="max-w-3xl space-y-4 md:space-y-6">
           <motion.div
             initial={{ x: -30, opacity: 0 }}
