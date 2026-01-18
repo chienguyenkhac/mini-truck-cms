@@ -107,8 +107,8 @@ const Hero = () => {
   return (
     <section className="relative w-full h-[500px] md:h-[500px] lg:h-[500px] flex items-center justify-center overflow-hidden bg-background">
       {/* Background Image Slideshow */}
-      <div className="absolute inset-0 z-0 flex items-center justify-center">
-        <div className="w-full max-w-7xl h-full">
+      <div className="absolute inset-0 z-0 flex items-center justify-center bg-gray-100">
+        <div className="w-full max-w-7xl h-full relative">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentBanner}
@@ -116,7 +116,7 @@ const Hero = () => {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 1 }}
-              className="absolute inset-0"
+              className="w-full h-full"
             >
               <img
                 src={bannerImages[currentBanner]}
