@@ -160,7 +160,7 @@ const ProductGrid = () => {
                     </div>
                 )}
                 {p.manufacturer_code && (
-                    <div className="absolute top-4 left-4 bg-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">
+                    <div className="absolute top-4 left-4 bg-amber-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">
                         {p.manufacturer_code}
                     </div>
                 )}
@@ -180,7 +180,7 @@ const ProductGrid = () => {
                     <a
                         href="tel:0382890990"
                         onClick={(e) => e.stopPropagation()}
-                        className="flex-1 py-2 bg-orange-500 text-white font-medium text-sm rounded-xl hover:bg-orange-600 transition-all flex items-center justify-center"
+                        className="flex-1 py-2 bg-amber-500 text-white font-medium text-sm rounded-xl hover:bg-amber-600 transition-all flex items-center justify-center"
                     >
                         Đặt Hàng
                     </a>

@@ -275,7 +275,7 @@ const Products = () => {
                         </div>
                       )}
                       {product.manufacturer_code && (
-                        <div className="absolute top-4 left-4 bg-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                        <div className="absolute top-4 left-4 bg-amber-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                           {product.manufacturer_code}
                         </div>
                       )}
@@ -299,7 +299,7 @@ const Products = () => {
                       </Link>
                       <a
                         href="tel:0382890990"
-                        className="flex-1 py-2 bg-orange-500 text-white font-medium text-sm rounded-xl hover:bg-orange-600 transition-all flex items-center justify-center"
+                        className="flex-1 py-2 bg-amber-500 text-white font-medium text-sm rounded-xl hover:bg-amber-600 transition-all flex items-center justify-center"
                       >
                         Đặt Hàng
                       </a>
