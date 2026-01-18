@@ -154,7 +154,7 @@ const ImageLibrary = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Compact Header */}
-      <div className="relative py-8 md:py-12 overflow-hidden">
+      <div className="relative py-10 md:py-14 overflow-hidden">
         <div className="absolute inset-0 z-0 bg-gradient-to-br from-primary/10 via-white to-sky-50" />
         <div className="absolute inset-0 z-10 flex items-center justify-center px-4">
           <motion.div
