@@ -108,8 +108,8 @@ const Hero = () => {
     <section className="relative w-full h-[500px] md:h-[500px] lg:h-[500px] flex items-center justify-center overflow-hidden bg-background">
       {/* Background Image Slideshow */}
       <div className="absolute inset-0 z-0 flex items-center justify-center">
-        <div className="w-full h-full max-w-6xl mx-auto px-6 md:px-16 lg:px-24">
-          <div className="w-full h-full relative rounded-[2rem] overflow-hidden shadow-inner bg-gray-100">
+        <div className="w-full h-full container mx-auto px-4 md:px-10 lg:px-20">
+          <div className="w-full h-full relative rounded-3xl overflow-hidden shadow-inner bg-gray-100">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentBanner}
@@ -150,7 +150,7 @@ const Hero = () => {
       <div className="absolute inset-0 z-[3] pointer-events-none bg-gradient-to-t from-white/60 via-white/20 to-transparent"></div>
 
 
-      <div className="relative z-10 container mx-auto px-12 md:px-24 lg:px-32 py-16 md:py-20 max-w-6xl">
+      <div className="relative z-10 container mx-auto px-4 md:px-10 lg:px-20 py-12 md:py-16">
         <div className="max-w-3xl space-y-4 md:space-y-6">
           <motion.div
             initial={{ x: -30, opacity: 0 }}

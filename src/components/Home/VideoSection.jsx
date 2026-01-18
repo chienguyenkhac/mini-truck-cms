@@ -1,7 +1,7 @@
 const VideoSection = () => {
     return (
         <section className="py-12 md:py-24 bg-gray-50 overflow-hidden">
-            <div className="container mx-auto px-6 md:px-16 lg:px-24 max-w-6xl">
+            <div className="container mx-auto px-4 md:px-10 lg:px-20">
                 <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
                     {/* Card - shows first on mobile */}
                     <div className="relative group order-1 lg:order-2">

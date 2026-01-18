@@ -72,7 +72,7 @@ const VehicleShowcase = () => {
     if (loading) {
         return (
             <section className="py-12 bg-gray-50">
-                <div className="container mx-auto px-6 md:px-16 lg:px-24 max-w-6xl">
+                <div className="container mx-auto px-4 md:px-10 lg:px-20">
                     <div className="flex justify-center">
                         <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
                     </div>
