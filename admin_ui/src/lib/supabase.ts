@@ -35,6 +35,11 @@ export interface Product {
     description: string | null;
 }
 
+export interface SiteSettings {
+    company_logo: string | null;
+    company_name: string | null;
+}
+
 // Auth functions
 export const loginUser = async (username: string, password: string): Promise<AdminUser | null> => {
     const { data, error } = await supabase
@@ -146,4 +151,15 @@ export const deleteSupabaseProduct = async (id: number): Promise<boolean> => {
         .eq('id', id);
 
     return !error;
+};
+
+// Settings functions
+export const getSiteSettings = async (): Promise<SiteSettings | null> => {
+    const { data, error } = await supabase
+        .from('site_settings')
+        .select('company_logo, company_name')
+        .single();
+
+    if (error) return null;
+    return data as SiteSettings;
 };

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { loginUser } from '../lib/supabase';
+import { loginUser, getSiteSettings } from '../lib/supabase';
+import { useEffect } from 'react';
 
 interface LoginProps {
     onLogin?: () => void;
@@ -10,6 +10,17 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [logo, setLogo] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            const settings = await getSiteSettings();
+            if (settings?.company_logo) {
+                setLogo(settings.company_logo);
+            }
+        };
+        fetchSettings();
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -79,10 +90,16 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <div className="w-full max-w-md">
                 {/* Logo - matching frontend Navbar exactly */}
                 <div className="text-center mb-10">
-                    <div className="flex items-center justify-center gap-3 mb-1 overflow-hidden py-1">
-                        <div className="w-20 h-20 text-primary animate-truck-drive">
-                            <span className="material-symbols-outlined text-7xl font-bold">local_shipping</span>
-                        </div>
+                    <div className="flex items-center justify-center mb-4">
+                        {logo ? (
+                            <img src={logo} alt="Logo" className="h-20 w-auto object-contain" />
+                        ) : (
+                            <div className="flex items-center justify-center gap-3 overflow-hidden py-1">
+                                <div className="w-20 h-20 text-primary animate-truck-drive">
+                                    <span className="material-symbols-outlined text-7xl font-bold">local_shipping</span>
+                                </div>
+                            </div>
+                        )}
                     </div>
                     <div className="flex flex-col items-center">
                         <span className="text-slate-800 text-5xl font-bold tracking-tight leading-none uppercase mb-2">Sinotruk</span>
