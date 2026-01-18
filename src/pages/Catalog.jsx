@@ -148,7 +148,7 @@ const Catalog = () => {
               Quay lại danh sách
             </button>
 
-            <article className="max-w-6xl mx-auto bg-white rounded-3xl shadow-lg border border-slate-200 p-8 md:p-16">
+            <article className="max-w-4xl mx-auto bg-white rounded-3xl shadow-lg border border-slate-200 p-8 md:p-12">
               <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
                 {selectedArticle.title}
               </h1>

@@ -126,8 +126,12 @@ const Navbar = ({ isScrolled }) => {
                 <div className="container mx-auto px-4 md:px-10 lg:px-20 flex items-center justify-between">
                     {/* Logo */}
                     <Link ref={logoRef} to="/" className="group cursor-pointer">
-                        {siteSettings.company_logo && (
+                        {siteSettings.company_logo ? (
                             <img src={siteSettings.company_logo} alt="Logo" className="h-12 w-auto object-contain transition-transform group-hover:scale-110 duration-300" />
+                        ) : (
+                            <div className="w-12 h-12 text-primary transition-transform group-hover:scale-110 group-hover:rotate-12 duration-300">
+                                <span className="material-symbols-outlined text-5xl font-bold">local_shipping</span>
+                            </div>
                         )}
                     </Link>
 

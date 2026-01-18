@@ -112,7 +112,7 @@ const AboutSection = () => {
             <div className="absolute inset-0 z-[2] bg-gradient-to-b from-background via-transparent to-background" />
             <div className="absolute inset-0 z-[2] bg-gradient-to-r from-background via-transparent to-background" />
 
-            <div className="relative z-10 container mx-auto px-4 md:px-10 lg:px-20">
+            <div className="relative z-10 container mx-auto px-4">
                 <div className="grid lg:grid-cols-2 gap-16 items-center">
                     {/* Left: Text Content */}
                     <motion.div
