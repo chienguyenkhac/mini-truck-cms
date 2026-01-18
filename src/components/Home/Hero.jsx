@@ -146,16 +146,6 @@ const Hero = () => {
       <div className="absolute inset-0 z-[3] pointer-events-none bg-gradient-to-r from-white/80 via-white/40 to-white/20"></div>
       <div className="absolute inset-0 z-[3] pointer-events-none bg-gradient-to-t from-white/60 via-white/20 to-transparent"></div>
 
-      {/* Banner indicators */}
-      <div className="absolute bottom-24 right-10 z-20 hidden md:flex gap-2">
-        {bannerImages.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setCurrentBanner(i)}
-            className={`w-2 h-2 rounded-full transition-all ${i === currentBanner ? 'bg-primary w-8' : 'bg-white/30 hover:bg-white/50'}`}
-          />
-        ))}
-      </div>
 
       <div className="relative z-10 container mx-auto px-4 md:px-10 lg:px-20 py-12 md:py-16">
         <div className="max-w-3xl space-y-4 md:space-y-6">
