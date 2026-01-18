@@ -92,9 +92,12 @@ export default async function handler(req, res) {
             return res.status(500).json({
                 message: 'Supabase upload failed',
                 error: uploadError.message,
-                details: uploadError,
+                statusCode: uploadError.statusCode,
+                errorCode: uploadError.error,
+                details: JSON.stringify(uploadError),
                 availableBuckets,
-                usingKey: isServiceRole ? 'SERVICE_ROLE' : 'ANON'
+                usingKey: isServiceRole ? 'SERVICE_ROLE' : 'ANON',
+                fileName: name
             });
         }
 
