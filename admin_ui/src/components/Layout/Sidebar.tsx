@@ -113,6 +113,17 @@ const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({ isOpen,
                     </NavLink>
 
                     <NavLink
+                        to="/image-library"
+                        onClick={onClose}
+                        className={({ isActive }) =>
+                            `flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${isActive ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-700 hover:bg-slate-100'}`
+                        }
+                    >
+                        <span className="material-symbols-outlined text-xl">photo_library</span>
+                        <span className="font-medium">Thư viện ảnh</span>
+                    </NavLink>
+
+                    <NavLink
                         to="/settings"
                         onClick={onClose}
                         className={({ isActive }) =>

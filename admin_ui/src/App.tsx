@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
 import Categories from './pages/Categories';
 import Catalogs from './pages/Catalogs';
+import ImageLibrary from './pages/ImageLibrary';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
 
@@ -113,6 +114,16 @@ const App: React.FC = () => {
                         <ProtectedRoute>
                             <Layout>
                                 <Catalogs />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/image-library"
+                    element={
+                        <ProtectedRoute>
+                            <Layout>
+                                <ImageLibrary />
                             </Layout>
                         </ProtectedRoute>
                     }
