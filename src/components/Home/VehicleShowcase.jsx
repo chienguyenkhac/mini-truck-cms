@@ -143,13 +143,14 @@ const VehicleShowcase = () => {
                     )}
 
                     {/* Vehicle Row */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 ${displayedVehicles.length < 5 ? 'justify-items-center' : ''}`}>
                         {displayedVehicles.map((vehicle, index) => (
                             <motion.div
                                 key={vehicle.id}
                                 initial={{ y: 20, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
                                 transition={{ delay: index * 0.05 }}
+                                className={displayedVehicles.length < 5 ? 'w-full max-w-[200px]' : ''}
                             >
                                 <Link
                                     to={`/products?vehicle=${vehicle.id}`}
@@ -179,8 +180,8 @@ const VehicleShowcase = () => {
                             </motion.div>
                         ))}
 
-                        {/* Fill empty slots for consistent layout */}
-                        {displayedVehicles.length < itemsPerPage &&
+                        {/* Fill empty slots for consistent layout - only when 5 items */}
+                        {displayedVehicles.length === itemsPerPage &&
                             [...Array(itemsPerPage - displayedVehicles.length)].map((_, i) => (
                                 <div key={`empty-${i}`} className="hidden lg:block opacity-0"></div>
                             ))
