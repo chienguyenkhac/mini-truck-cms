@@ -7,8 +7,8 @@ const stats = [
 
 const StatsSection = () => {
     return (
-        <section className="bg-background relative z-20 mt-12 pb-20 px-4">
-            <div className="container mx-auto">
+        <section className="bg-background relative z-20 mt-8 pb-20 px-4">
+            <div className="container mx-auto max-w-7xl">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 p-8 md:p-12 bg-white border border-slate-200 rounded-3xl shadow-xl">
                     {stats.map((stat, idx) => (
                         <div

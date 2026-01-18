@@ -135,9 +135,14 @@ const ProductCategory = () => {
                       <h3 className="text-slate-800 font-bold text-lg group-hover:text-primary transition-colors line-clamp-2">
                         {product.name}
                       </h3>
-                      {product.code && (
-                        <p className="text-slate-400 text-xs mt-2 font-mono">Mã: {product.code}</p>
-                      )}
+                      <div className="space-y-1">
+                        {product.code && (
+                          <p className="text-slate-400 text-xs font-mono">Mã: {product.code}</p>
+                        )}
+                        {product.manufacturer_code && (
+                          <p className="text-amber-500 text-[10px] font-bold uppercase tracking-wider">Mã NSX: {product.manufacturer_code}</p>
+                        )}
+                      </div>
                     </div>
                     <button className="w-full py-3 bg-primary/10 text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all">
                       Xem Chi Tiết

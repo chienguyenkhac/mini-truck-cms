@@ -274,7 +274,7 @@ const Products = () => {
                         </div>
                       )}
                       {product.manufacturer_code && (
-                        <div className="absolute top-4 left-4 bg-amber-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                        <div className="absolute top-4 left-4 text-amber-500 text-[10px] font-bold uppercase tracking-wider">
                           {product.manufacturer_code}
                         </div>
                       )}

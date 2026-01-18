@@ -100,7 +100,7 @@ const Hero = () => {
 
   const subtitleChars = useMemo(() => (
     'HÀ NỘI'.split('').map((char, i) => (
-      <span key={i} className="char inline-block opacity-0">{char === ' ' ? '\u00A0' : char}</span>
+      <span key={i} className="char inline-block opacity-0" style={{ color: '#800c0b' }}>{char === ' ' ? '\u00A0' : char}</span>
     ))
   ), [])
 
@@ -147,7 +147,7 @@ const Hero = () => {
       <div className="absolute inset-0 z-[3] pointer-events-none bg-gradient-to-t from-white/60 via-white/20 to-transparent"></div>
 
 
-      <div className="relative z-10 container mx-auto px-4 md:px-10 lg:px-20 py-12 md:py-16">
+      <div className="relative z-10 container mx-auto px-4 py-12 md:py-16 max-w-7xl">
         <div className="max-w-3xl space-y-4 md:space-y-6">
           <motion.div
             initial={{ x: -30, opacity: 0 }}
@@ -161,13 +161,12 @@ const Hero = () => {
 
           <div ref={titleRef} className="overflow-hidden">
             <h1 className="text-slate-800 text-4xl sm:text-5xl md:text-6xl font-bold leading-[0.9] tracking-tighter drop-shadow-sm">
-              <span className="inline-block hover:scale-105 transition-transform duration-300 cursor-default">
+              <span className="inline-block hover:scale-105 transition-transform duration-300 cursor-default" style={{ color: '#306269' }}>
                 {titleChars}
               </span>
               <br />
               <span
-                className="text-primary inline-block hover:scale-105 transition-transform duration-300 cursor-default animate-pulse-subtle"
-                style={{ textShadow: '0 0 8px rgba(24, 83, 93, 0.6), 0 0 20px rgba(24, 83, 93, 0.4)' }}
+                className="inline-block hover:scale-105 transition-transform duration-300 cursor-default"
               >
                 {subtitleChars}
               </span>

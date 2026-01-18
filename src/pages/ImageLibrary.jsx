@@ -245,35 +245,76 @@ const ImageLibrary = () => {
       </div>
 
       {/* Lightbox */}
-      {selectedImage && (
-        <div
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
-          onClick={() => setSelectedImage(null)}
-        >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="relative max-w-4xl w-full"
-            onClick={(e) => e.stopPropagation()}
+      {selectedImage && (() => {
+        const currentIndex = images.findIndex(img => img.id === selectedImage.id)
+        const hasPrev = currentIndex > 0
+        const hasNext = currentIndex < images.length - 1
+
+        const handlePrev = () => {
+          if (hasPrev) {
+            setSelectedImage(images[currentIndex - 1])
+          }
+        }
+
+        const handleNext = () => {
+          if (hasNext) {
+            setSelectedImage(images[currentIndex + 1])
+          }
+        }
+
+        return (
+          <div
+            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+            onClick={() => setSelectedImage(null)}
           >
-            <button
-              onClick={() => setSelectedImage(null)}
-              className="absolute -top-12 right-0 text-white/70 hover:text-white transition-colors"
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="relative max-w-4xl w-full"
+              onClick={(e) => e.stopPropagation()}
             >
-              <span className="material-symbols-outlined text-3xl">close</span>
-            </button>
-            <img
-              src={getImageUrl(selectedImage.image_path)}
-              alt={selectedImage.title || 'Gallery image'}
-              className="w-full rounded-xl shadow-2xl"
-              onContextMenu={(e) => handleImageRightClick(e, getImageUrl(selectedImage.image_path), selectedImage.title)}
-            />
-            {selectedImage.title && (
-              <p className="mt-4 text-center text-white text-lg">{selectedImage.title}</p>
-            )}
-          </motion.div>
-        </div>
-      )}
+              <button
+                onClick={() => setSelectedImage(null)}
+                className="absolute -top-12 right-0 text-white/70 hover:text-white transition-colors"
+              >
+                <span className="material-symbols-outlined text-3xl">close</span>
+              </button>
+
+              {/* Previous Arrow */}
+              {hasPrev && (
+                <button
+                  onClick={handlePrev}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 md:-translate-x-16 text-white/70 hover:text-white transition-all hover:scale-110 bg-black/30 hover:bg-black/50 rounded-full p-2"
+                  aria-label="Previous image"
+                >
+                  <span className="material-symbols-outlined text-4xl">chevron_left</span>
+                </button>
+              )}
+
+              {/* Next Arrow */}
+              {hasNext && (
+                <button
+                  onClick={handleNext}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 md:translate-x-16 text-white/70 hover:text-white transition-all hover:scale-110 bg-black/30 hover:bg-black/50 rounded-full p-2"
+                  aria-label="Next image"
+                >
+                  <span className="material-symbols-outlined text-4xl">chevron_right</span>
+                </button>
+              )}
+
+              <img
+                src={getImageUrl(selectedImage.image_path)}
+                alt={selectedImage.title || 'Gallery image'}
+                className="w-full rounded-xl shadow-2xl"
+                onContextMenu={(e) => handleImageRightClick(e, getImageUrl(selectedImage.image_path), selectedImage.title)}
+              />
+              {selectedImage.title && (
+                <p className="mt-4 text-center text-white text-lg">{selectedImage.title}</p>
+              )}
+            </motion.div>
+          </div>
+        )
+      })()}
     </div>
   )
 }
