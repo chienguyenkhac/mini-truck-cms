@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { getProfile } from '../../lib/supabase';
+import { getProfile, getSiteSettings } from '../../lib/supabase';
 import ProfileModal from '../ProfileModal';
 
 const ADMIN_NAME_KEY = 'sinotruk_admin_name';
@@ -10,11 +10,18 @@ const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({ isOpen,
     const [adminName, setAdminName] = useState(() => localStorage.getItem(ADMIN_NAME_KEY) || 'Admin');
     const [adminAvatar, setAdminAvatar] = useState(() => localStorage.getItem(ADMIN_AVATAR_KEY) || '');
     const [adminUsername, setAdminUsername] = useState(() => localStorage.getItem('username') || '');
+    const [logo, setLogo] = useState<string | null>(null);
     const [showProfileModal, setShowProfileModal] = useState(false);
 
-    // Load profile from Supabase on mount
+    // Load profile and settings from Supabase on mount
     useEffect(() => {
-        const loadProfile = async () => {
+        const loadData = async () => {
+            // Load settings
+            const settings = await getSiteSettings();
+            if (settings?.company_logo) {
+                setLogo(settings.company_logo);
+            }
+
             const userId = localStorage.getItem('userId');
             if (userId) {
                 try {
@@ -36,7 +43,7 @@ const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({ isOpen,
                 }
             }
         };
-        loadProfile();
+        loadData();
     }, []);
 
     const handleSaveProfile = (name: string, avatar: string, username: string) => {
@@ -61,8 +68,14 @@ const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({ isOpen,
                 {/* Logo */}
                 <div className="h-16 flex items-center justify-between px-6 border-b border-slate-200">
                     <div className="flex items-center gap-3 cursor-pointer">
-                        <div className="w-10 h-10 text-primary">
-                            <span className="material-symbols-outlined text-4xl font-bold">local_shipping</span>
+                        <div className="w-10 h-10 flex items-center justify-center">
+                            {logo ? (
+                                <img src={logo} alt="Logo" className="w-full h-full object-contain" />
+                            ) : (
+                                <div className="text-primary translate-y-[-2px]">
+                                    <span className="material-symbols-outlined text-4xl font-bold">local_shipping</span>
+                                </div>
+                            )}
                         </div>
                         <div className="flex flex-col">
                             <span className="text-slate-800 text-lg font-bold tracking-tight uppercase leading-tight">Sinotruk</span>
