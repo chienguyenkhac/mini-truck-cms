@@ -99,7 +99,7 @@ const Catalog = () => {
             className="text-center"
           >
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-800 tracking-tighter mb-2">
-              BÀI<span className="text-primary">VIẾT</span>
+              BÀI<span className="text-primary"> VIẾT</span>
             </h1>
             <p className="text-slate-500 text-sm md:text-base max-w-xl mx-auto">
               Bài viết kỹ thuật và hướng dẫn sử dụng phụ tùng xe tải
@@ -148,7 +148,7 @@ const Catalog = () => {
               Quay lại danh sách
             </button>
 
-            <article className="max-w-4xl mx-auto bg-white rounded-3xl shadow-lg border border-slate-200 p-8 md:p-12">
+            <article className="max-w-6xl mx-auto bg-white rounded-3xl shadow-lg border border-slate-200 p-8 md:p-16">
               <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
                 {selectedArticle.title}
               </h1>
