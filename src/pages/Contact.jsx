@@ -27,19 +27,19 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="relative py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent"></div>
-        <div className="container mx-auto px-4 md:px-10 lg:px-20 relative z-10">
+      {/* Compact Header */}
+      <div className="relative py-8 md:py-12 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-white to-sky-50"></div>
+        <div className="absolute inset-0 flex items-center justify-center px-4">
           <motion.div
-            initial={{ y: 30, opacity: 0 }}
+            initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             className="text-center"
           >
-            <h1 className="text-5xl md:text-7xl font-bold text-slate-800 tracking-tighter mb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-800 tracking-tighter mb-2">
               LIÊN <span className="text-primary">HỆ</span>
             </h1>
-            <p className="text-slate-500 text-lg max-w-xl mx-auto">
+            <p className="text-slate-500 text-sm md:text-base max-w-xl mx-auto">
               Chúng tôi luôn sẵn sàng hỗ trợ bạn 24/7
             </p>
           </motion.div>

@@ -127,19 +127,19 @@ const Products = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="relative py-12 md:py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent"></div>
-        <div className="container mx-auto px-4 md:px-10 lg:px-20 relative z-10">
+      {/* Compact Header */}
+      <div className="relative py-8 md:py-12 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-white to-sky-50"></div>
+        <div className="absolute inset-0 flex items-center justify-center px-4">
           <motion.div
-            initial={{ y: 30, opacity: 0 }}
+            initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             className="text-center"
           >
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-800 tracking-tighter mb-3 md:mb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-800 tracking-tighter mb-2">
               SẢN <span className="text-primary">PHẨM</span>
             </h1>
-            <p className="text-slate-500 text-sm md:text-lg max-w-xl mx-auto px-4">
+            <p className="text-slate-500 text-sm md:text-base max-w-xl mx-auto">
               Tìm kiếm và lọc phụ tùng chính hãng theo nhu cầu của bạn
             </p>
           </motion.div>

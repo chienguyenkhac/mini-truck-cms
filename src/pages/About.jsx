@@ -137,32 +137,29 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section - Clean gradient without 3D */}
-      <div className="relative h-[35vh] md:h-[40vh] overflow-hidden">
+      {/* Compact Header */}
+      <div className="relative py-8 md:py-12 overflow-hidden">
         {/* Gradient background */}
         <div className="absolute inset-0 z-0 bg-gradient-to-br from-primary/10 via-white to-sky-50" />
 
         {/* Text content */}
         <div className="absolute inset-0 z-10 flex items-center justify-center">
           <motion.div
-            initial={{ y: 30, opacity: 0 }}
+            initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             className="text-center px-4"
           >
-            <span className="text-primary font-bold text-sm tracking-[0.3em] uppercase mb-4 block">
-              SINOTRUK HÀ NỘI
-            </span>
-            <h1 className="text-3xl md:text-5xl font-bold text-slate-800 tracking-tighter mb-6">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-800 tracking-tighter mb-2">
               GIỚI <span className="text-primary">THIỆU</span>
             </h1>
-            <p className="text-slate-600 text-lg max-w-xl mx-auto mb-8">
+            <p className="text-slate-500 text-sm md:text-base max-w-xl mx-auto">
               Đối tác tin cậy trong lĩnh vực phụ tùng xe tải
             </p>
           </motion.div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 md:px-10 lg:px-20 pb-20 space-y-16 -mt-10 relative z-20">
+      <div className="container mx-auto px-4 md:px-10 lg:px-20 pb-20 space-y-16 relative z-20">
         {/* Stats */}
         <motion.div
           initial={{ y: 30, opacity: 0 }}

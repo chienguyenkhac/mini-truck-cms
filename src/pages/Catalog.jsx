@@ -89,22 +89,19 @@ const Catalog = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="relative h-[25vh] md:h-[30vh] overflow-hidden">
+      {/* Compact Header */}
+      <div className="relative py-8 md:py-12 overflow-hidden">
         <div className="absolute inset-0 z-0 bg-gradient-to-br from-primary/10 via-white to-sky-50" />
         <div className="absolute inset-0 z-10 flex items-center justify-center px-4">
           <motion.div
-            initial={{ y: 30, opacity: 0 }}
+            initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             className="text-center"
           >
-            <span className="text-primary font-bold text-xs md:text-sm tracking-[0.2em] md:tracking-[0.3em] uppercase mb-2 md:mb-4 block">
-              SINOTRUK HÀ NỘI
-            </span>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-800 tracking-tighter mb-3 md:mb-6">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-800 tracking-tighter mb-2">
               CATA<span className="text-primary">LOG</span>
             </h1>
-            <p className="text-slate-600 text-sm md:text-lg max-w-xl mx-auto">
+            <p className="text-slate-500 text-sm md:text-base max-w-xl mx-auto">
               Bài viết kỹ thuật và hướng dẫn sử dụng phụ tùng xe tải
             </p>
           </motion.div>
