@@ -160,7 +160,7 @@ const ProductGrid = () => {
                     </div>
                 )}
                 {p.manufacturer_code && (
-                    <div className="absolute top-4 left-4 bg-amber-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">
+                    <div className="absolute top-4 left-4 text-amber-500 text-[10px] font-bold uppercase tracking-wider">
                         {p.manufacturer_code}
                     </div>
                 )}

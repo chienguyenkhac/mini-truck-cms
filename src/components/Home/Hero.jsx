@@ -160,14 +160,14 @@ const Hero = () => {
           </motion.div>
 
           <div ref={titleRef} className="overflow-hidden">
-            <h1 className="text-slate-800 text-4xl sm:text-5xl md:text-6xl font-bold leading-[0.9] tracking-tighter drop-shadow-sm">
-              <span className="inline-block hover:scale-105 transition-transform duration-300 cursor-default">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-[0.9] tracking-tighter drop-shadow-sm">
+              <span className="inline-block hover:scale-105 transition-transform duration-300 cursor-default" style={{ color: '#306269' }}>
                 {titleChars}
               </span>
               <br />
               <span
-                className="text-primary inline-block hover:scale-105 transition-transform duration-300 cursor-default animate-pulse-subtle"
-                style={{ textShadow: '0 0 8px rgba(24, 83, 93, 0.6), 0 0 20px rgba(24, 83, 93, 0.4)' }}
+                className="inline-block hover:scale-105 transition-transform duration-300 cursor-default"
+                style={{ color: '#800c0b' }}
               >
                 {subtitleChars}
               </span>
