@@ -57,7 +57,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ onClose, currentUsername, c
 
                 if (response.ok) {
                     const result = await response.json();
-                    setAvatar(result.secure_url);
+                    setAvatar(result.url);
                 } else {
                     setAvatar(base64Image);
                 }

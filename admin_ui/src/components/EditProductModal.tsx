@@ -98,7 +98,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
                 if (!response.ok) throw new Error('Upload failed');
 
                 const result = await response.json();
-                setImages(prev => [...prev, { url: result.secure_url, isNew: true }]);
+                setImages(prev => [...prev, { url: result.url, isNew: true }]);
             } catch (error: any) {
                 console.error('Error uploading image:', error);
                 notification.error(`Không thể tải ảnh ${file.name}`);

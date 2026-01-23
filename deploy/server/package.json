@@ -1,0 +1,24 @@
+{
+    "name": "sinotruk-server",
+    "version": "1.0.0",
+    "description": "SINOTRUK Hà Nội API Server",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js",
+        "dev": "nodemon index.js",
+        "test": "jest --coverage --forceExit --testPathIgnorePatterns=integration",
+        "test:integration": "jest integration.test.js --forceExit --runInBand"
+    },
+    "dependencies": {
+        "cors": "^2.8.5",
+        "express": "^4.18.2",
+        "multer": "^1.4.5-lts.1",
+        "pg": "^8.11.3",
+        "sharp": "^0.33.2"
+    },
+    "devDependencies": {
+        "jest": "^29.7.0",
+        "nodemon": "^3.0.2",
+        "supertest": "^6.3.4"
+    }
+}

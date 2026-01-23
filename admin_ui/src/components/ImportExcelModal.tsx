@@ -206,7 +206,7 @@ const ImportExcelModal: React.FC<ImportExcelModalProps> = ({ onClose, onImportCo
 
                         if (response.ok) {
                             const result = await response.json();
-                            imageUrl = result.secure_url;
+                            imageUrl = result.url;
                         }
                     } catch (err) {
                         console.error('Error uploading embedded image:', err);

@@ -245,3 +245,39 @@ body.modal-open {
 .badge-green {
   @apply bg-green-100 text-green-700 border border-green-200;
 }
+
+/* EditorJS ImageTool - fix broken image display */
+.image-tool {
+  position: relative;
+}
+
+.image-tool__image {
+  min-height: 200px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-tool__image img {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+.image-tool__image img[src=""],
+.image-tool__image img:not([src]) {
+  display: none;
+}
+
+.image-tool__caption {
+  margin-top: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Fix broken image placeholder */
+.image-tool__image-picture {
+  min-height: 150px;
+  display: block;
+}

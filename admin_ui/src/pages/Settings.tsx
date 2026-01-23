@@ -53,16 +53,23 @@ const Settings: React.FC = () => {
     const handleSave = async () => {
         setSaving(true);
         try {
-            // Update all changed settings
+            // Build updates object with changed values
+            const updates: Record<string, string | null> = {};
             for (const setting of settings) {
                 if (formData[setting.key] !== setting.value) {
-                    const { error } = await supabase
-                        .from('site_settings')
-                        .update({ value: formData[setting.key] || null })
-                        .eq('key', setting.key);
-
-                    if (error) throw error;
+                    updates[setting.key] = formData[setting.key] || null;
                 }
+            }
+
+            // Send all updates in one request
+            const response = await fetch('/api/site-settings', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updates)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to save settings');
             }
 
             notification.success('Đã lưu cấu hình thành công!');
@@ -103,7 +110,7 @@ const Settings: React.FC = () => {
                 const bucketInfo = result.availableBuckets ? ` (Buckets: ${result.availableBuckets})` : '';
                 throw new Error(`${errorMsg}${bucketInfo}`);
             }
-            handleChange('company_logo', result.secure_url);
+            handleChange('company_logo', result.url);
             notification.success('Đã tải logo lên');
         } catch (err: any) {
             console.error('Error uploading logo:', err);

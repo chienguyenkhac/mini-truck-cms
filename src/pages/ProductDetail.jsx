@@ -13,116 +13,6 @@ const ProductDetail = () => {
     const [images, setImages] = useState([])
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
-    // Right-click protection: show custom context menu with watermark download option
-    const handleImageRightClick = useCallback((e, imageUrl) => {
-        e.preventDefault()
-
-        // Remove existing menu if any
-        const existingMenu = document.getElementById('product-image-menu')
-        if (existingMenu) existingMenu.remove()
-
-        // Build watermarked URL
-        const watermarkedUrl = imageUrl.includes('?')
-            ? `${imageUrl}&watermark=true`
-            : `${imageUrl}?watermark=true`
-
-        // Create custom context menu
-        const menu = document.createElement('div')
-        menu.id = 'product-image-menu'
-        menu.style.cssText = `
-            position: fixed;
-            top: ${e.clientY}px;
-            left: ${e.clientX}px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            padding: 8px 0;
-            z-index: 99999;
-            min-width: 200px;
-            font-family: system-ui, -apple-system, sans-serif;
-            animation: menuFadeIn 0.15s ease-out;
-        `
-
-        // Add CSS animation if not exists
-        if (!document.getElementById('product-image-menu-styles')) {
-            const style = document.createElement('style')
-            style.id = 'product-image-menu-styles'
-            style.textContent = `
-                @keyframes menuFadeIn {
-                    from { opacity: 0; transform: scale(0.95); }
-                    to { opacity: 1; transform: scale(1); }
-                }
-                #product-image-menu button {
-                    width: 100%;
-                    padding: 10px 16px;
-                    text-align: left;
-                    background: none;
-                    border: none;
-                    cursor: pointer;
-                    font-size: 14px;
-                    color: #374151;
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    transition: background 0.1s;
-                }
-                #product-image-menu button:hover {
-                    background: #f3f4f6;
-                }
-                #product-image-menu button .icon {
-                    font-size: 18px;
-                    color: #6b7280;
-                }
-            `
-            document.head.appendChild(style)
-        }
-
-        // Download button (with watermark)
-        const downloadBtn = document.createElement('button')
-        downloadBtn.innerHTML = `
-            <span class="material-symbols-outlined icon">download</span>
-            <span>Tải ảnh xuống</span>
-        `
-        downloadBtn.onclick = () => {
-            const link = document.createElement('a')
-            link.href = watermarkedUrl
-            link.download = `${product?.name || 'image'}_watermarked.jpg`
-            link.style.display = 'none'
-            document.body.appendChild(link)
-            link.click()
-            document.body.removeChild(link)
-            menu.remove()
-        }
-
-        // Copy product link button
-        const copyBtn = document.createElement('button')
-        copyBtn.innerHTML = `
-            <span class="material-symbols-outlined icon">link</span>
-            <span>Sao chép liên kết sản phẩm</span>
-        `
-        copyBtn.onclick = () => {
-            navigator.clipboard.writeText(window.location.href)
-            menu.remove()
-        }
-
-        menu.appendChild(downloadBtn)
-        menu.appendChild(copyBtn)
-        document.body.appendChild(menu)
-
-        // Close menu when clicking outside
-        const closeMenu = (event) => {
-            if (!menu.contains(event.target)) {
-                menu.remove()
-                document.removeEventListener('click', closeMenu)
-                document.removeEventListener('contextmenu', closeMenu)
-            }
-        }
-        setTimeout(() => {
-            document.addEventListener('click', closeMenu)
-            document.addEventListener('contextmenu', closeMenu)
-        }, 10)
-    }, [product?.name])
-
     // Auto-slide images every 7 seconds
     useEffect(() => {
         if (images.length <= 1) return
@@ -246,7 +136,7 @@ const ProductDetail = () => {
                                         exit={{ opacity: 0, x: -50 }}
                                         transition={{ duration: 0.3 }}
                                         onError={(e) => { e.target.style.display = 'none' }}
-                                        onContextMenu={(e) => handleImageRightClick(e, images[currentImageIndex])}
+
                                         draggable={false}
                                     />
                                 ) : (
@@ -301,7 +191,7 @@ const ProductDetail = () => {
                                             src={img}
                                             alt={`${product.name} ${idx + 1}`}
                                             className="w-full h-full object-cover"
-                                            onContextMenu={(e) => handleImageRightClick(e, img)}
+
                                             draggable={false}
                                         />
                                     </button>
@@ -410,7 +300,7 @@ const ProductDetail = () => {
                                                     alt={p.name}
                                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                                     onError={(e) => { e.target.style.display = 'none' }}
-                                                    onContextMenu={(e) => handleImageRightClick(e, getImageUrl(p.image))}
+
                                                     draggable={false}
                                                 />
                                             ) : (

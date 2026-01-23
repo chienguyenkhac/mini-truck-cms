@@ -24,18 +24,17 @@ const ImageLibrary: React.FC = () => {
     const loadImages = async () => {
         setLoading(true);
         try {
-            const from = (currentPage - 1) * ITEMS_PER_PAGE;
-            const to = from + ITEMS_PER_PAGE - 1;
+            const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
+            const response = await fetch(`${API_BASE}/gallery-images?page=${currentPage}&limit=${ITEMS_PER_PAGE}`);
+            const result = await response.json();
 
-            const { data, count, error } = await supabase
-                .from('gallery_images')
-                .select('*', { count: 'exact' })
-                .order('created_at', { ascending: false })
-                .range(from, to);
-
-            if (error) throw error;
-            setImages(data || []);
-            setTotalCount(count || 0);
+            if (result.data) {
+                setImages(result.data);
+                setTotalCount(result.count || 0);
+            } else if (Array.isArray(result)) {
+                setImages(result);
+                setTotalCount(result.length);
+            }
         } catch (err) {
             console.error('Error loading images:', err);
             notification.error('Không thể tải danh sách ảnh');
@@ -86,7 +85,7 @@ const ImageLibrary: React.FC = () => {
                     .from('gallery_images')
                     .insert({
                         title: file.name.replace(/\.[^/.]+$/, ''),
-                        image_path: result.path
+                        image_path: result.url
                     });
 
                 if (insertError) throw insertError;
@@ -127,7 +126,8 @@ const ImageLibrary: React.FC = () => {
     // Get image URL with proxy
     const getImageUrl = (path: string) => {
         if (path.startsWith('http')) return path;
-        return `/api/image?path=${encodeURIComponent(path)}`;
+        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
+        return `${API_BASE}/image?path=${encodeURIComponent(path)}`;
     };
 
     return (

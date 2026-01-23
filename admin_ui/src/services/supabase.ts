@@ -1,34 +1,36 @@
-// Admin Supabase Service - connects to Supabase database
-import { createClient } from '@supabase/supabase-js';
+// Admin Supabase Service - Uses local Express API
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
-const supabaseUrl = 'https://irncljhvsjtohiqllnsv.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Helper for API calls
+async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const url = `${API_BASE}${endpoint}`;
+    const response = await fetch(url, {
+        headers: { 'Content-Type': 'application/json', ...options.headers },
+        ...options
+    });
+    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+    return response.json();
+}
 
 export const getImageUrl = (image: string | null | undefined): string => {
     if (!image) return 'https://res.cloudinary.com/dgv7d7n6q/image/upload/v1734944400/product_placeholder.png';
-
-    // If already proxied
-    if (image.startsWith('/api/image')) return image;
-
-    // If it's a relative path
-    if (!image.startsWith('http') && !image.startsWith('/')) {
-        return `/api/image?path=${image}`;
+    if (image.startsWith('/api/image') || image.startsWith('/uploads/')) {
+        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
+        return image.startsWith('/api/') ? `${API_BASE}${image.substring(4)}` : image;
     }
-
-    // If it's a full URL from our own Supabase storage
+    if (!image.startsWith('http') && !image.startsWith('/')) {
+        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
+        return `${API_BASE}/image?path=${image}`;
+    }
     if (image.includes('/storage/v1/object/public/')) {
         const parts = image.split('/');
-        const filename = parts[parts.length - 1];
-        return `/api/image?path=${filename}`;
+        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
+        return `${API_BASE}/image?path=${parts[parts.length - 1]}`;
     }
-
-    // If it's Cloudinary, proxy it
     if (image.includes('cloudinary.com')) {
-        return `/api/image?url=${encodeURIComponent(image)}`;
+        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
+        return `${API_BASE}/image?url=${encodeURIComponent(image)}`;
     }
-
     return image;
 };
 
@@ -64,193 +66,13 @@ export interface CatalogArticle {
     id: number;
     title: string;
     slug: string;
-    content: object; // EditorJS JSON
+    content: object;
     thumbnail?: string;
     is_published: boolean;
     created_at: string;
     updated_at: string;
 }
 
-// Product Service
-export const productService = {
-    getAll: async (params?: { cursor?: number; limit?: number; category?: string; search?: string }) => {
-        let query = supabase
-            .from('products')
-            .select('*')
-            .order('id', { ascending: true });
-
-        if (params?.limit) {
-            query = query.limit(params.limit);
-        } else {
-            query = query.limit(20);
-        }
-
-        if (params?.cursor) {
-            query = query.gt('id', params.cursor);
-        }
-
-        if (params?.category && params.category !== 'ALL') {
-            query = query.eq('category_id', parseInt(params.category));
-        }
-
-        if (params?.search) {
-            query = query.or(`name.ilike.%${params.search}%,code.ilike.%${params.search}%`);
-        }
-
-        const { data, error } = await query;
-        if (error) throw error;
-        return data || [];
-    },
-
-    getById: async (id: number) => {
-        const { data, error } = await supabase
-            .from('products')
-            .select('*')
-            .eq('id', id)
-            .single();
-        if (error) throw error;
-        return data;
-    },
-
-    create: async (product: Omit<Product, 'id' | 'created_at' | 'updated_at'>) => {
-        const { data, error } = await supabase
-            .from('products')
-            .insert([product])
-            .select()
-            .single();
-        if (error) throw error;
-        return data;
-    },
-
-    update: async (id: number, product: Partial<Product>) => {
-        const { data, error } = await supabase
-            .from('products')
-            .update(product)
-            .eq('id', id)
-            .select()
-            .single();
-        if (error) throw error;
-        return data;
-    },
-
-    delete: async (id: number) => {
-        const { error } = await supabase
-            .from('products')
-            .delete()
-            .eq('id', id);
-        if (error) throw error;
-    }
-};
-
-// Category Service
-export const categoryService = {
-    getAll: async () => {
-        const { data, error } = await supabase
-            .from('categories')
-            .select('*')
-            .order('name');
-        if (error) throw error;
-        return data || [];
-    },
-
-    create: async (category: { name: string; code?: string; thumbnail?: string; is_vehicle_name?: boolean; is_visible?: boolean }) => {
-        const { data, error } = await supabase
-            .from('categories')
-            .insert([category])
-            .select()
-            .single();
-        if (error) throw error;
-        return data;
-    },
-
-    update: async (id: number, category: { name?: string; code?: string; thumbnail?: string; is_vehicle_name?: boolean; is_visible?: boolean }) => {
-        const { data, error } = await supabase
-            .from('categories')
-            .update(category)
-            .eq('id', id)
-            .select()
-            .single();
-        if (error) throw error;
-        return data;
-    },
-
-    delete: async (id: number) => {
-        const { error } = await supabase
-            .from('categories')
-            .delete()
-            .eq('id', id);
-        if (error) throw error;
-    }
-};
-
-// Catalog Article Service
-export const catalogService = {
-    getAll: async (publishedOnly: boolean = false) => {
-        let query = supabase
-            .from('catalog_articles')
-            .select('*')
-            .order('created_at', { ascending: false });
-
-        if (publishedOnly) {
-            query = query.eq('is_published', true);
-        }
-
-        const { data, error } = await query;
-        if (error) throw error;
-        return data || [];
-    },
-
-    getById: async (id: number) => {
-        const { data, error } = await supabase
-            .from('catalog_articles')
-            .select('*')
-            .eq('id', id)
-            .single();
-        if (error) throw error;
-        return data;
-    },
-
-    getBySlug: async (slug: string) => {
-        const { data, error } = await supabase
-            .from('catalog_articles')
-            .select('*')
-            .eq('slug', slug)
-            .single();
-        if (error) throw error;
-        return data;
-    },
-
-    create: async (article: { title: string; slug: string; content: object; thumbnail?: string; is_published?: boolean }) => {
-        const { data, error } = await supabase
-            .from('catalog_articles')
-            .insert([article])
-            .select()
-            .single();
-        if (error) throw error;
-        return data;
-    },
-
-    update: async (id: number, article: { title?: string; slug?: string; content?: object; thumbnail?: string; is_published?: boolean }) => {
-        const { data, error } = await supabase
-            .from('catalog_articles')
-            .update({ ...article, updated_at: new Date().toISOString() })
-            .eq('id', id)
-            .select()
-            .single();
-        if (error) throw error;
-        return data;
-    },
-
-    delete: async (id: number) => {
-        const { error } = await supabase
-            .from('catalog_articles')
-            .delete()
-            .eq('id', id);
-        if (error) throw error;
-    }
-};
-
-// Image interface
 export interface Image {
     id: number;
     url: string;
@@ -265,102 +87,183 @@ export interface ProductImage {
     sort_order: number;
     is_primary: boolean;
     created_at: string;
-    image?: Image; // Joined data
+    image?: Image;
 }
+
+// Product Service
+export const productService = {
+    getAll: async (params?: { cursor?: number; limit?: number; category?: string; search?: string }) => {
+        const query = new URLSearchParams();
+        if (params?.limit) query.append('limit', String(params.limit));
+        if (params?.cursor) query.append('cursor', String(params.cursor));
+        if (params?.category && params.category !== 'ALL') query.append('category_id', params.category);
+        if (params?.search) query.append('search', params.search);
+        return fetchAPI<Product[]>(`/products?${query}`);
+    },
+
+    getById: async (id: number) => fetchAPI<Product>(`/products/${id}`),
+
+    create: async (product: Omit<Product, 'id' | 'created_at' | 'updated_at'>) =>
+        fetchAPI<Product>('/products', { method: 'POST', body: JSON.stringify(product) }),
+
+    update: async (id: number, product: Partial<Product>) =>
+        fetchAPI<Product>(`/products/${id}`, { method: 'PUT', body: JSON.stringify(product) }),
+
+    delete: async (id: number) => fetchAPI(`/products/${id}`, { method: 'DELETE' })
+};
+
+// Category Service
+export const categoryService = {
+    getAll: async () => fetchAPI<Category[]>('/categories'),
+
+    create: async (category: { name: string; code?: string; thumbnail?: string; is_vehicle_name?: boolean; is_visible?: boolean }) =>
+        fetchAPI<Category>('/categories', { method: 'POST', body: JSON.stringify(category) }),
+
+    update: async (id: number, category: { name?: string; code?: string; thumbnail?: string; is_vehicle_name?: boolean; is_visible?: boolean }) =>
+        fetchAPI<Category>(`/categories/${id}`, { method: 'PUT', body: JSON.stringify(category) }),
+
+    delete: async (id: number) => fetchAPI(`/categories/${id}`, { method: 'DELETE' })
+};
+
+// Catalog Article Service  
+export const catalogService = {
+    getAll: async (publishedOnly: boolean = false) => {
+        const query = publishedOnly ? '?is_published=true' : '';
+        return fetchAPI<CatalogArticle[]>(`/catalog-articles${query}`);
+    },
+
+    getById: async (id: number) => fetchAPI<CatalogArticle>(`/catalog-articles/${id}`),
+
+    getBySlug: async (slug: string) => fetchAPI<CatalogArticle>(`/catalog-articles/${slug}`),
+
+    create: async (article: { title: string; slug: string; content: object; thumbnail?: string; is_published?: boolean }) =>
+        fetchAPI<CatalogArticle>('/catalog-articles', { method: 'POST', body: JSON.stringify(article) }),
+
+    update: async (id: number, article: { title?: string; slug?: string; content?: object; thumbnail?: string; is_published?: boolean }) =>
+        fetchAPI<CatalogArticle>(`/catalog-articles/${id}`, { method: 'PUT', body: JSON.stringify({ ...article, updated_at: new Date().toISOString() }) }),
+
+    delete: async (id: number) => fetchAPI(`/catalog-articles/${id}`, { method: 'DELETE' })
+};
 
 // Image Service
 export const imageService = {
-    create: async (url: string, publicId?: string) => {
-        const { data, error } = await supabase
-            .from('images')
-            .insert([{ url, public_id: publicId }])
-            .select()
-            .single();
-        if (error) throw error;
-        return data as Image;
-    },
+    create: async (url: string, publicId?: string) =>
+        fetchAPI<Image>('/images', { method: 'POST', body: JSON.stringify({ url, public_id: publicId }) }),
 
-    delete: async (id: number) => {
-        const { error } = await supabase
-            .from('images')
-            .delete()
-            .eq('id', id);
-        if (error) throw error;
-    }
+    delete: async (id: number) => fetchAPI(`/images/${id}`, { method: 'DELETE' })
 };
 
-// Product Images Service (junction table)
+// Product Images Service
 export const productImageService = {
-    // Get all images for a product
     getByProduct: async (productId: number) => {
-        const { data, error } = await supabase
-            .from('product_images')
-            .select(`
-                *,
-                image:images(*)
-            `)
-            .eq('product_id', productId)
-            .order('sort_order', { ascending: true });
-        if (error) throw error;
-
-        // Format URLs
+        const data = await fetchAPI<ProductImage[]>(`/product-images/${productId}`);
         return (data || []).map(pi => ({
             ...pi,
             image: pi.image ? { ...pi.image, url: getImageUrl(pi.image.url) } : pi.image
         }));
     },
 
-    // Add image to product
-    addToProduct: async (productId: number, imageId: number, isPrimary = false, sortOrder = 0) => {
-        const { data, error } = await supabase
-            .from('product_images')
-            .insert([{
-                product_id: productId,
-                image_id: imageId,
-                is_primary: isPrimary,
-                sort_order: sortOrder
-            }])
-            .select()
-            .single();
-        if (error) throw error;
-        return data;
-    },
+    addToProduct: async (productId: number, imageId: number, isPrimary = false, sortOrder = 0) =>
+        fetchAPI<ProductImage>('/product-images', {
+            method: 'POST',
+            body: JSON.stringify({ product_id: productId, image_id: imageId, is_primary: isPrimary, sort_order: sortOrder })
+        }),
 
-    // Remove image from product
-    removeFromProduct: async (productId: number, imageId: number) => {
-        const { error } = await supabase
-            .from('product_images')
-            .delete()
-            .eq('product_id', productId)
-            .eq('image_id', imageId);
-        if (error) throw error;
-    },
+    removeFromProduct: async (productId: number, imageId: number) =>
+        fetchAPI(`/product-images/${productId}/${imageId}`, { method: 'DELETE' }),
 
-    // Set primary image
-    setPrimary: async (productId: number, imageId: number) => {
-        // First, unset all primary for this product
-        await supabase
-            .from('product_images')
-            .update({ is_primary: false })
-            .eq('product_id', productId);
+    setPrimary: async (productId: number, imageId: number) =>
+        fetchAPI(`/product-images/${productId}/${imageId}/primary`, { method: 'PUT' }),
 
-        // Then set the new primary
-        const { error } = await supabase
-            .from('product_images')
-            .update({ is_primary: true })
-            .eq('product_id', productId)
-            .eq('image_id', imageId);
-        if (error) throw error;
-    },
+    updateOrder: async (productId: number, imageId: number, newOrder: number) =>
+        fetchAPI(`/product-images/${productId}/${imageId}/order`, { method: 'PUT', body: JSON.stringify({ sort_order: newOrder }) })
+};
 
-    // Reorder images
-    updateOrder: async (productId: number, imageId: number, newOrder: number) => {
-        const { error } = await supabase
-            .from('product_images')
-            .update({ sort_order: newOrder })
-            .eq('product_id', productId)
-            .eq('image_id', imageId);
-        if (error) throw error;
+// Mock supabase for backward compatibility
+export const supabase = {
+    from: (table: string) => ({
+        select: () => {
+            const doFetch = async () => {
+                try {
+                    const endpoint = `/${table.replace('_', '-')}`;
+                    const result = await fetchAPI(endpoint);
+                    return { data: result, error: null };
+                } catch (error) {
+                    return { data: null, error };
+                }
+            };
+            const promise = doFetch();
+            return {
+                order: () => ({
+                    limit: () => ({ then: (r: Function) => promise.then(r) }),
+                    then: (r: Function) => promise.then(r)
+                }),
+                eq: () => ({ single: async () => ({ data: null, error: null }), then: (r: Function) => promise.then(r) }),
+                single: async () => ({ data: null, error: null }),
+                then: (r: Function) => promise.then(r)
+            };
+        },
+        insert: (data: unknown) => {
+            const doInsert = async () => {
+                try {
+                    const endpoint = `/${table.replace('_', '-')}`;
+                    const result = await fetchAPI(endpoint, {
+                        method: 'POST',
+                        body: JSON.stringify(data)
+                    });
+                    return { data: result, error: null };
+                } catch (error) {
+                    return { data: null, error };
+                }
+            };
+            // Return thenable that also has select().single() chain
+            const promise = doInsert();
+            return {
+                then: (resolve: Function) => promise.then(resolve),
+                select: () => ({
+                    single: () => promise
+                })
+            };
+        },
+        update: (data: unknown) => ({
+            eq: (field: string, value: unknown) => {
+                const doUpdate = async () => {
+                    try {
+                        const endpoint = `/${table.replace('_', '-')}`;
+                        await fetchAPI(endpoint, {
+                            method: 'PUT',
+                            body: JSON.stringify({ [field]: value, ...data as object })
+                        });
+                        return { data: null, error: null };
+                    } catch (error) {
+                        return { data: null, error };
+                    }
+                };
+                const promise = doUpdate();
+                return {
+                    then: (r: Function) => promise.then(r),
+                    select: () => ({ single: () => promise })
+                };
+            }
+        }),
+        delete: () => ({
+            eq: (field: string, value: unknown) => ({
+                then: async (r: Function) => {
+                    try {
+                        await fetchAPI(`/${table.replace('_', '-')}/${value}`, { method: 'DELETE' });
+                        r({ error: null });
+                    } catch (error) {
+                        r({ error });
+                    }
+                }
+            })
+        })
+    }),
+    storage: {
+        from: () => ({
+            upload: async () => ({ data: null, error: new Error('Use /api/upload') }),
+            getPublicUrl: (path: string) => ({ data: { publicUrl: `/uploads/original/${path}` } })
+        })
     }
 };
 

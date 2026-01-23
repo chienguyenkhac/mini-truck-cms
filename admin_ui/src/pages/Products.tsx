@@ -7,7 +7,7 @@ import EditProductModal from '../components/EditProductModal';
 import ImportExcelModal from '../components/ImportExcelModal';
 import * as XLSX from 'xlsx';
 
-import { productService, categoryService, Product, Category } from '../services/supabase';
+import { productService, categoryService, getImageUrl, Product, Category } from '../services/supabase';
 
 const PAGE_SIZE = 10;
 
@@ -327,7 +327,7 @@ const Products: React.FC = () => {
                                         <td className="py-3">
                                             <div className="w-14 h-14 mx-auto rounded-xl bg-slate-50 border border-slate-100 overflow-hidden shadow-sm">
                                                 <img
-                                                    src={product.thumbnail || product.image || 'https://res.cloudinary.com/dgv7d7n6q/image/upload/v1734944400/product_placeholder.png'}
+                                                    src={getImageUrl(product.thumbnail || product.image)}
                                                     alt={product.name}
                                                     className="w-full h-full object-cover"
                                                 />

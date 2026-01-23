@@ -1,0 +1,18 @@
+{
+  "name": "deploy",
+  "version": "1.0.0",
+  "description": "- **Server**: Ubuntu 20.04+ hoặc CentOS 7+ - **RAM**: Tối thiểu 2GB (khuyến nghị 4GB) - **Disk**: Tối thiểu 20GB - **aaPanel**: Đã cài đặt và hoạt động - **Docker**: Sẽ được cài qua aaPanel",
+  "main": "download-images.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.90.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "@types/node": "^25.0.9"
+  }
+}

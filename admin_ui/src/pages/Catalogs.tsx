@@ -67,7 +67,7 @@ const Catalogs: React.FC = () => {
 
             return {
                 success: 1,
-                file: { url: result.secure_url }
+                file: { url: result.url }
             };
         } catch (error: any) {
             console.error('Error uploading catalog image:', error);

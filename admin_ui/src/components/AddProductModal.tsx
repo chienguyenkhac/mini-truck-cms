@@ -107,7 +107,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ onClose, onAdd }) => 
                     throw new Error(`${errorMsg}${bucketInfo}`);
                 }
 
-                setImages(prev => [...prev, { url: result.secure_url, isNew: true }]);
+                setImages(prev => [...prev, { url: result.url, isNew: true }]);
                 successCount++;
             } catch (error: any) {
                 console.error('Error uploading image:', error);

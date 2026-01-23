@@ -1,128 +1,272 @@
-import { createClient } from '@supabase/supabase-js';
+// API Client - Replaces Supabase direct calls
+// Uses local Express API server
 
-const supabaseUrl = 'https://irncljhvsjtohiqllnsv.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
-console.log('Supabase URL:', supabaseUrl);
-console.log('Supabase Key exists:', !!supabaseAnonKey);
+// Helper function for API calls
+async function fetchAPI(endpoint, options = {}) {
+    const url = `${API_BASE}${endpoint}`;
+    const response = await fetch(url, {
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        },
+        ...options
+    });
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+    }
 
+    return response.json();
+}
+
+// Image URL helper - always proxy through /api/image for watermark protection
 export const getImageUrl = (image) => {
     if (!image) return 'https://res.cloudinary.com/dgv7d7n6q/image/upload/v1734944400/product_placeholder.png';
 
-    // If already proxied
+    // If already proxied through /api/image
     if (image.startsWith('/api/image')) return image;
 
-    // If it's a relative path (likely from new system or just a filename)
+    // If it's an upload path, proxy it
+    if (image.startsWith('/uploads/')) {
+        const filename = image.replace('/uploads/original/', '').replace('/uploads/', '');
+        return `/api/image?path=${filename}`;
+    }
+
+    // If it's a relative path (filename only)
     if (!image.startsWith('http') && !image.startsWith('/')) {
         return `/api/image?path=${image}`;
     }
 
-    // If it's a full URL from our own Supabase storage (any bucket)
+    // If it's a full URL from Supabase storage
     if (image.includes('/storage/v1/object/public/')) {
         const parts = image.split('/');
         const filename = parts[parts.length - 1];
         return `/api/image?path=${filename}`;
     }
 
-    // If it's Cloudinary, proxy it to apply watermark
-    if (image.includes('cloudinary.com')) {
+    // External URLs - proxy them
+    if (image.startsWith('http')) {
         return `/api/image?url=${encodeURIComponent(image)}`;
     }
 
     return image;
 };
 
+// Products
 export const getProducts = async (limit = 12, onlyHomepage = false, options = {}) => {
-    const { orderBy = 'created_at', ascending = false } = options;
+    try {
+        const params = new URLSearchParams({ limit });
+        if (onlyHomepage) params.append('show_on_homepage', 'true');
+        if (options.search) params.append('search', options.search);
+        if (options.manufacturer_code) params.append('manufacturer_code', options.manufacturer_code);
+        if (options.category_id) params.append('category_id', options.category_id);
 
-    let query = supabase
-        .from('products')
-        .select('*')
-        .order(orderBy, { ascending })
-        .limit(limit);
-
-    // Filter by show_on_homepage if requested
-    if (onlyHomepage) {
-        query = query.eq('show_on_homepage', true);
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
+        return await fetchAPI(`/products?${params}`);
+    } catch (error) {
         console.error('Error fetching products:', error);
         return [];
     }
-    return data || [];
 };
 
-export const getCategories = async () => {
-    const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('is_visible', true)
-        .order('name');
+export const getProductById = async (id) => {
+    try {
+        return await fetchAPI(`/products/${id}`);
+    } catch (error) {
+        console.error('Error fetching product:', error);
+        return null;
+    }
+};
 
-    if (error) {
+// Categories
+export const getCategories = async (options = {}) => {
+    try {
+        const params = new URLSearchParams();
+        if (options.is_visible) params.append('is_visible', 'true');
+        if (options.is_vehicle_name !== undefined) {
+            params.append('is_vehicle_name', options.is_vehicle_name);
+        }
+
+        const query = params.toString() ? `?${params}` : '';
+        return await fetchAPI(`/categories${query}`);
+    } catch (error) {
         console.error('Error fetching categories:', error);
         return [];
     }
-    return data || [];
 };
 
-// Get images for a specific product
-export const getProductImages = async (productId) => {
-    const { data, error } = await supabase
-        .from('product_images')
-        .select(`
-            *,
-            image:images(*)
-        `)
-        .eq('product_id', productId)
-        .order('sort_order', { ascending: true });
-
-    if (error) {
-        console.error('Error fetching product images:', error);
-        return [];
+export const getCategoryById = async (id) => {
+    try {
+        return await fetchAPI(`/categories/${id}`);
+    } catch (error) {
+        console.error('Error fetching category:', error);
+        return null;
     }
-
-    // Extract image URLs and format them
-    return (data || []).map(pi => getImageUrl(pi.image?.url)).filter(Boolean);
 };
 
-// Get published catalog articles
-export const getCatalogArticles = async () => {
-    const { data, error } = await supabase
-        .from('catalog_articles')
-        .select('*')
-        .eq('is_published', true)
-        .order('created_at', { ascending: false });
+// Site Settings
+export const getSiteSettings = async () => {
+    try {
+        return await fetchAPI('/site-settings');
+    } catch (error) {
+        console.error('Error fetching site settings:', error);
+        return {};
+    }
+};
 
-    if (error) {
+// Catalog Articles
+export const getCatalogArticles = async () => {
+    try {
+        return await fetchAPI('/catalog-articles');
+    } catch (error) {
         console.error('Error fetching catalog articles:', error);
         return [];
     }
-    return data || [];
 };
 
-// Get single catalog article by slug
 export const getCatalogBySlug = async (slug) => {
-    const { data, error } = await supabase
-        .from('catalog_articles')
-        .select('*')
-        .eq('slug', slug)
-        .eq('is_published', true)
-        .single();
-
-    if (error) {
+    try {
+        return await fetchAPI(`/catalog-articles/${slug}`);
+    } catch (error) {
         console.error('Error fetching catalog:', error);
         return null;
     }
-    return data;
 };
 
-// (Legacy - keep for backward compatibility)
-export const getCatalogs = async () => {
-    return getCatalogArticles();
+// Legacy alias
+export const getCatalogs = getCatalogArticles;
+
+// Gallery Images
+export const getGalleryImages = async (page = 1, limit = 20) => {
+    try {
+        return await fetchAPI(`/gallery-images?page=${page}&limit=${limit}`);
+    } catch (error) {
+        console.error('Error fetching gallery images:', error);
+        return { data: [], count: 0 };
+    }
+};
+
+// Product Images
+export const getProductImages = async (productId) => {
+    try {
+        const data = await fetchAPI(`/product-images/${productId}`);
+        return (data || []).map(pi => getImageUrl(pi.image_url)).filter(Boolean);
+    } catch (error) {
+        console.error('Error fetching product images:', error);
+        return [];
+    }
+};
+
+// Admin Auth
+export const loginUser = async (username, password) => {
+    try {
+        return await fetchAPI('/admin/login', {
+            method: 'POST',
+            body: JSON.stringify({ username, password })
+        });
+    } catch (error) {
+        console.error('Login error:', error);
+        return null;
+    }
+};
+
+export const getProfile = async (userId) => {
+    try {
+        return await fetchAPI(`/admin/profile/${userId}`);
+    } catch (error) {
+        console.error('Error fetching profile:', error);
+        return null;
+    }
+};
+
+export const updateProfile = async (userId, updates) => {
+    try {
+        return await fetchAPI(`/admin/profile/${userId}`, {
+            method: 'PUT',
+            body: JSON.stringify(updates)
+        });
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        return null;
+    }
+};
+
+// For backward compatibility - create a mock supabase object
+// This allows minimal changes to existing code
+export const supabase = {
+    from: (table) => ({
+        select: (columns = '*') => ({
+            _table: table,
+            _columns: columns,
+            _filters: [],
+            _order: null,
+            _limit: null,
+
+            eq: function (col, val) { this._filters.push({ type: 'eq', col, val }); return this; },
+            neq: function (col, val) { this._filters.push({ type: 'neq', col, val }); return this; },
+            gt: function (col, val) { this._filters.push({ type: 'gt', col, val }); return this; },
+            gte: function (col, val) { this._filters.push({ type: 'gte', col, val }); return this; },
+            lt: function (col, val) { this._filters.push({ type: 'lt', col, val }); return this; },
+            lte: function (col, val) { this._filters.push({ type: 'lte', col, val }); return this; },
+            not: function (col, operator, val) { this._filters.push({ type: 'not', col, operator, val }); return this; },
+            ilike: function (col, val) { this._filters.push({ type: 'ilike', col, val }); return this; },
+            or: function (conditions) { this._filters.push({ type: 'or', conditions }); return this; },
+            order: function (col, opts) { this._order = { col, ...opts }; return this; },
+            limit: function (n) { this._limit = n; return this; },
+            range: function (from, to) { this._range = { from, to }; return this; },
+            single: function () { this._single = true; return this; },
+
+            then: async function (resolve, reject) {
+                try {
+                    // Build query params from filters
+                    const params = new URLSearchParams();
+                    if (this._limit) params.append('limit', this._limit);
+
+                    // Check if filtering by id - use /:id endpoint instead
+                    const idFilter = this._filters.find(f => f.type === 'eq' && f.col === 'id');
+
+                    // Add other filters to params (excluding id)
+                    this._filters.forEach(f => {
+                        if (f.type === 'eq' && f.col !== 'id') params.append(f.col, f.val);
+                    });
+
+                    // Map table to API endpoint
+                    const endpoints = {
+                        'products': '/products',
+                        'categories': '/categories',
+                        'site_settings': '/site-settings',
+                        'catalog_articles': '/catalog-articles',
+                        'gallery_images': '/gallery-images'
+                    };
+
+                    let endpoint = endpoints[this._table] || `/${this._table}`;
+
+                    // If filtering by id, append to endpoint path
+                    if (idFilter) {
+                        endpoint = `${endpoint}/${idFilter.val}`;
+                    }
+
+                    const query = params.toString() ? `?${params}` : '';
+
+                    let data = await fetchAPI(`${endpoint}${query}`);
+
+                    // Special handling for site_settings - convert object to array format
+                    if (this._table === 'site_settings' && data && typeof data === 'object' && !Array.isArray(data)) {
+                        // Convert {key: value} to [{key: 'key', value: 'value'}, ...]
+                        data = Object.entries(data).map(([key, value]) => ({ key, value }));
+                    }
+
+                    if (this._single) {
+                        resolve({ data: Array.isArray(data) ? data[0] : data, error: null });
+                    } else {
+                        resolve({ data, error: null, count: Array.isArray(data) ? data.length : 0 });
+                    }
+                } catch (error) {
+                    if (reject) reject({ data: null, error });
+                    else resolve({ data: null, error });
+                }
+            }
+        })
+    })
 };

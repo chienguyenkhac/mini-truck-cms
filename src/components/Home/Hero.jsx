@@ -106,25 +106,29 @@ const Hero = () => {
 
   return (
     <section className="relative w-full h-[500px] md:h-[500px] lg:h-[500px] flex items-center justify-center overflow-hidden bg-background">
-      {/* Background Image Slideshow */}
-      <div className="absolute inset-0 z-0 flex items-center justify-center bg-gray-100">
-        <div className="w-full max-w-7xl h-full relative">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentBanner}
-              initial={{ opacity: 0, scale: 1.1 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1 }}
-              className="w-full h-full"
-            >
-              <img
-                src={bannerImages[currentBanner]}
-                alt="Banner"
-                className="w-full h-full object-cover"
-              />
-            </motion.div>
-          </AnimatePresence>
+      {/* Background Image Slideshow - Constrained to container */}
+      <div className="absolute inset-0 z-0 flex items-center justify-center">
+        <div className="container mx-auto px-4 md:px-10 lg:px-20 h-full py-4">
+          <div className="w-full h-full relative rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentBanner}
+                initial={{ opacity: 0, scale: 1.1 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1 }}
+                className="w-full h-full"
+              >
+                <img
+                  src={bannerImages[currentBanner]}
+                  alt="Banner"
+                  className="w-full h-full object-cover"
+                />
+              </motion.div>
+            </AnimatePresence>
+            {/* Darker overlay for better text readability within the card */}
+            <div className="absolute inset-0 bg-black/10"></div>
+          </div>
         </div>
       </div>
 
@@ -148,7 +152,7 @@ const Hero = () => {
 
 
       <div className="relative z-10 container mx-auto px-4 md:px-10 lg:px-20 py-12 md:py-16">
-        <div className="max-w-3xl space-y-4 md:space-y-6">
+        <div className="max-w-3xl space-y-4 md:space-y-6 px-4 md:px-8">
           <motion.div
             initial={{ x: -30, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
