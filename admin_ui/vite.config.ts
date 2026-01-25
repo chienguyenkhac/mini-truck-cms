@@ -5,7 +5,17 @@ export default defineConfig({
   plugins: [react()],
   base: '/secret/',
   server: {
-    port: 3001,
+    port: 3000,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+      '/uploads': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      }
+    }
   },
   build: {
     outDir: 'dist',

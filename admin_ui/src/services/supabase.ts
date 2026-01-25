@@ -1,5 +1,5 @@
 // Admin Supabase Service - Uses local Express API
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
 
 // Helper for API calls
 async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
