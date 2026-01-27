@@ -1,16 +1,13 @@
-import { Suspense, useEffect, useRef, useMemo, useState } from 'react'
-import { Canvas } from '@react-three/fiber'
+import { useEffect, useRef, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
-import { AbstractTruckScene } from '../ThreeDModels'
 import { IMAGES } from '../../constants/images'
 
 // Banner images for slideshow
 const bannerImages = [
   IMAGES.hero.main,
   IMAGES.hero.secondary,
-  IMAGES.hero.tertiary,
 ]
 
 // Optimized magnetic hook
@@ -132,23 +129,10 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* 3D Canvas overlay - hidden on mobile for performance */}
-      <div className="absolute inset-0 z-[2] opacity-60 mix-blend-screen pointer-events-none lg:pointer-events-auto hidden md:block">
-        <Canvas
-          shadows={false}
-          camera={{ position: [0, 2, 8], fov: 35 }}
-          dpr={[1, 1.5]}
-          performance={{ min: 0.5 }}
-        >
-          <Suspense fallback={null}>
-            <AbstractTruckScene />
-          </Suspense>
-        </Canvas>
-      </div>
 
-      {/* Light overlays - made more transparent for clarity */}
-      <div className="absolute inset-0 z-[3] pointer-events-none bg-gradient-to-r from-white/80 via-white/40 to-white/20"></div>
-      <div className="absolute inset-0 z-[3] pointer-events-none bg-gradient-to-t from-white/60 via-white/20 to-transparent"></div>
+      {/* Light overlays - reduced for clearer banner */}
+      <div className="absolute inset-0 z-[3] pointer-events-none bg-gradient-to-r from-white/40 via-white/20 to-transparent"></div>
+      <div className="absolute inset-0 z-[3] pointer-events-none bg-gradient-to-t from-white/30 via-transparent to-transparent"></div>
 
 
       <div className="relative z-10 container mx-auto px-4 md:px-10 lg:px-20 py-12 md:py-16">
@@ -182,7 +166,7 @@ const Hero = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="text-slate-600 text-base md:text-lg max-w-xl leading-relaxed font-light"
+            className="text-slate-800 text-base md:text-lg max-w-xl leading-relaxed font-normal"
           >
             Chuyên cung cấp phụ tùng chính hãng cho xe tải HOWO & SITRAK. Đầy đủ linh kiện từ động cơ, hộp số, phanh đến các chi tiết nhỏ nhất. Cam kết giá tốt nhất thị trường.
           </motion.p>

@@ -4,9 +4,8 @@
 export const IMAGES = {
     // Hero section - banner slideshow
     hero: {
-        main: '/images/howoA7.jpg',
-        secondary: '/images/howomax.webp',
-        tertiary: '/images/sitrakg7s.webp',
+        main: '/images/banner-1.png',
+        secondary: '/images/banner-2.png',
     },
 
     // Truck models
