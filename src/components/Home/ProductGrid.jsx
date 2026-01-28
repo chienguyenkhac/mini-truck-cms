@@ -180,7 +180,7 @@ const ProductGrid = () => {
                     <a
                         href="tel:0382890990"
                         onClick={(e) => e.stopPropagation()}
-                        className="flex-1 py-2 bg-amber-500 text-white font-medium text-sm rounded-xl hover:bg-amber-600 transition-all flex items-center justify-center"
+                        className="flex-1 py-2 bg-[#c41e1e] text-white font-medium text-sm rounded-xl hover:bg-[#a01818] transition-all flex items-center justify-center"
                     >
                         Đặt Hàng
                     </a>
@@ -195,7 +195,7 @@ const ProductGrid = () => {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
                     <div>
                         <span className="text-primary font-bold tracking-widest text-sm uppercase mb-2 block">Danh mục phụ tùng</span>
-                        <h2 className="text-slate-800 text-4xl md:text-5xl font-bold tracking-tight">Sản Phẩm Bán Chạy</h2>
+                        <h2 className="text-slate-800 text-2xl md:text-3xl font-bold tracking-tight">Sản Phẩm Bán Chạy</h2>
                     </div>
                     <Link
                         to="/products"

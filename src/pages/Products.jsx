@@ -319,7 +319,7 @@ const Products = () => {
                         </Link>
                         <a
                           href="tel:0382890990"
-                          className="flex-1 py-2 bg-amber-500 text-white font-medium text-sm rounded-xl hover:bg-amber-600 transition-all flex items-center justify-center"
+                          className="flex-1 py-2 bg-[#c41e1e] text-white font-medium text-sm rounded-xl hover:bg-[#a01818] transition-all flex items-center justify-center"
                         >
                           Đặt Hàng
                         </a>

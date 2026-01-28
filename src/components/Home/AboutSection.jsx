@@ -86,8 +86,8 @@ const Scene3D = () => {
 
 const AboutSection = () => {
     const features = [
-        { label: 'Chính Hãng 100%', icon: 'verified_user', desc: 'Nhập khẩu trực tiếp từ SINOTRUK' },
-        { label: 'Bảo Hành Uy Tín', icon: 'handyman', desc: 'Bảo hành chính hãng toàn quốc' },
+        { label: 'Chính Hãng 100%', icon: 'verified_user', desc: 'Nhập khẩu trực tiếp' },
+        { label: 'Bảo Hành Uy Tín', icon: 'handyman', desc: 'Bảo hành toàn quốc' },
         { label: 'Giá Cạnh Tranh', icon: 'savings', desc: 'Cam kết giá tốt nhất thị trường' }
     ]
 
@@ -126,7 +126,7 @@ const AboutSection = () => {
                             <span className="text-primary font-bold text-sm tracking-[0.3em] uppercase mb-4 block">
                                 Về Chúng Tôi
                             </span>
-                            <h2 className="text-slate-800 text-4xl md:text-6xl font-bold leading-tight tracking-tight">
+                            <h2 className="text-slate-800 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight tracking-tight">
                                 Tiên Phong <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-sky-400">
                                     Công Nghệ
@@ -163,22 +163,22 @@ const AboutSection = () => {
                         whileInView={{ x: 0, opacity: 1 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.8, delay: 0.2 }}
-                        className="space-y-6"
+                        className="space-y-5"
                     >
                         {features.map((item, i) => (
                             <motion.div
                                 key={i}
-                                whileHover={{ x: 10, scale: 1.02 }}
-                                className="group flex items-center gap-6 p-6 bg-gray-100 border border-gray-300 rounded-2xl hover:border-primary/30 transition-all cursor-pointer shadow-sm"
+                                whileHover={{ x: 8, scale: 1.02 }}
+                                className="group flex items-center gap-5 p-5 bg-gray-100 border border-gray-300 rounded-2xl hover:border-primary/30 transition-all cursor-pointer shadow-sm"
                             >
-                                <div className="w-16 h-16 flex-shrink-0 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/30 text-primary group-hover:bg-primary group-hover:text-white transition-all">
-                                    <span className="material-symbols-outlined text-3xl">{item.icon}</span>
+                                <div className="w-14 h-14 flex-shrink-0 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/30 text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                                    <span className="material-symbols-outlined text-2xl">{item.icon}</span>
                                 </div>
-                                <div>
+                                <div className="min-w-0">
                                     <h4 className="text-slate-800 font-bold text-lg group-hover:text-primary transition-colors">{item.label}</h4>
-                                    <p className="text-slate-400 text-sm mt-1">{item.desc}</p>
+                                    <p className="text-slate-400 text-sm mt-0.5">{item.desc}</p>
                                 </div>
-                                <span className="material-symbols-outlined text-slate-400 group-hover:text-primary ml-auto transition-colors">
+                                <span className="material-symbols-outlined text-slate-400 group-hover:text-primary ml-auto flex-shrink-0 text-2xl transition-colors">
                                     arrow_forward
                                 </span>
                             </motion.div>

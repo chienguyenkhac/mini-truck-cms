@@ -248,7 +248,7 @@ const ProductDetail = () => {
                         <div className="flex flex-col sm:flex-row gap-4">
                             <a
                                 href="tel:0382890990"
-                                className="flex-1 py-4 px-8 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 shadow-lg"
+                                className="flex-1 py-4 px-8 bg-[#c41e1e] text-white font-bold rounded-xl hover:bg-[#a01818] transition-colors flex items-center justify-center gap-2 shadow-lg"
                             >
                                 <span className="material-symbols-outlined">call</span>
                                 Đặt Hàng Ngay
