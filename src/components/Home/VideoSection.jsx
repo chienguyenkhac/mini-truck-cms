@@ -35,7 +35,7 @@ const VideoSection = () => {
                         </h3>
 
                         <p className="text-slate-500 text-base md:text-xl leading-relaxed">
-                            Chuyên cung cấp phụ tùng chính hãng cho xe tải HOWO & SITRAK. Đầy đủ linh kiện từ động cơ, hộp số, phanh đến các chi tiết nhỏ nhất. Giao hàng toàn quốc.
+                        Với sự hiểu biết sâu sắc về các chủng loại xe tải nặng do Trung Quốc sản xuất, phong cách phục vụ chuyên nghiệp và giá cả cạnh tranh cùng chế độ bảo hành cho sản phẩm, chúng tôi mong rằng sẽ trở thành đối tác tin cậy của Quý khách hàng trên toàn quốc.
                         </p>
 
                         <div className="space-y-3 md:space-y-4">

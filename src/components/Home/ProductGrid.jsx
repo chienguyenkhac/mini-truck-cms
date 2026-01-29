@@ -195,7 +195,7 @@ const ProductGrid = () => {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
                     <div>
                         <span className="text-primary font-bold tracking-widest text-sm uppercase mb-2 block">Danh mục phụ tùng</span>
-                        <h2 className="text-slate-800 text-2xl md:text-3xl font-bold tracking-tight">Sản Phẩm Bán Chạy</h2>
+                        <h2 className="text-slate-800 text-2xl md:text-3xl font-bold tracking-tight">Sản phẩm mới nhất</h2>
                     </div>
                     <Link
                         to="/products"

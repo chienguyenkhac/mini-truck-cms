@@ -105,7 +105,7 @@ const Hero = () => {
     <section className="relative w-full h-[500px] md:h-[500px] lg:h-[500px] flex items-center justify-center overflow-hidden bg-background">
       {/* Background Image Slideshow - Constrained to container */}
       <div className="absolute inset-0 z-0 flex items-center justify-center">
-        <div className="container mx-auto px-4 md:px-10 lg:px-20 h-full py-4">
+        <div className="container mx-auto px-4 md:px-10 lg:px-20 h-full py-0">
           <div className="w-full h-full relative rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl">
             <AnimatePresence mode="wait">
               <motion.div
@@ -119,7 +119,7 @@ const Hero = () => {
                 <img
                   src={bannerImages[currentBanner]}
                   alt="Banner"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover block"
                 />
               </motion.div>
             </AnimatePresence>
