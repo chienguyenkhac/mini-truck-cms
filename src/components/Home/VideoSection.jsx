@@ -8,13 +8,10 @@ const VideoSection = () => {
                         <div className="absolute -inset-4 bg-primary/20 rounded-[2.5rem] blur-2xl group-hover:bg-primary/30 transition-all"></div>
                         <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border border-border bg-white">
                             <div
-                                className="relative w-full h-full flex flex-col items-center justify-center p-6 md:p-8 text-center bg-cover bg-center bg-no-repeat"
-                                style={{ backgroundImage: "linear-gradient(to bottom, rgba(255,255,255,0.4), rgba(255,255,255,0.4)), url('/images/part-service.png')" }}
+                                className="relative w-full h-full flex flex-col items-center justify-between p-6 md:p-8 text-center bg-cover bg-center bg-no-repeat"
+                                style={{ backgroundImage: "linear-gradient(to bottom, rgba(255,255,255,0.15), rgba(255,255,255,0.2)), url('/images/part-service.png')" }}
                             >
-                                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4 md:mb-6">
-                                    <span className="material-symbols-outlined text-4xl md:text-5xl text-primary">settings</span>
-                                </div>
-                                <div className="flex flex-wrap justify-center gap-2">
+                                <div className="flex flex-wrap justify-center gap-2 flex-shrink-0 mt-auto">
                                     {['Động cơ', 'Hộp số', 'Cầu', 'Dẫn động', 'Ly hợp'].map((item, i) => (
                                         <span key={i} className="px-4 py-2 bg-white/40 backdrop-blur-sm text-slate-800 font-semibold rounded-full text-xs md:text-sm border border-white/80 shadow-md">
                                             {item}
@@ -44,8 +41,8 @@ const VideoSection = () => {
                         <div className="space-y-3 md:space-y-4">
                             <div className="grid grid-cols-2 gap-3 md:gap-6">
                                 {[
-                                    { title: 'Chính Hãng 100%', desc: 'Nhập khẩu trực tiếp', icon: 'verified' },
-                                    { title: 'Bảo Hành Uy Tín', desc: 'Đổi trả nếu sai mẫu, lỗi sản xuất', icon: 'shield' }
+                                    { title: 'Nhập khẩu trực tiếp', desc: 'Chính hãng, Original Parts', icon: 'verified' },
+                                    { title: 'Bảo Hành Uy Tín', desc: 'Đổi mới 100% nếu sai mẫu hoặc lỗi do nhà sản xuất', icon: 'shield' }
                                 ].map((item, i) => (
                                     <div key={i} className="flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-xl md:rounded-2xl bg-gray-100 border border-gray-300 shadow-sm">
                                         <div className="w-10 h-10 md:w-12 md:h-12 flex-shrink-0 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
