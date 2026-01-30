@@ -203,17 +203,17 @@ const Catalog = () => {
         )}
 
         {/* Contact CTA */}
-        <div className="mt-16 text-center p-12 bg-gradient-to-r from-primary to-sky-600 rounded-3xl shadow-lg">
-          <span className="material-symbols-outlined text-6xl text-white/80 mb-4">support_agent</span>
-          <h3 className="text-white text-2xl font-bold mb-2">Cần tra mã phụ tùng?</h3>
-          <p className="text-white/80 mb-6">
+        <div className="mt-6 text-center p-4 md:p-5 bg-gradient-to-r from-primary to-sky-600 rounded-2xl shadow-lg">
+          <span className="material-symbols-outlined text-4xl text-white/80 mb-2 block">support_agent</span>
+          <h3 className="text-white text-lg font-bold mb-0.5">Cần tra mã phụ tùng?</h3>
+          <p className="text-white/80 text-sm mb-3">
             Liên hệ hotline để được hỗ trợ tra cứu và báo giá nhanh nhất
           </p>
           <a
             href="tel:0382890990"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-white text-primary font-bold rounded-xl hover:bg-slate-100 transition-colors shadow-lg"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-white text-primary font-bold rounded-lg hover:bg-slate-100 transition-colors shadow-lg text-sm"
           >
-            <span className="material-symbols-outlined">call</span>
+            <span className="material-symbols-outlined text-lg">call</span>
             0382.890.990
           </a>
         </div>

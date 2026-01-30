@@ -315,12 +315,69 @@ const About = () => {
               CHÍNH SÁCH CUNG CẤP
             </h2>
           </div>
-          <div className="text-slate-500 leading-relaxed">
+          <div className="text-slate-500 space-y-6 leading-relaxed">
             <p>
-              Chúng tôi cam kết cung cấp sản phẩm chính hãng với chất lượng
-              cao nhất. Tất cả sản phẩm đều được kiểm tra kỹ lưỡng trước khi
-              giao đến tay khách hàng.
+              Sản phẩm chúng tôi bán thông qua hệ thống trực tuyến, trực tiếp qua kênh phân phối và cung cấp toàn lãnh thổ Việt Nam. Để nắm rõ thông tin, quy chế bán hàng xin vui lòng liên hệ theo:
             </p>
+
+            <div>
+              <h3 className="text-slate-800 font-bold text-lg mb-3">Thông tin liên lạc:</h3>
+              <p className="font-bold text-slate-700 uppercase">CÔNG TY CỔ PHẦN SINOTRUK HÀ NỘI</p>
+              <ul className="mt-2 space-y-1 pl-0 list-none">
+                <li>Địa chỉ: Thôn 1, Xã Lại Yên, Hoài Đức, Hà Nội (cách cầu vượt An Khánh 300m)</li>
+                <li>Điện thoại: 0382.890.990</li>
+                <li>Email: hnsinotruk@gmail.com</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-slate-800 font-bold text-lg mb-3">1. Thời gian chờ xử lý:</h3>
+              <p>
+                Chúng tôi sẽ thông tin lại cho Quý khách hàng trong vòng 24 giờ sau khi nhận được đơn đặt hàng của Quý khách. Thời gian làm việc của chúng tôi được bắt đầu tất cả các ngày làm việc trong tuần từ 08h00 – 17h00. Không bao gồm các buổi tối hoặc ngày nghỉ cuối tuần.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-slate-800 font-bold text-lg mb-3">2. Thời gian đặt hàng:</h3>
+              <p>
+                Thời gian đặt hàng thông thường từ 10-15 ngày ngay sau khi ký hợp đồng. Trong trường hợp đặc biệt (có thể cấm biên hay vì lý do nào đó...điều này bất khả kháng) thì thời gian đặt hàng có thể kéo dài tối đa 30 ngày sau khi ký hợp đồng. Trong trường hợp này chúng tôi sẽ liên lạc với bạn qua điện thoại, Email hoặc Fax để lấy ý kiến của khách tiếp tục hay hủy bỏ đơn hàng.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-slate-800 font-bold text-lg mb-3">3. Điều kiện giao hàng:</h3>
+              <p>
+                Quý khách có thể lựa chọn hình thức vận chuyển đường bộ thông qua hệ thống tàu hỏa, xe tải, xe ôm hoặc công ty vận chuyển Bắc Nam. Chúng tôi không chịu trách nhiệm trong trường hợp hàng giao trễ khi Quý khách đã lựa chọn một trong các hình thức trên vì lý do bất khả kháng của các hãng vận chuyển.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-slate-800 font-bold text-lg mb-3">4. Hủy đơn hàng:</h3>
+              <p>
+                Quý khách hàng có thời gian 1-2 ngày làm việc (không bao gồm các ngày nghỉ lễ hoặc cuối tuần) để hủy bỏ đơn hàng (trả lại hàng) sau khi nhận được hàng trong trường hợp hàng không đúng theo yêu cầu, hàng sai về mặt kỹ thuật, hàng lỗi. Nếu quá ngày trên chúng tôi sẽ không đồng ý cho Quý khách trả lại hàng. Trường hợp Quý khách sẽ không trả lại hàng nếu hàng được đặt theo yêu cầu kỹ thuật riêng.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-slate-800 font-bold text-lg mb-3">5. Gửi trả lại hàng:</h3>
+              <p>
+                Chúng tôi sẽ không chịu trách nhiệm hoàn tiền cho Quý khách hàng nếu không nhận được hàng trả lại. Chúng tôi chịu mọi chi phí trả hàng, nhưng chỉ áp dụng với sản phẩm không đạt tiêu chuẩn kỹ thuật. Chúng tôi có quyền từ chối mọi trường hợp trả hàng nếu hàng không do chúng tôi cung cấp, bị hư hỏng, đã thay thế hoặc thay đổi.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-slate-800 font-bold text-lg mb-3">6. Hoàn lại tiền:</h3>
+              <p>
+                Chúng tôi sẽ xử lý hoàn tiền nhanh chóng, trong vòng 1-2 ngày làm việc (không bao gồm ngày nghỉ lễ hoặc cuối tuần) sau khi nhận được đơn hủy và hàng trả lại từ Quý khách. Thời gian xử lý hoàn tiền chậm nhất là 7 ngày. Chúng tôi có quyền từ chối hoàn tiền theo điều khoản của công ty.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-slate-800 font-bold text-lg mb-3">7. Khiếu nại, tố tụng:</h3>
+              <p>
+                Nếu Quý khách có khiếu nại về hàng hóa hoặc dịch vụ, vui lòng gọi đường dây nóng quản lý bán hàng: <span className="font-bold text-slate-700">0382.890.990</span>.
+              </p>
+            </div>
           </div>
         </motion.section>
 

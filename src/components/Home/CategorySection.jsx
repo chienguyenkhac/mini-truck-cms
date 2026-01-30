@@ -1,20 +1,20 @@
 import { Link } from 'react-router-dom'
 
 const categories = [
-    { title: 'Cabin & Thân vỏ', desc: 'Gương, kính, bơm cabin, thân vỏ...', icon: 'directions_car', path: '/products' },
-    { title: 'Động cơ', desc: 'Piston, kim phun, lọc dầu, lọc gió...', icon: 'engineering', path: '/products' },
-    { title: 'Hộp số', desc: 'Bánh răng, đồng tốc, vòng bi hộp số...', icon: 'precision_manufacturing', path: '/products' },
-    { title: 'Hệ thống cầu', desc: 'Cầu trước, cầu sau, bánh răng cầu...', icon: 'hub', path: '/products' },
-    { title: 'Ly hợp', desc: 'Đĩa ly hợp, bàn ép, bi ly hợp...', icon: 'settings', path: '/products' },
-    { title: 'Hệ thống giằng treo', desc: 'Nhíp, giảm chấn, đòn treo...', icon: 'tune', path: '/products' },
-    { title: 'Hệ thống truyền động', desc: 'Các-te, trục các đăng...', icon: 'settings_input_component', path: '/products' },
-    { title: 'Hệ thống lái', desc: 'Trợ lực lái, thanh lái, bơm lái...', icon: 'explore', path: '/products' },
-    { title: 'Hệ thống hút xả', desc: 'Ống xả, turbo, van EGR...', icon: 'air', path: '/products' },
-    { title: 'Hệ thống làm mát', desc: 'Két nước, bơm nước, quạt gió...', icon: 'ac_unit', path: '/products' },
-    { title: 'Hệ thống điện', desc: 'Máy phát, củ đề, cảm biến...', icon: 'electric_bolt', path: '/products' },
-    { title: 'Hệ thống nhiên liệu', desc: 'Bơm dầu, bầu lọc, ống dẫn...', icon: 'local_gas_station', path: '/products' },
-    { title: 'Hệ thống moay ơ', desc: 'Moay ơ trước, moay ơ sau...', icon: 'donut_large', path: '/products' },
-    { title: 'Hệ thống phanh', desc: 'Má phanh, đĩa phanh, bầu phanh...', icon: 'car_crash', path: '/products' }
+    { title: 'Cabin & Thân vỏ', desc: 'Gương, đèn, kính chắn gió, thân vỏ...', icon: 'directions_car', path: '/products/cabin-than-vo' },
+    { title: 'Động cơ', desc: 'Bộ hơi, kim phun, trục cơ, bạc biên balie...', icon: 'engineering', path: '/products/dong-co' },
+    { title: 'Hộp số', desc: 'Bánh răng, đồng tốc, chuyển tầng, vòng bi...', icon: 'precision_manufacturing', path: '/products/hop-so' },
+    { title: 'Hệ thống cầu', desc: 'Visai, vành chậu, cầu tổng thành...', icon: 'hub', path: '/products/he-thong-cau' },
+    { title: 'Ly hợp', desc: 'Lá côn, bàn ép, bánh đà...', icon: 'settings', path: '/products/ly-hop' },
+    { title: 'Hệ thống giằng treo', desc: 'Nhíp, giằng cầu, ba-lăng-xê...', icon: 'tune', path: '/products/he-thong-giang-treo' },
+    { title: 'Hệ thống truyền động', desc: 'Trục các đăng, bi quang treo...', icon: 'settings_input_component', path: '/products/he-thong-truyen-dong' },
+    { title: 'Hệ thống lái', desc: 'Trợ lực lái, thước lái, bơm lái, dầu thủy lực...', icon: 'explore', path: '/products/he-thong-lai' },
+    { title: 'Hệ thống hút xả', desc: 'Ống xả, turbo, van EGR...', icon: 'air', path: '/products/he-thong-hut-xa' },
+    { title: 'Hệ thống làm mát', desc: 'Két nước, két gió, bơm nước, quạt gió...', icon: 'ac_unit', path: '/products/he-thong-lam-mat' },
+    { title: 'Hệ thống điện', desc: 'Máy phát, củ đề, cảm biến...', icon: 'electric_bolt', path: '/products/he-thong-dien' },
+    { title: 'Hệ thống nhiên liệu', desc: 'Bơm dầu, bầu lọc, ống dẫn...', icon: 'local_gas_station', path: '/products/he-thong-nhien-lieu' },
+    { title: 'Hệ thống moay ơ', desc: 'Moay ơ, bi moay ơ, phớt moay ơ...', icon: 'donut_large', path: '/products/he-thong-moay-o' },
+    { title: 'Hệ thống phanh', desc: 'Má phanh, đĩa phanh, bầu phanh lốc kê...', icon: 'car_crash', path: '/products/he-thong-phanh' }
 ]
 
 const CategorySection = () => {
