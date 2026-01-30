@@ -157,7 +157,7 @@ const Products = () => {
           <div className="flex-grow relative">
             <input
               type="text"
-              placeholder="Tìm kiếm sản phẩm, mã sản phẩm..."
+              placeholder="Tìm kiếm theo tên hoặc mã danh điểm..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-4 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary transition-all shadow-sm"
@@ -235,17 +235,17 @@ const Products = () => {
             </div>
 
             {/* Manufacturer Code Filter */}
-            <div>
-              <h4 className="text-slate-800 font-bold mb-3 uppercase tracking-wider text-sm flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+              <h4 className="text-slate-800 font-bold uppercase tracking-wider text-sm flex items-center gap-2 shrink-0">
                 <span className="material-symbols-outlined text-amber-500 text-lg">barcode</span>
                 MÃ NHÀ SẢN XUẤT
               </h4>
               <input
                 type="text"
-                placeholder="Ví dụ: HOWO, SINOTRUK..."
+                placeholder="Ví dụ: VG1034080020, WG9525820140..."
                 value={manufacturerTerm}
                 onChange={(e) => setManufacturerTerm(e.target.value)}
-                className="w-full max-w-md px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary transition-all"
+                className="flex-1 min-w-0 max-w-md px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary transition-all"
               />
             </div>
           </motion.div>
