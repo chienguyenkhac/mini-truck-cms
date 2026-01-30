@@ -46,8 +46,7 @@ const Footer = () => {
             </Link>
 
             <p className="text-slate-500 leading-relaxed text-sm max-w-sm">
-              Chuyên cung cấp phụ tùng chính hãng cho xe tải HOWO, SITRAK, SINOTRUK.
-              Cam kết giá tốt nhất, giao hàng toàn quốc và dịch vụ hỗ trợ 24/7.
+            Chuyên cung cấp phụ tùng chính hãng cho các dòng xe tải HOWO SINOTRUK. Đầy đủ linh kiện từ động cơ, hộp số, gầm, cầu đến các chi tiết nhỏ nhất. Cam kết giá tốt nhất thị trường.
             </p>
 
             <div className="flex gap-4">

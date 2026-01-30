@@ -73,7 +73,7 @@ const Hero = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentBanner((prev) => (prev + 1) % bannerImages.length)
-    }, 5000)
+    }, 7000)
     return () => clearInterval(interval)
   }, [])
 
@@ -107,14 +107,14 @@ const Hero = () => {
       <div className="absolute inset-0 z-0 flex items-center justify-center">
         <div className="container mx-auto px-4 md:px-10 lg:px-20 h-full py-0">
           <div className="w-full h-full relative rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl">
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="sync">
               <motion.div
                 key={currentBanner}
-                initial={{ opacity: 0, scale: 1.1 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 1 }}
-                className="w-full h-full"
+                transition={{ duration: 1.4 }}
+                className="absolute inset-0 w-full h-full"
               >
                 <img
                   src={bannerImages[currentBanner]}
