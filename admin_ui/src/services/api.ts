@@ -9,8 +9,6 @@ export interface Product {
     code: string;
     name: string;
     price: number;
-    price_bulk: number;
-    total: number;
     type: string;
     image: string | null;
     mansx: string | null;

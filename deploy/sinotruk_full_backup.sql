@@ -10,7 +10,6 @@
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
-SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -3322,7 +3321,8 @@ CREATE TABLE public.categories (
     is_vehicle_name boolean DEFAULT false,
     code character varying(50),
     thumbnail character varying(500),
-    is_visible boolean DEFAULT true
+    is_visible boolean DEFAULT true,
+    brand character varying(100)
 );
 
 
@@ -3453,8 +3453,6 @@ CREATE TABLE public.products (
     id integer NOT NULL,
     code character varying(255),
     name character varying(255) NOT NULL,
-    price_bulk bigint DEFAULT 0,
-    total integer DEFAULT 0,
     category_id integer,
     image text,
     description text,
@@ -4054,18 +4052,20 @@ COPY public.catalog_articles (id, title, slug, content, thumbnail, is_published,
 --
 
 COPY public.categories (id, name, created_at, updated_at, is_vehicle_name, code, thumbnail, is_visible) FROM stdin;
-2	ĐỘNG CƠ	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
-3	LY HỢP	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
-4	HỘP SỐ	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
-5	PHANH	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
-7	GẦM	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
-8	THỦY LỰC	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
-1	CABIN	2025-12-23 20:21:27.641607	2025-12-27 08:17:45.296763	f	\N	\N	t
-11	F123	2025-12-29 06:06:16.412725	2025-12-29 06:06:16.412725	t	HOWO	\N	t
-13	NBSA	2025-12-29 06:06:36.727319	2025-12-29 06:06:36.727319	t	CHENGLONG	\N	t
-12	ACX	2025-12-29 06:06:26.395333	2025-12-29 06:08:14.579226	t	CHENGLONG	\N	t
-6	ĐIỆN	2025-12-23 20:21:27.641607	2025-12-29 13:54:30.533412	f	\N	\N	t
-14	NNN	2025-12-29 06:06:52.490894	2025-12-29 13:54:58.660497	t	HOWO	\N	t
+1	Cabin & Thân vỏ	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
+2	Động cơ	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
+3	Hộp số	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
+4	Hệ thống cầu	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
+5	Ly hợp	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
+6	Giằng treo	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
+7	Truyền động	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
+8	Hệ thống lái	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
+9	Hệ thống hút xả	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
+10	Hệ thống làm mát	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
+11	Hệ thống điện	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
+12	Hệ thống nhiên liệu	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
+13	Hệ thống moay ơ	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
+14	Hệ thống phanh	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
 \.
 
 
@@ -4119,15 +4119,6 @@ COPY public.images (id, url, public_id, created_at) FROM stdin;
 --
 
 COPY public.product_images (id, product_id, image_id, sort_order, is_primary, created_at) FROM stdin;
-8	27	8	1	f	2026-01-03 14:41:04.133012
-1	1	1	0	t	2025-12-24 14:53:29.715768
-2	1	2	1	f	2025-12-24 14:53:30.007739
-3	1	3	2	f	2025-12-24 14:53:30.259637
-26	1	26	3	f	2026-01-12 14:48:02.816263
-6	2	6	0	t	2026-01-02 23:03:40.628051
-7	2	7	1	f	2026-01-03 14:29:56.103175
-27	2	27	2	f	2026-01-12 14:48:49.013751
-25	3	25	0	t	2026-01-12 05:15:21.559458
 \.
 
 
@@ -4135,32 +4126,7 @@ COPY public.product_images (id, product_id, image_id, sort_order, is_primary, cr
 -- Data for Name: products; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.products (id, code, name, price_bulk, total, category_id, image, description, created_at, updated_at, vehicle_ids, show_on_homepage, thumbnail, manufacturer_code) FROM stdin;
-5	LC420	Lá côn HOWO 420	2200000	4	3	\N	Lá côn ly hợp chính hãng 420mm	2025-12-23 22:04:50.449505	2025-12-23 22:04:50.449505	{}	t	\N	\N
-6	PTTS	Phanh tang trống sau SITRAK	1600000	12	5	\N	Phanh tang trống sau chính hãng	2025-12-23 22:04:50.449505	2025-12-23 22:04:50.449505	{}	t	\N	\N
-7	DLKN	Đầu lọc khí nén HOWO	380000	20	2	\N	Lọc khí nén cho hệ thống phanh	2025-12-23 22:04:50.449505	2025-12-23 22:04:50.449505	{}	t	\N	\N
-8	BML-HW	Bơm mỡ ly hợp HOWO	600000	10	3	\N	Bơm mỡ ly hợp thủy lực	2025-12-23 22:04:50.449505	2025-12-23 22:04:50.449505	{}	t	\N	\N
-9	GKDL-A7	Giảm xóc đầu lọc A7	450000	18	7	\N	Giảm xóc cabin HOWO A7	2025-12-23 22:04:50.449505	2025-12-23 22:04:50.449505	{}	t	\N	\N
-4	LDDC-A7	Lọc dầu động cơ HOWO A7	280000	25	2	https://res.cloudinary.com/dbschdcyq/image/upload/v1768033872/sinotruk_products/ac4glx157mkxbbg1rctt.png	Lọc dầu động cơ chính hãng HOWO	2025-12-23 22:04:50.449505	2026-01-10 08:31:15.547317	{}	t	https://res.cloudinary.com/dbschdcyq/image/upload/v1768033872/sinotruk_products/ac4glx157mkxbbg1rctt.png	\N
-12	VD: XLKVX123	VD: Xilanh kích cabin VX350	0	0	\N	\N	Phụ tùng chính hãng Sinotruk	2026-01-02 17:39:49.635411	2026-01-02 17:39:49.635411	{}	t	\N	VD: WEICHAI-612600130777
-13	XLKVX123	Xilanh kích cabin VX350	0	0	\N	\N	Phụ tùng chính hãng Sinotruk	2026-01-03 14:32:31.110988	2026-01-03 14:32:31.110988	{}	t	\N	WEICHAI-612600130777
-14	XLKVX124	Xilanh kích cabin VX351	0	0	\N	\N	Phụ tùng chính hãng Sinotruk	2026-01-03 14:32:31.26091	2026-01-03 14:32:31.26091	{}	t	\N	WEICHAI-612600130777
-15	XLKVX125	Xilanh kích cabin VX352	0	0	\N	\N	Phụ tùng chính hãng Sinotruk	2026-01-03 14:32:31.411804	2026-01-03 14:32:31.411804	{}	t	\N	WEICHAI-612600130777
-16	XLKVX126	Xilanh kích cabin VX353	0	0	\N	\N	Phụ tùng chính hãng Sinotruk	2026-01-03 14:32:31.523762	2026-01-03 14:32:31.523762	{}	t	\N	WEICHAI-612600130777
-17	XLKVX127	Xilanh kích cabin VX354	0	0	\N	\N	Phụ tùng chính hãng Sinotruk	2026-01-03 14:32:31.641043	2026-01-03 14:32:31.641043	{}	t	\N	WEICHAI-612600130777
-18	XLKVX128	Xilanh kích cabin VX355	0	0	\N	\N	Phụ tùng chính hãng Sinotruk	2026-01-03 14:32:31.750268	2026-01-03 14:32:31.750268	{}	t	\N	WEICHAI-612600130777
-19	XLKVX129	Xilanh kích cabin VX356	0	0	\N	\N	Phụ tùng chính hãng Sinotruk	2026-01-03 14:32:31.890788	2026-01-03 14:32:31.890788	{}	t	\N	WEICHAI-612600130777
-1	XBCHD	Dầu động cơ HOWO	400000	100	2	/api/image?url=https%3A%2F%2Fres.cloudinary.com%2Fdbschdcyq%2Fimage%2Fupload%2Fv1766587954%2Fsinotruk_products%2Fzwogslk9trmry4sazut5.jpg	Mô tả sản phẩmMô tả sản phẩmMô tả sản phẩmMô tả sản phẩmMô tả sản phẩm	2025-12-23 22:02:08.940996	2026-01-12 14:48:00.511293	{9,12,11}	t	/api/image?url=https%3A%2F%2Fres.cloudinary.com%2Fdbschdcyq%2Fimage%2Fupload%2Fv1766587954%2Fsinotruk_products%2Fzwogslk9trmry4sazut5.jpg	WECHAI-129382
-2	XLKVX	Xilanh kích cabin VX350 VX400	750000	15	1	/api/image?url=https%3A%2F%2Fres.cloudinary.com%2Fdbschdcyq%2Fimage%2Fupload%2Fv1767395011%2Fsinotruk_products%2Fcjmwmqdlmyuitsfudjcb.jpg	Xilanh kích cabin chính hãng SINOTRUK	2025-12-23 22:04:50.449505	2026-01-12 14:48:48.238179	{}	t	/api/image?url=https%3A%2F%2Fres.cloudinary.com%2Fdbschdcyq%2Fimage%2Fupload%2Fv1767395011%2Fsinotruk_products%2Fcjmwmqdlmyuitsfudjcb.jpg	\N
-3	TBTSI	Tăm bét trước SITRAK T7H	1000000	8	2	/api/image?path=1768194897831.jpeg	Tăm bét động cơ SITRAK chính hãng	2025-12-23 22:04:50.449505	2026-01-18 08:41:16.943363	{}	t	/api/image?path=1768194897831.jpeg	WG9925550966
-20	XLKVX130	Xilanh kích cabin VX357	0	0	\N	\N	Phụ tùng chính hãng Sinotruk	2026-01-03 14:32:32.028419	2026-01-03 14:32:32.028419	{}	t	\N	WEICHAI-612600130777
-24	XLKVX134	Xilanh kích cabin VX361	0	0	\N	\N	Phụ tùng chính hãng Sinotruk	2026-01-03 14:32:32.571358	2026-01-03 14:32:32.571358	{}	t	\N	WEICHAI-612600130777
-21	XLKVX131	Xilanh kích cabin VX358	0	0	\N	\N	Phụ tùng chính hãng Sinotruk	2026-01-03 14:32:32.175763	2026-01-03 14:32:32.175763	{}	t	\N	WEICHAI-612600130777
-25	XLKVX135	Xilanh kích cabin VX362	0	0	\N	\N	Phụ tùng chính hãng Sinotruk	2026-01-03 14:32:32.701888	2026-01-03 14:32:32.701888	{}	t	\N	WEICHAI-612600130777
-22	XLKVX132	Xilanh kích cabin VX359	0	0	\N	\N	Phụ tùng chính hãng Sinotruk	2026-01-03 14:32:32.308993	2026-01-03 14:32:32.308993	{}	t	\N	WEICHAI-612600130777
-26	XLKVX136	Xilanh kích cabin VX363	0	0	\N	\N	Phụ tùng chính hãng Sinotruk	2026-01-03 14:32:32.824167	2026-01-03 14:32:32.824167	{}	t	\N	WEICHAI-612600130777
-23	XLKVX133	Xilanh kích cabin VX360	0	0	\N	\N	Phụ tùng chính hãng Sinotruk	2026-01-03 14:32:32.441256	2026-01-03 14:32:32.441256	{}	t	\N	WEICHAI-612600130777
-27	BBWH	Xilanh kích cabin VX350	0	0	\N	https://res.cloudinary.com/dbschdcyq/image/upload/v1767451181/sinotruk_products/iahlgfzzrdclapa0vw4u.jpg	Phụ tùng chính hãng Sinotruk	2026-01-03 14:39:41.898686	2026-01-03 14:41:03.816316	{}	t	https://res.cloudinary.com/dbschdcyq/image/upload/v1767451181/sinotruk_products/iahlgfzzrdclapa0vw4u.jpg	WEICHAI-612600130777
+COPY public.products (id, code, name, category_id, image, description, created_at, updated_at, vehicle_ids, show_on_homepage, thumbnail, manufacturer_code) FROM stdin;
 \.
 
 

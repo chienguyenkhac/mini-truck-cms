@@ -1,6 +1,6 @@
 const VideoSection = () => {
     return (
-        <section className="py-12 md:py-24 bg-gray-50 overflow-hidden">
+        <section className="pt-4 md:pt-8 pb-8 md:pb-16 bg-gray-50 overflow-hidden">
             <div className="container mx-auto px-4 md:px-10 lg:px-20">
                 <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
                     {/* Card - shows first on mobile */}
@@ -39,7 +39,7 @@ const VideoSection = () => {
                         </p>
 
                         <div className="space-y-3 md:space-y-4">
-                            <div className="grid grid-cols-2 gap-3 md:gap-6">
+                            <div className="grid grid-cols-2 gap-3 md:gap-6 mb-6 md:mb-8">
                                 {[
                                     { title: 'Nhập khẩu trực tiếp', desc: 'Chính hãng, Original Parts', icon: 'verified' },
                                     { title: 'Bảo Hành Uy Tín', desc: 'Đổi mới 100% nếu sai mẫu hoặc lỗi do nhà sản xuất', icon: 'shield' }
@@ -56,13 +56,15 @@ const VideoSection = () => {
                                 ))}
                             </div>
 
-                            <a
-                                href="tel:0382890990"
-                                className="flex items-center gap-2 px-5 md:px-6 py-2.5 md:py-3 bg-primary hover:bg-primary/90 rounded-xl text-white font-bold transition-all group w-fit shadow-lg text-xs md:text-sm"
-                            >
-                                <span className="material-symbols-outlined text-base md:text-lg">call</span>
-                                Hotline: 0382.890.990
-                            </a>
+                            <div className="mt-6 md:mt-8">
+                                <a
+                                    href="tel:0382890990"
+                                    className="flex items-center gap-2 px-5 md:px-6 py-2.5 md:py-3 bg-primary hover:bg-primary/90 rounded-xl text-white font-bold transition-all group w-fit shadow-lg text-xs md:text-sm"
+                                >
+                                    <span className="material-symbols-outlined text-base md:text-lg">call</span>
+                                    Hotline: 0382.890.990
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -72,3 +74,4 @@ const VideoSection = () => {
 }
 
 export default VideoSection
+

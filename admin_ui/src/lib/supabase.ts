@@ -44,8 +44,6 @@ export interface Product {
     code: string;
     name: string;
     price: number;
-    price_bulk: number;
-    total: number;
     category_id: number;
     image: string | null;
     description: string | null;

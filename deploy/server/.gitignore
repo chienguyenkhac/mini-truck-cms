@@ -1,0 +1,21 @@
+# Environment files - DO NOT COMMIT
+.env
+.env.*
+
+# Allow templates
+!.env.example
+!env.*.template
+
+# Uploads
+uploads/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Dependencies
+node_modules/
+
+# Coverage
+coverage/
+

@@ -7,7 +7,7 @@ const stats = [
 
 const StatsSection = () => {
     return (
-        <section className="bg-background relative z-20 mt-4 pb-20">
+        <section className="bg-background relative z-20 mt-2 md:mt-4 pb-4">
             <div className="container mx-auto px-4 md:px-10 lg:px-20">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 md:p-6 bg-white border border-slate-200 rounded-3xl shadow-xl">
                     {stats.map((stat, idx) => (

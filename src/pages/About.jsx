@@ -226,10 +226,19 @@ const About = () => {
                 >
                   <div className="aspect-square relative mb-3 bg-white rounded-lg p-2 border border-slate-100 hover:border-primary/30 hover:shadow-lg transition-all duration-300">
                     <img
-                      src={vehicle.thumbnail || '/images/default-truck.png'}
+                      src={vehicle.thumbnail || '/images/default-truck.svg'}
                       alt={vehicle.name}
                       className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
-                      onError={(e) => { e.target.src = '/images/default-truck.png' }}
+                      onError={(e) => {
+                        // Prevent infinite loop: only try fallback once
+                        if (!e.target.dataset.errorHandled) {
+                          e.target.dataset.errorHandled = 'true'
+                          e.target.src = '/images/default-truck.svg'
+                        } else {
+                          // If fallback also fails, hide the image
+                          e.target.style.display = 'none'
+                        }
+                      }}
                     />
                   </div>
                   <h3 className="text-sm font-bold text-slate-700 group-hover:text-primary transition-colors uppercase leading-tight line-clamp-2">

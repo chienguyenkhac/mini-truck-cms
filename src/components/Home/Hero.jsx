@@ -102,7 +102,7 @@ const Hero = () => {
   ), [])
 
   return (
-    <section className="relative w-full h-[500px] md:h-[500px] lg:h-[500px] flex items-center justify-center overflow-hidden bg-background">
+    <section className="relative w-full h-[500px] md:h-[500px] lg:h-[500px] flex items-center justify-center overflow-hidden bg-background pb-4">
       {/* Background Image Slideshow - Constrained to container */}
       <div className="absolute inset-0 z-0 flex items-center justify-center">
         <div className="container mx-auto px-4 md:px-10 lg:px-20 h-full py-0">
@@ -148,7 +148,7 @@ const Hero = () => {
           </motion.div>
 
           <div ref={titleRef} className="overflow-hidden">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-[0.9] tracking-tighter drop-shadow-sm">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-[0.9] tracking-tighter drop-shadow-sm">
               <span className="inline-block hover:scale-105 transition-transform duration-300 cursor-default" style={{ color: '#306269' }}>
                 {titleChars}
               </span>

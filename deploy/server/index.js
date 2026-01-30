@@ -6,24 +6,56 @@ const path = require('path');
 const fs = require('fs');
 const { Pool } = require('pg');
 
+// Load environment variables
+require('dotenv').config();
+
 const app = express();
+
+// Configuration from environment variables
 const PORT = process.env.PORT || 3001;
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads';
+const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024; // 10MB default
 
 // Database connection
+if (!process.env.DATABASE_URL) {
+    console.warn('⚠️  DATABASE_URL not found in environment variables. Using default for development.');
+    console.warn('   Please create .env file in deploy/server/ directory.');
+    console.warn('   Copy from: env.development.template');
+}
+
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@db:5432/sinotruk'
+    connectionString: process.env.DATABASE_URL
 });
 
+// Test database connection
+pool.connect((err, client, release) => {
+    if (err) {
+        console.error('❌ Database connection error:', err.message);
+        console.error('   Check your DATABASE_URL in .env file');
+        console.error('   Expected format: postgresql://user:password@host:port/database');
+    } else {
+        console.log('✅ Database connected successfully');
+        release();
+    }
+});
+
+// CORS configuration
+const corsOptions = {
+    origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : '*',
+    credentials: true
+};
+
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-app.use('/uploads', express.static(path.join(__dirname, './uploads')));
+app.use('/uploads', express.static(path.join(__dirname, UPLOAD_DIR)));
 
 // Multer config for file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const uploadDir = path.join(__dirname, './uploads/original');
+        const uploadDir = path.join(__dirname, UPLOAD_DIR, 'original');
         if (!fs.existsSync(uploadDir)) {
             fs.mkdirSync(uploadDir, { recursive: true });
         }
@@ -37,7 +69,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
     storage,
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+    limits: { fileSize: MAX_FILE_SIZE },
     fileFilter: (req, file, cb) => {
         const allowedTypes = /jpeg|jpg|png|gif|webp/;
         const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
@@ -370,15 +402,15 @@ app.get('/api/products/:id', async (req, res) => {
 app.post('/api/products', async (req, res) => {
     try {
         const {
-            code, name, price_bulk, total, category_id, image, description,
+            code, name, category_id, image, description,
             vehicle_ids, show_on_homepage, thumbnail, manufacturer_code
         } = req.body;
 
         const { rows } = await pool.query(
-            `INSERT INTO products (code, name, price_bulk, total, category_id, image, description, vehicle_ids, show_on_homepage, thumbnail, manufacturer_code, created_at, updated_at)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW())
+            `INSERT INTO products (code, name, category_id, image, description, vehicle_ids, show_on_homepage, thumbnail, manufacturer_code, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
              RETURNING *`,
-            [code, name, price_bulk || '0', total || 0, category_id, image, description, vehicle_ids || [], show_on_homepage || true, thumbnail, manufacturer_code]
+            [code, name, category_id, image, description, vehicle_ids || [], show_on_homepage || true, thumbnail, manufacturer_code]
         );
 
         res.status(201).json(rows[0]);
@@ -393,7 +425,7 @@ app.put('/api/products/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const {
-            code, name, price_bulk, total, category_id, image, description,
+            code, name, category_id, image, description,
             vehicle_ids, show_on_homepage, thumbnail, manufacturer_code
         } = req.body;
 
@@ -401,19 +433,17 @@ app.put('/api/products/:id', async (req, res) => {
             `UPDATE products SET
                 code = COALESCE($1, code),
                 name = COALESCE($2, name),
-                price_bulk = COALESCE($3, price_bulk),
-                total = COALESCE($4, total),
-                category_id = COALESCE($5, category_id),
-                image = COALESCE($6, image),
-                description = COALESCE($7, description),
-                vehicle_ids = COALESCE($8, vehicle_ids),
-                show_on_homepage = COALESCE($9, show_on_homepage),
-                thumbnail = COALESCE($10, thumbnail),
-                manufacturer_code = COALESCE($11, manufacturer_code),
+                category_id = COALESCE($3, category_id),
+                image = COALESCE($4, image),
+                description = COALESCE($5, description),
+                vehicle_ids = COALESCE($6, vehicle_ids),
+                show_on_homepage = COALESCE($7, show_on_homepage),
+                thumbnail = COALESCE($8, thumbnail),
+                manufacturer_code = COALESCE($9, manufacturer_code),
                 updated_at = NOW()
-             WHERE id = $12
+             WHERE id = $10
              RETURNING *`,
-            [code, name, price_bulk, total, category_id, image, description, vehicle_ids, show_on_homepage, thumbnail, manufacturer_code, id]
+            [code, name, category_id, image, description, vehicle_ids, show_on_homepage, thumbnail, manufacturer_code, id]
         );
 
         if (rows.length === 0) {

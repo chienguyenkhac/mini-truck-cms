@@ -9,10 +9,6 @@ interface CategoryWithExtras extends Category {
     is_visible?: boolean;
 }
 
-// Cloudinary config
-const CLOUDINARY_CLOUD_NAME = 'dxggvypzl';
-const CLOUDINARY_UPLOAD_PRESET = 'sinotruk_unsigned';
-
 const Categories: React.FC = () => {
     const notification = useNotification();
     const [categories, setCategories] = useState<CategoryWithExtras[]>([]);
@@ -42,24 +38,29 @@ const Categories: React.FC = () => {
         thumbnail: ''
     });
 
-    // Upload to Cloudinary
-    const uploadToCloudinary = async (file: File): Promise<string> => {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-        formData.append('folder', 'categories');
+    // Upload to local server
+    const uploadToLocal = async (file: File): Promise<string> => {
+        // Convert file to base64
+        const reader = new FileReader();
+        const base64Promise = new Promise<string>((resolve, reject) => {
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+        const base64Image = await base64Promise;
 
-        const response = await fetch(
-            `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-            { method: 'POST', body: formData }
-        );
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: base64Image, fileName: file.name }),
+        });
 
         if (!response.ok) {
             throw new Error('Upload failed');
         }
 
         const data = await response.json();
-        return data.secure_url;
+        return data.url;
     };
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean) => {
@@ -68,7 +69,7 @@ const Categories: React.FC = () => {
 
         setUploading(true);
         try {
-            const url = await uploadToCloudinary(file);
+            const url = await uploadToLocal(file);
             if (isEdit) {
                 setEditForm({ ...editForm, thumbnail: url });
             } else {

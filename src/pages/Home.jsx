@@ -11,10 +11,9 @@ const Home = () => {
   return (
     <div className="bg-background">
       <Hero />
-      <StatsSection />
       <VehicleShowcase />
-
       <VideoSection />
+      <StatsSection />
       <ProductGrid />
       <AboutSection />
       <CategorySection />

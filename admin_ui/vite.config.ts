@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   base: '/secret/',
   server: {
-    port: 3000,
+    port: 5174,  // Đổi từ 3000 sang 5174 để tránh conflict
     proxy: {
       '/api': {
         target: 'http://localhost:3001',
