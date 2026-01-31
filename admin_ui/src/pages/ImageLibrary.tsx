@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNotification } from '../components/shared/Notification';
+import ConfirmDeleteModal from '../components/shared/ConfirmDeleteModal';
 import { supabase } from '../services/supabase';
 
 interface GalleryImage {
@@ -19,6 +20,7 @@ const ImageLibrary: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
     const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
+    const [deleteImage, setDeleteImage] = useState<GalleryImage | null>(null);
 
     // Load images
     const loadImages = async () => {
@@ -81,14 +83,15 @@ const ImageLibrary: React.FC = () => {
                 }
 
                 // Save to gallery_images table
-                const { error: insertError } = await supabase
+                await supabase
                     .from('gallery_images')
                     .insert({
                         title: file.name.replace(/\.[^/.]+$/, ''),
                         image_path: result.url
+                    })
+                    .then((res: any) => {
+                        if (res.error) throw res.error;
                     });
-
-                if (insertError) throw insertError;
             }
 
             notification.success(`Đã upload ${files.length} ảnh thành công`);
@@ -103,17 +106,20 @@ const ImageLibrary: React.FC = () => {
     };
 
     // Handle delete
-    const handleDelete = async (id: number) => {
-        if (!confirm('Bạn có chắc muốn xóa ảnh này?')) return;
+    const confirmDelete = async () => {
+        if (!deleteImage) return;
 
         try {
-            const { error } = await supabase
+            await supabase
                 .from('gallery_images')
                 .delete()
-                .eq('id', id);
-
-            if (error) throw error;
+                .eq('id', deleteImage.id)
+                .then((res: any) => {
+                    if (res.error) throw res.error;
+                });
+            
             notification.success('Đã xóa ảnh');
+            setDeleteImage(null);
             loadImages();
         } catch (err) {
             console.error('Delete error:', err);
@@ -190,7 +196,7 @@ const ImageLibrary: React.FC = () => {
                             {/* Overlay */}
                             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                 <button
-                                    onClick={(e) => { e.stopPropagation(); handleDelete(img.id); }}
+                                    onClick={(e) => { e.stopPropagation(); setDeleteImage(img); }}
                                     className="w-10 h-10 bg-red-500 text-white rounded-lg flex items-center justify-center hover:bg-red-600 transition-colors"
                                     title="Xóa"
                                 >
@@ -257,6 +263,18 @@ const ImageLibrary: React.FC = () => {
                         )}
                     </div>
                 </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {deleteImage && (
+                <ConfirmDeleteModal
+                    isOpen={!!deleteImage}
+                    onClose={() => setDeleteImage(null)}
+                    onConfirm={confirmDelete}
+                    title="Xác nhận xóa ảnh"
+                    message="Bạn có chắc chắn muốn xóa ảnh này khỏi thư viện?"
+                    itemName={deleteImage.title || 'Ảnh không có tiêu đề'}
+                />
             )}
         </div>
     );

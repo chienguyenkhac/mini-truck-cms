@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNotification } from '../components/shared/Notification';
+import ConfirmDeleteModal from '../components/shared/ConfirmDeleteModal';
 import { categoryService, Category } from '../services/supabase';
 
 interface CategoryWithExtras extends Category {
@@ -19,6 +20,7 @@ const Categories: React.FC = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const editFileInputRef = useRef<HTMLInputElement>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [deleteCategory, setDeleteCategory] = useState<CategoryWithExtras | null>(null);
 
     // New category form - use 'type' field: 'vehicle' or 'part'
     const [newForm, setNewForm] = useState({
@@ -176,15 +178,15 @@ const Categories: React.FC = () => {
         }
     };
 
-    const handleDeleteCategory = async (category: CategoryWithExtras) => {
-        if (confirm(`Bạn có chắc muốn xóa "${category.name}"?`)) {
-            try {
-                await categoryService.delete(category.id);
-                notification.success(`Đã xóa "${category.name}"`);
-                loadCategories();
-            } catch (error: any) {
-                notification.error(error.message || 'Có lỗi xảy ra');
-            }
+    const confirmDelete = async () => {
+        if (!deleteCategory) return;
+        try {
+            await categoryService.delete(deleteCategory.id);
+            notification.success(`Đã xóa "${deleteCategory.name}"`);
+            setDeleteCategory(null);
+            loadCategories();
+        } catch (error: any) {
+            notification.error(error.message || 'Có lỗi xảy ra');
         }
     };
 
@@ -205,21 +207,26 @@ const Categories: React.FC = () => {
                 <div className="flex flex-wrap items-center gap-2 w-full">
                     {/* Thumbnail upload for edit - only show for vehicle type */}
                     {editForm.type === 'vehicle' && (
-                        <div className="relative">
+                        <div className="relative group">
                             {editForm.thumbnail ? (
-                                <img src={editForm.thumbnail} alt="Thumbnail" className="w-12 h-12 rounded-lg object-cover" />
+                                <img src={editForm.thumbnail} alt="Thumbnail" className="w-10 h-10 rounded-lg object-cover border border-slate-200" />
                             ) : (
-                                <div className="w-12 h-12 rounded-lg bg-red-100 border-2 border-dashed border-red-300 flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-red-400 text-lg">image</span>
+                                <div className="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-slate-400 text-base">image</span>
                                 </div>
                             )}
                             <button
                                 type="button"
                                 onClick={() => editFileInputRef.current?.click()}
-                                className="absolute -bottom-1 -right-1 w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-xs"
+                                className="absolute inset-0 bg-black/40 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                                 disabled={uploading}
+                                title="Thay đổi ảnh"
                             >
-                                {uploading ? '...' : <span className="material-symbols-outlined text-xs">add_photo_alternate</span>}
+                                {uploading ? (
+                                    <span className="text-white text-xs">...</span>
+                                ) : (
+                                    <span className="material-symbols-outlined text-white text-base">edit</span>
+                                )}
                             </button>
                             <input
                                 ref={editFileInputRef}
@@ -230,39 +237,60 @@ const Categories: React.FC = () => {
                             />
                         </div>
                     )}
-                    <input
-                        type="text"
-                        placeholder={editForm.type === 'vehicle' ? 'Mã xe' : 'Tên'}
-                        value={editForm.name}
-                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                        className="input py-1.5 px-2 text-sm w-32"
-                    />
-                    <input
-                        type="text"
-                        placeholder={editForm.type === 'vehicle' ? 'Hãng xe' : 'Mã'}
-                        value={editForm.code}
-                        onChange={(e) => setEditForm({ ...editForm, code: e.target.value })}
-                        className="input py-1.5 px-2 text-sm w-24"
-                    />
-                    {/* Type dropdown */}
-                    <select
-                        value={editForm.type}
-                        onChange={(e) => setEditForm({ ...editForm, type: e.target.value as 'vehicle' | 'part' })}
-                        className="input py-1.5 px-2 text-sm w-24"
-                    >
-                        <option value="vehicle">Xe</option>
-                        <option value="part">Phụ tùng</option>
-                    </select>
-                    <label className="flex items-center gap-1 text-xs">
-                        <input type="checkbox" checked={editForm.is_visible} onChange={(e) => setEditForm({ ...editForm, is_visible: e.target.checked })} />
-                        Hiện
-                    </label>
-                    <button onClick={handleSaveEdit} className="text-green-600 hover:bg-green-100 p-1.5 rounded-lg">
-                        <span className="material-symbols-outlined text-sm">check</span>
-                    </button>
-                    <button onClick={() => setEditingId(null)} className="text-slate-400 hover:bg-slate-200 p-1.5 rounded-lg">
-                        <span className="material-symbols-outlined text-sm">close</span>
-                    </button>
+                    
+                    {/* Form inputs - compact and organized */}
+                    <div className="flex items-center gap-2 flex-1">
+                        <input
+                            type="text"
+                            placeholder={editForm.type === 'vehicle' ? 'Mã xe' : 'Tên danh mục'}
+                            value={editForm.name}
+                            onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                            className="input py-2 px-3 text-sm flex-1 min-w-[120px] border-slate-300 focus:border-primary focus:ring-1 focus:ring-primary"
+                        />
+                        <input
+                            type="text"
+                            placeholder={editForm.type === 'vehicle' ? 'Hãng xe' : 'Mã'}
+                            value={editForm.code}
+                            onChange={(e) => setEditForm({ ...editForm, code: e.target.value })}
+                            className="input py-2 px-3 text-sm w-28 border-slate-300 focus:border-primary focus:ring-1 focus:ring-primary"
+                        />
+                        <select
+                            value={editForm.type}
+                            onChange={(e) => setEditForm({ ...editForm, type: e.target.value as 'vehicle' | 'part' })}
+                            className="input py-2 px-3 text-sm w-32 border-slate-300 focus:border-primary focus:ring-1 focus:ring-primary"
+                        >
+                            <option value="vehicle">🚛 Xe</option>
+                            <option value="part">🔧 Phụ tùng</option>
+                        </select>
+                    </div>
+
+                    {/* Actions group */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                        <label className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-100 transition-colors">
+                            <input 
+                                type="checkbox" 
+                                checked={editForm.is_visible} 
+                                onChange={(e) => setEditForm({ ...editForm, is_visible: e.target.checked })}
+                                className="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary"
+                            />
+                            <span className="text-xs font-medium text-slate-600">Hiển thị</span>
+                        </label>
+                        <button 
+                            onClick={handleSaveEdit} 
+                            className="flex items-center gap-1 px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors shadow-sm"
+                            title="Lưu"
+                        >
+                            <span className="material-symbols-outlined text-base">check</span>
+                            <span className="text-xs font-medium">Lưu</span>
+                        </button>
+                        <button 
+                            onClick={() => setEditingId(null)} 
+                            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                            title="Hủy"
+                        >
+                            <span className="material-symbols-outlined text-base">close</span>
+                        </button>
+                    </div>
                 </div>
             ) : (
                 <>
@@ -301,7 +329,7 @@ const Categories: React.FC = () => {
                         <button onClick={() => handleEdit(cat)} className="text-slate-400 hover:text-blue-600 hover:bg-blue-50 p-1.5 rounded-lg">
                             <span className="material-symbols-outlined text-sm">edit</span>
                         </button>
-                        <button onClick={() => handleDeleteCategory(cat)} className="text-slate-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg">
+                        <button onClick={() => setDeleteCategory(cat)} className="text-slate-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg">
                             <span className="material-symbols-outlined text-sm">delete</span>
                         </button>
                     </div>
@@ -506,6 +534,18 @@ const Categories: React.FC = () => {
                 <span className="material-symbols-outlined text-lg">info</span>
                 <span>Tổng cộng <span className="font-bold text-slate-800">{categories.length}</span> danh mục.</span>
             </div>
+
+            {/* Delete Confirmation Modal */}
+            {deleteCategory && (
+                <ConfirmDeleteModal
+                    isOpen={!!deleteCategory}
+                    onClose={() => setDeleteCategory(null)}
+                    onConfirm={confirmDelete}
+                    title="Xác nhận xóa danh mục"
+                    message="Bạn có chắc chắn muốn xóa danh mục này?"
+                    itemName={deleteCategory.name}
+                />
+            )}
         </div>
     );
 };

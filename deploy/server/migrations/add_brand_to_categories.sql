@@ -23,3 +23,4 @@ CREATE INDEX IF NOT EXISTS idx_categories_brand ON categories(brand);
 COMMENT ON COLUMN categories.brand IS 'Brand name for vehicle categories (e.g., HOWO, SINOTRUK)';
 
 
+

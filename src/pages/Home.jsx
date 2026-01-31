@@ -11,9 +11,13 @@ const Home = () => {
   return (
     <div className="bg-background">
       <Hero />
-      <VehicleShowcase />
+      <div className="hidden md:block">
+        <VehicleShowcase />
+      </div>
       <VideoSection />
-      <StatsSection />
+      <div className="hidden md:block">
+        <StatsSection />
+      </div>
       <ProductGrid />
       <AboutSection />
       <CategorySection />
