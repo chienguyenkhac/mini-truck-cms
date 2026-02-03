@@ -7,9 +7,9 @@ services:
     container_name: sinotruk-db
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: sinotruk123
-      POSTGRES_DB: postgres
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-postgres}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./server/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -31,9 +31,11 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    env_file:
+      - ./server/.env
     environment:
-      DATABASE_URL: postgresql://postgres:sinotruk123@db:5432/postgres
-      PORT: 3002
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD}@db:5432/${DB_NAME:-postgres}
+      PORT: ${API_PORT:-3002}
       NODE_ENV: production
     volumes:
       - uploads_data:/app/uploads
