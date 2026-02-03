@@ -151,7 +151,11 @@ export const getGalleryImages = async (page = 1, limit = 20) => {
 export const getProductImages = async (productId) => {
     try {
         const data = await fetchAPI(`/product-images/${productId}`);
-        return (data || []).map(pi => getImageUrl(pi.image_url)).filter(Boolean);
+        return (data || []).map(pi => {
+            // Support both old format (image_url) and new format (image.url)
+            const imageUrl = pi.image?.url || pi.image_url;
+            return imageUrl ? getImageUrl(imageUrl) : null;
+        }).filter(Boolean);
     } catch (error) {
         console.error('Error fetching product images:', error);
         return [];

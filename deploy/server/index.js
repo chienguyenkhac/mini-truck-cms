@@ -743,7 +743,8 @@ app.get('/api/product-images/:productId', async (req, res) => {
     try {
         const { productId } = req.params;
         const { rows } = await pool.query(`
-            SELECT pi.*, i.url as image_url 
+            SELECT pi.id, pi.product_id, pi.image_id, pi.sort_order, pi.is_primary, pi.created_at,
+                   json_build_object('id', i.id, 'url', i.url, 'public_id', i.public_id, 'created_at', i.created_at) as image
             FROM product_images pi 
             LEFT JOIN images i ON pi.image_id = i.id 
             WHERE pi.product_id = $1 
