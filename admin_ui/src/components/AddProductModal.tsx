@@ -23,7 +23,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ onClose, onAdd }) => 
         category_id: 0,
         vehicle_ids: [] as number[],
         manufacturer_code: '',
-        description: 'Phụ tùng chính hãng Sinotruk, nhập khẩu trực tiếp từ nhà máy. Cam kết 100% hàng chính hãng, bảo hành theo tiêu chuẩn nhà sản xuất.',
+        description: 'SINOTRUK HÀ NỘI nhập khẩu trực tiếp từ Trung Quốc. Cam kết 100% hàng chính hãng, bảo hành theo tiêu chuẩn nhà sản xuất.',
         show_on_homepage: true,
     });
     const [images, setImages] = useState<UploadedImage[]>([]);

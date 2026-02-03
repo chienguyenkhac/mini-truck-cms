@@ -66,11 +66,14 @@ const renderContent = (content) => {
   })
 }
 
+const ITEMS_PER_PAGE = 10
+
 const Catalog = () => {
   const [articles, setArticles] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedArticle, setSelectedArticle] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [displayCount, setDisplayCount] = useState(ITEMS_PER_PAGE)
 
   // Load articles from database
   useEffect(() => {
@@ -86,6 +89,24 @@ const Catalog = () => {
     }
     loadArticles()
   }, [])
+
+  // Filter articles based on search
+  const filteredArticles = articles.filter(article =>
+    article.title.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  // Get displayed articles
+  const displayedArticles = filteredArticles.slice(0, displayCount)
+  const hasMore = displayCount < filteredArticles.length
+
+  const loadMore = () => {
+    setDisplayCount(prev => prev + ITEMS_PER_PAGE)
+  }
+
+  // Reset display count when search changes
+  useEffect(() => {
+    setDisplayCount(ITEMS_PER_PAGE)
+  }, [searchTerm])
 
   return (
     <div className="min-h-screen bg-background">
@@ -111,14 +132,14 @@ const Catalog = () => {
       <div className="container mx-auto px-4 md:px-10 lg:px-20 py-4 md:py-8">
         {/* Search Box */}
         {!selectedArticle && articles.length > 0 && (
-          <div className="mb-8">
-            <div className="relative max-w-2xl mx-auto">
+          <div className="mb-8 flex justify-end">
+            <div className="relative w-full md:w-[480px]">
               <input
                 type="text"
                 placeholder="Tìm kiếm bài viết..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary transition-all shadow-sm"
+                className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary transition-all shadow-sm"
               />
               <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
             </div>
@@ -149,14 +170,28 @@ const Catalog = () => {
             </button>
 
             <article className="bg-white rounded-3xl shadow-lg border border-slate-200 p-8 md:p-12 lg:p-16">
-              <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
-                {selectedArticle.title}
-              </h1>
-              <div className="flex items-center gap-4 text-sm text-slate-400 mb-8 pb-8 border-b border-slate-200">
-                <span className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-sm">calendar_today</span>
-                  {new Date(selectedArticle.created_at).toLocaleDateString('vi-VN')}
-                </span>
+              {/* Header with thumbnail */}
+              <div className="flex flex-col md:flex-row gap-6 mb-8 pb-8 border-b border-slate-200">
+                {selectedArticle.thumbnail && (
+                  <div className="md:w-48 flex-shrink-0">
+                    <img
+                      src={selectedArticle.thumbnail}
+                      alt={selectedArticle.title}
+                      className="w-full aspect-video object-cover rounded-xl shadow-md"
+                    />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
+                    {selectedArticle.title}
+                  </h1>
+                  <div className="flex items-center gap-4 text-sm text-slate-400">
+                    <span className="flex items-center gap-1">
+                      <span className="material-symbols-outlined text-sm">calendar_today</span>
+                      {new Date(selectedArticle.created_at).toLocaleDateString('vi-VN')}
+                    </span>
+                  </div>
+                </div>
               </div>
               <div className="prose prose-slate max-w-none">
                 {renderContent(selectedArticle.content)}
@@ -164,42 +199,86 @@ const Catalog = () => {
             </article>
           </div>
         ) : (
-          // Articles List
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {articles
-              .filter(article =>
-                article.title.toLowerCase().includes(searchTerm.toLowerCase())
-              )
-              .map((article, index) => (
-                <motion.div
+          // Articles List - Compact Blog Style
+          <>
+            <div className="space-y-3">
+              {displayedArticles.map((article, index) => (
+                <motion.article
                   key={article.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl transition-all group cursor-pointer"
+                  transition={{ delay: index * 0.05 }}
+                  className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all group cursor-pointer"
                   onClick={() => setSelectedArticle(article)}
                 >
-                  {/* Thumbnail */}
-                  <div className="aspect-video bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center relative overflow-hidden">
-                    {article.thumbnail ? (
-                      <img src={article.thumbnail} alt={article.title} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="material-symbols-outlined text-6xl text-slate-300 group-hover:text-primary/50 transition-colors">article</span>
-                    )}
-                  </div>
+                  <div className="flex flex-col md:flex-row gap-3 p-3">
+                    {/* Thumbnail */}
+                    <div className="md:w-40 md:flex-shrink-0">
+                      <div className="aspect-video w-full rounded-lg overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+                        {article.thumbnail ? (
+                          <img
+                            src={article.thumbnail}
+                            alt={article.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <span className="material-symbols-outlined text-3xl text-slate-300 group-hover:text-primary/50 transition-colors">
+                            article
+                          </span>
+                        )}
+                      </div>
+                    </div>
 
-                  {/* Content */}
-                  <div className="p-6">
-                    <h3 className="font-bold text-slate-800 text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                      {article.title}
-                    </h3>
-                    <p className="text-sm text-slate-400">
-                      {new Date(article.created_at).toLocaleDateString('vi-VN')}
-                    </p>
+                    {/* Content */}
+                    <div className="flex-1 flex flex-col justify-center min-w-0">
+                      <div className="flex items-center gap-1 text-xs text-slate-400 mb-1.5">
+                        <span className="material-symbols-outlined text-xs">calendar_today</span>
+                        <span>{new Date(article.created_at).toLocaleDateString('vi-VN')}</span>
+                      </div>
+                      
+                      <h2 className="text-base md:text-lg font-bold text-slate-800 mb-1.5 group-hover:text-primary transition-colors line-clamp-2">
+                        {article.title}
+                      </h2>
+                      
+                      {/* Extract first paragraph as excerpt */}
+                      {article.content?.blocks && (
+                        <p className="text-xs text-slate-600 line-clamp-2 mb-2">
+                          {article.content.blocks
+                            .find(block => block.type === 'paragraph')
+                            ?.data?.text?.replace(/<[^>]*>/g, '') || ''}
+                        </p>
+                      )}
+
+                      <div className="flex items-center gap-1 text-primary text-xs font-semibold group-hover:gap-1.5 transition-all">
+                        <span>Đọc thêm</span>
+                        <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                      </div>
+                    </div>
                   </div>
-                </motion.div>
+                </motion.article>
               ))}
-          </div>
+            </div>
+
+            {/* Load More Button */}
+            {hasMore && (
+              <div className="flex justify-center mt-8">
+                <button
+                  onClick={loadMore}
+                  className="px-8 py-3 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-sm hover:shadow-lg flex items-center gap-2"
+                >
+                  <span>Xem thêm bài viết</span>
+                  <span className="material-symbols-outlined text-lg">expand_more</span>
+                </button>
+              </div>
+            )}
+
+            {/* Show count */}
+            {filteredArticles.length > 0 && (
+              <div className="text-center mt-6 text-sm text-slate-500">
+                Đang hiển thị {displayedArticles.length} / {filteredArticles.length} bài viết
+              </div>
+            )}
+          </>
         )}
 
         {/* Contact CTA */}

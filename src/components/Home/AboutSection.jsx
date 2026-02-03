@@ -86,8 +86,8 @@ const Scene3D = () => {
 
 const AboutSection = () => {
     const features = [
-        { label: 'Chính Hãng 100%', icon: 'verified_user', desc: 'Nhập khẩu trực tiếp' },
-        { label: 'Bảo Hành Uy Tín', icon: 'handyman', desc: 'Bảo hành toàn quốc' },
+        { label: 'Sản Phẩm Chính Hãng, Original Parts', icon: 'verified_user', desc: 'Nhập khẩu trực tiếp' },
+        { label: 'Bảo Hành Uy Tín', icon: 'handyman', desc: 'Đổi mới 100% nếu lỗi do nhà sản xuất' },
         { label: 'Giá Cạnh Tranh', icon: 'savings', desc: 'Cam kết giá tốt nhất thị trường' }
     ]
 
@@ -143,7 +143,7 @@ const AboutSection = () => {
 
                         <div className="flex flex-wrap gap-4">
                             <div className="flex items-center gap-3 px-5 py-3 bg-gray-100 border border-gray-300 rounded-xl shadow-sm">
-                                <span className="text-primary text-3xl font-bold">500+</span>
+                                <span className="text-primary text-3xl font-bold">3000+</span>
                                 <span className="text-slate-500 text-sm">Khách hàng<br />tin tưởng</span>
                             </div>
                             <div className="flex items-center gap-3 px-5 py-3 bg-gray-100 border border-gray-300 rounded-xl shadow-sm">

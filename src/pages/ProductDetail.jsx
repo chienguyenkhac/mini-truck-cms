@@ -121,9 +121,9 @@ const ProductDetail = () => {
                     <motion.div
                         initial={{ opacity: 0, x: -30 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="relative"
+                        className="relative max-w-2xl mx-auto"
                     >
-                        <div className="aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 border border-gray-200 shadow-lg relative">
+                        <div className="aspect-[4/3] rounded-3xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 border border-gray-200 shadow-lg relative">
                             <AnimatePresence mode="wait">
                                 {images.length > 0 ? (
                                     <motion.img
@@ -223,20 +223,14 @@ const ProductDetail = () => {
                         </h1>
 
                         {/* Product Codes */}
-                        <div className="flex flex-wrap gap-4 text-sm">
-                            {product.code && (
-                                <div className="flex items-center gap-2 text-slate-600">
-                                    <span className="font-medium">Mã SP:</span>
-                                    <span className="font-mono bg-slate-100 px-2 py-1 rounded">{product.code}</span>
-                                </div>
-                            )}
-                            {product.manufacturer_code && (
+                        {product.manufacturer_code && (
+                            <div className="flex flex-wrap gap-4 text-sm">
                                 <div className="flex items-center gap-2 text-slate-600">
                                     <span className="font-medium">Mã NSX:</span>
                                     <span className="font-mono bg-slate-100 px-2 py-1 rounded">{product.manufacturer_code}</span>
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
 
                         {product.description && (
                             <p className="text-slate-500 text-lg leading-relaxed">
@@ -284,16 +278,16 @@ const ProductDetail = () => {
                 {/* Related Products */}
                 {
                     relatedProducts.length > 0 && (
-                        <div className="mt-20">
-                            <h2 className="text-2xl font-bold text-slate-800 mb-8">Sản Phẩm Liên Quan</h2>
-                            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="mt-16">
+                            <h2 className="text-xl font-bold text-slate-800 mb-4">Sản Phẩm Liên Quan</h2>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                                 {relatedProducts.map((p) => (
                                     <Link
                                         key={p.id}
                                         to={`/product/${p.id}`}
-                                        className="group bg-white border border-slate-200 rounded-2xl overflow-hidden hover:border-primary/50 transition-all shadow-sm hover:shadow-lg"
+                                        className="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-primary/50 transition-all shadow-sm hover:shadow-md"
                                     >
-                                        <div className="aspect-[4/3] relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                                        <div className="aspect-video relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
                                             {p.image ? (
                                                 <img
                                                     src={getImageUrl(p.image)}
@@ -309,8 +303,8 @@ const ProductDetail = () => {
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="p-5">
-                                            <h3 className="text-slate-800 font-bold group-hover:text-primary transition-colors line-clamp-2">
+                                        <div className="p-3">
+                                            <h3 className="text-slate-800 font-medium text-xs group-hover:text-primary transition-colors line-clamp-2">
                                                 {p.name}
                                             </h3>
                                         </div>

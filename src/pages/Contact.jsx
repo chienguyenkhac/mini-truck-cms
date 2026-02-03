@@ -197,9 +197,9 @@ const Contact = () => {
           className="mt-12 rounded-3xl overflow-hidden border border-slate-200 shadow-sm"
         >
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.123456789!2d105.7!3d21.05!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjHCsDAzJzAwLjAiTiAxMDXCsDQyJzAwLjAiRQ!5e0!3m2!1svi!2s!4v1234567890123!5m2!1svi!2s"
+            src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d17715.665864277737!2d105.7075459798745!3d21.022281109497083!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x313455b2b079440f%3A0xcbaa30aea515ad31!2zQ8O0bmcgVHkgU2lub3RydWsgSMOgIE7hu5lp!5e0!3m2!1svi!2s!4v1770136668771!5m2!1svi!2s"
             width="100%"
-            height="400"
+            height="300"
             style={{ border: 0 }}
             allowFullScreen=""
             loading="lazy"

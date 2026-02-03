@@ -173,7 +173,13 @@ const Products: React.FC = () => {
     };
 
     const handleCopyLink = (product: Product) => {
-        const url = `https://sinotruk-hanoi.vercel.app/product/${product.id}`;
+        // Get the base URL without /secret path
+        const origin = window.location.origin;
+        // If we're on admin (port 5174 or /secret), use the client base URL
+        const baseUrl = origin.includes(':5174') 
+            ? origin.replace(':5174', ':5173')  // Local dev: switch from admin port to client port
+            : origin; // Production: same origin, just remove /secret path
+        const url = `${baseUrl}/product/${product.id}`;
         navigator.clipboard.writeText(url);
         notification.success('Đã copy link sản phẩm');
     };

@@ -14,8 +14,9 @@ const Catalogs: React.FC = () => {
     const [articles, setArticles] = useState<CatalogArticle[]>([]);
     const [isEditing, setIsEditing] = useState(false);
     const [editingArticle, setEditingArticle] = useState<CatalogArticle | null>(null);
-    const [formData, setFormData] = useState({ title: '', slug: '' });
+    const [formData, setFormData] = useState({ title: '', slug: '', thumbnail: '' });
     const [_loading, setLoading] = useState(true);
+    const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
     const [deleteArticle, setDeleteArticle] = useState<CatalogArticle | null>(null);
     const [showHelp, setShowHelp] = useState(false);
     const editorRef = useRef<EditorJS | null>(null);
@@ -131,16 +132,63 @@ const Catalogs: React.FC = () => {
 
     const handleNewArticle = () => {
         setEditingArticle(null);
-        setFormData({ title: '', slug: '' });
+        setFormData({ title: '', slug: '', thumbnail: '' });
         setIsEditing(true);
         setTimeout(() => initEditor(), 100);
     };
 
     const handleEditArticle = (article: CatalogArticle) => {
         setEditingArticle(article);
-        setFormData({ title: article.title, slug: article.slug });
+        setFormData({ title: article.title, slug: article.slug, thumbnail: article.thumbnail || '' });
         setIsEditing(true);
         setTimeout(() => initEditor(article.content), 100);
+    };
+
+    const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            notification.error('Vui lòng chọn file ảnh');
+            return;
+        }
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            notification.error('Kích thước ảnh tối đa 5MB');
+            return;
+        }
+
+        setUploadingThumbnail(true);
+        try {
+            const reader = new FileReader();
+            const base64Promise = new Promise<string>((resolve, reject) => {
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+            const base64Image = await base64Promise;
+
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: base64Image }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Upload failed');
+            }
+
+            setFormData({ ...formData, thumbnail: result.url });
+            notification.success('Đã tải ảnh đại diện lên');
+        } catch (error: any) {
+            notification.error(`Không thể tải ảnh lên: ${error.message}`);
+        } finally {
+            setUploadingThumbnail(false);
+        }
     };
 
     const handleSave = async () => {
@@ -160,7 +208,8 @@ const Catalogs: React.FC = () => {
                 await catalogService.update(editingArticle.id, {
                     title: formData.title,
                     slug,
-                    content: content || {}
+                    content: content || {},
+                    thumbnail: formData.thumbnail || undefined
                 });
                 notification.success('Đã cập nhật bài viết');
             } else {
@@ -168,6 +217,7 @@ const Catalogs: React.FC = () => {
                     title: formData.title,
                     slug,
                     content: content || {},
+                    thumbnail: formData.thumbnail || undefined,
                     is_published: false
                 });
                 notification.success('Đã tạo bài viết mới');
@@ -264,6 +314,50 @@ const Catalogs: React.FC = () => {
 
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Ảnh đại diện <span className="text-slate-400 text-xs">(khuyên dùng tỷ lệ 16:9)</span>
+                        </label>
+                        <div className="flex items-start gap-4">
+                            {formData.thumbnail && (
+                                <div className="relative w-48 h-32 rounded-xl overflow-hidden border-2 border-slate-200">
+                                    <img
+                                        src={formData.thumbnail}
+                                        alt="Thumbnail preview"
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <button
+                                        onClick={() => setFormData({ ...formData, thumbnail: '' })}
+                                        className="absolute top-2 right-2 p-1 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+                                        title="Xóa ảnh"
+                                    >
+                                        <span className="material-symbols-outlined text-sm">close</span>
+                                    </button>
+                                </div>
+                            )}
+                            <label className={`flex flex-col items-center justify-center ${formData.thumbnail ? 'w-32 h-32' : 'w-48 h-32'} border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors`}>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleThumbnailUpload}
+                                    className="hidden"
+                                    disabled={uploadingThumbnail}
+                                />
+                                {uploadingThumbnail ? (
+                                    <div className="flex flex-col items-center gap-2">
+                                        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+                                        <span className="text-xs text-slate-500">Đang tải...</span>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <span className="material-symbols-outlined text-4xl text-slate-400">add_photo_alternate</span>
+                                        <span className="text-xs text-slate-500 mt-1">{formData.thumbnail ? 'Đổi ảnh' : 'Tải ảnh lên'}</span>
+                                    </>
+                                )}
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">
                             Nội dung bài viết
                         </label>
                         <div
@@ -325,6 +419,7 @@ const Catalogs: React.FC = () => {
                 <table className="admin-table w-full">
                     <thead>
                         <tr className="bg-slate-50">
+                            <th className="w-20">Ảnh</th>
                             <th>Tiêu đề</th>
                             <th className="w-32">Trạng thái</th>
                             <th className="w-40">Ngày tạo</th>
@@ -339,6 +434,15 @@ const Catalogs: React.FC = () => {
                             )
                             .map(article => (
                                 <tr key={article.id} className="hover:bg-slate-50/80 transition-colors">
+                                    <td>
+                                        <div className="w-16 h-12 rounded-lg overflow-hidden bg-slate-100 flex items-center justify-center">
+                                            {article.thumbnail ? (
+                                                <img src={article.thumbnail} alt={article.title} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <span className="material-symbols-outlined text-slate-300 text-2xl">article</span>
+                                            )}
+                                        </div>
+                                    </td>
                                     <td>
                                         <p className="font-bold text-slate-800">{article.title}</p>
                                         <p className="text-xs text-slate-400">/{article.slug}</p>
@@ -381,7 +485,7 @@ const Catalogs: React.FC = () => {
                                 </tr>
                             )) : (
                             <tr>
-                                <td colSpan={4} className="py-16 text-center">
+                                <td colSpan={5} className="py-16 text-center">
                                     <div className="flex flex-col items-center gap-2 opacity-50">
                                         <span className="material-symbols-outlined text-5xl">article</span>
                                         <p className="font-medium">Chưa có bài viết nào</p>
@@ -425,6 +529,13 @@ const Catalogs: React.FC = () => {
                             </button>
                         </div>
                         <div className="p-6 space-y-4 text-slate-600">
+                            <div className="flex items-start gap-3">
+                                <span className="material-symbols-outlined text-primary mt-0.5">add_photo_alternate</span>
+                                <div>
+                                    <p className="font-bold text-slate-800">Ảnh đại diện</p>
+                                    <p className="text-sm">Click vùng "Tải ảnh lên" để chọn ảnh đại diện hiển thị trong danh sách bài viết (khuyên dùng tỷ lệ 16:9).</p>
+                                </div>
+                            </div>
                             <div className="flex items-start gap-3">
                                 <span className="material-symbols-outlined text-primary mt-0.5">edit</span>
                                 <div>

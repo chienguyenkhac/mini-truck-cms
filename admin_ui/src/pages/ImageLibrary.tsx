@@ -10,7 +10,7 @@ interface GalleryImage {
     created_at: string;
 }
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 80; // More items per page with smaller grid
 
 const ImageLibrary: React.FC = () => {
     const notification = useNotification();
@@ -129,6 +129,39 @@ const ImageLibrary: React.FC = () => {
 
     const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
+    // Navigate to previous/next image
+    const goToPreviousImage = () => {
+        const currentIndex = images.findIndex(img => img.id === selectedImage?.id);
+        if (currentIndex > 0) {
+            setSelectedImage(images[currentIndex - 1]);
+        }
+    };
+
+    const goToNextImage = () => {
+        const currentIndex = images.findIndex(img => img.id === selectedImage?.id);
+        if (currentIndex < images.length - 1) {
+            setSelectedImage(images[currentIndex + 1]);
+        }
+    };
+
+    // Keyboard navigation
+    useEffect(() => {
+        if (!selectedImage) return;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                setSelectedImage(null);
+            } else if (e.key === 'ArrowLeft') {
+                goToPreviousImage();
+            } else if (e.key === 'ArrowRight') {
+                goToNextImage();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [selectedImage, images]);
+
     // Get image URL with proxy
     const getImageUrl = (path: string) => {
         if (path.startsWith('http')) return path;
@@ -175,13 +208,13 @@ const ImageLibrary: React.FC = () => {
 
             {/* Image Grid */}
             {loading ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    {[...Array(10)].map((_, i) => (
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2 md:gap-3">
+                    {[...Array(20)].map((_, i) => (
                         <div key={i} className="aspect-square bg-slate-200 rounded-xl animate-pulse" />
                     ))}
                 </div>
             ) : images.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2 md:gap-3">
                     {images.map((img) => (
                         <div
                             key={img.id}
@@ -240,26 +273,60 @@ const ImageLibrary: React.FC = () => {
             {/* Lightbox */}
             {selectedImage && (
                 <div
-                    className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+                    className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 md:p-8 lg:p-16"
                     onClick={() => setSelectedImage(null)}
                 >
                     <div
-                        className="relative max-w-4xl w-full"
+                        className="relative max-w-5xl w-full h-full flex flex-col justify-center"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <button
-                            onClick={() => setSelectedImage(null)}
-                            className="absolute -top-12 right-0 text-white/70 hover:text-white transition-colors"
-                        >
-                            <span className="material-symbols-outlined text-3xl">close</span>
-                        </button>
-                        <img
-                            src={getImageUrl(selectedImage.image_path)}
-                            alt={selectedImage.title || 'Gallery image'}
-                            className="w-full rounded-xl shadow-2xl"
-                        />
+                        {/* Top bar with counter and close button */}
+                        <div className="absolute -top-4 md:-top-12 left-0 right-0 flex justify-between items-center">
+                            <div className="text-white/70 text-sm md:text-base font-medium">
+                                {images.findIndex(img => img.id === selectedImage.id) + 1} / {images.length}
+                            </div>
+                            <button
+                                onClick={() => setSelectedImage(null)}
+                                className="text-white/70 hover:text-white transition-colors"
+                            >
+                                <span className="material-symbols-outlined text-2xl md:text-3xl">close</span>
+                            </button>
+                        </div>
+
+                        {/* Previous Button */}
+                        {images.findIndex(img => img.id === selectedImage.id) > 0 && (
+                            <button
+                                onClick={goToPreviousImage}
+                                className="absolute left-2 md:-left-16 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-2 md:p-3 rounded-full transition-all duration-300 hover:scale-110 z-10"
+                                aria-label="Previous image"
+                            >
+                                <span className="material-symbols-outlined text-2xl md:text-3xl">chevron_left</span>
+                            </button>
+                        )}
+
+                        {/* Next Button */}
+                        {images.findIndex(img => img.id === selectedImage.id) < images.length - 1 && (
+                            <button
+                                onClick={goToNextImage}
+                                className="absolute right-2 md:-right-16 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-2 md:p-3 rounded-full transition-all duration-300 hover:scale-110 z-10"
+                                aria-label="Next image"
+                            >
+                                <span className="material-symbols-outlined text-2xl md:text-3xl">chevron_right</span>
+                            </button>
+                        )}
+
+                        {/* Image container with max height */}
+                        <div className="relative max-h-[70vh] md:max-h-[80vh] flex items-center justify-center">
+                            <img
+                                src={getImageUrl(selectedImage.image_path)}
+                                alt={selectedImage.title || 'Gallery image'}
+                                className="max-w-full max-h-[70vh] md:max-h-[80vh] w-auto h-auto object-contain rounded-lg md:rounded-xl shadow-2xl"
+                            />
+                        </div>
+
+                        {/* Image title */}
                         {selectedImage.title && (
-                            <p className="mt-4 text-center text-white text-lg">{selectedImage.title}</p>
+                            <p className="mt-4 text-center text-white text-base md:text-lg font-medium">{selectedImage.title}</p>
                         )}
                     </div>
                 </div>

@@ -169,7 +169,7 @@ const About = () => {
         >
           {[
             { value: '15+', label: 'Năm kinh nghiệm' },
-            { value: '500+', label: 'Khách hàng tin tưởng' },
+            { value: '3000+', label: 'Khách hàng tin tưởng' },
             { value: '50K+', label: 'Phụ tùng đã bán' },
             { value: '63', label: 'Tỉnh thành phủ sóng' },
           ].map((stat, i) => (
@@ -209,7 +209,7 @@ const About = () => {
             initial={{ y: 30, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             viewport={{ once: true }}
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
+            className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3"
           >
             {categories.map((vehicle, index) => (
               <motion.div
@@ -224,7 +224,7 @@ const About = () => {
                   rel="noopener noreferrer"
                   className="group block text-center"
                 >
-                  <div className="aspect-square relative mb-3 bg-white rounded-lg p-2 border border-slate-100 hover:border-primary/30 hover:shadow-lg transition-all duration-300">
+                  <div className="aspect-square relative mb-2 bg-white rounded-lg p-1.5 border border-slate-100 hover:border-primary/30 hover:shadow-lg transition-all duration-300">
                     <img
                       src={vehicle.thumbnail || '/images/default-truck.svg'}
                       alt={vehicle.name}
@@ -241,11 +241,11 @@ const About = () => {
                       }}
                     />
                   </div>
-                  <h3 className="text-sm font-bold text-slate-700 group-hover:text-primary transition-colors uppercase leading-tight line-clamp-2">
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-700 group-hover:text-primary transition-colors uppercase leading-tight line-clamp-2">
                     {vehicle.name}
                   </h3>
                   {vehicle.code && (
-                    <p className="text-xs text-slate-400 mt-0.5 uppercase">{vehicle.code}</p>
+                    <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5 uppercase">{vehicle.code}</p>
                   )}
                 </Link>
               </motion.div>

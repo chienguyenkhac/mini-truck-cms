@@ -118,7 +118,7 @@ export const getSiteSettings = async () => {
 // Catalog Articles
 export const getCatalogArticles = async () => {
     try {
-        return await fetchAPI('/catalog-articles');
+        return await fetchAPI('/catalog-articles?is_published=true');
     } catch (error) {
         console.error('Error fetching catalog articles:', error);
         return [];

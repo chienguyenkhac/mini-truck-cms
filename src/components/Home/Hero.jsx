@@ -144,7 +144,7 @@ const Hero = () => {
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs font-bold uppercase tracking-widest backdrop-blur-sm"
           >
             <span className="material-symbols-outlined text-sm">verified</span>
-            Phụ tùng chính hãng 100%
+            Phụ tùng chính hãng, Original Parts
           </motion.div>
 
           <div ref={titleRef} className="overflow-hidden">
@@ -166,7 +166,8 @@ const Hero = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="text-slate-800 text-base md:text-lg max-w-xl leading-relaxed font-normal"
+            className="text-slate-800 text-base md:text-lg max-w-xl leading-relaxed font-medium px-4 py-3 rounded-lg backdrop-blur-[2px] bg-white/5 shadow-sm"
+            style={{ textShadow: '0 2px 8px rgba(255, 255, 255, 0.8), 0 1px 3px rgba(0, 0, 0, 0.3)' }}
           >
             Chuyên cung cấp phụ tùng chính hãng cho các dòng xe tải HOWO SINOTRUK. Đầy đủ linh kiện từ động cơ, hộp số, gầm, cầu đến các chi tiết nhỏ nhất. Cam kết giá tốt nhất thị trường.
           </motion.p>

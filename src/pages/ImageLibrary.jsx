@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { supabase } from '../services/supabase'
 
-const ITEMS_PER_PAGE = 50 // 5x10 grid
+const ITEMS_PER_PAGE = 80 // More items per page with smaller grid
 
 const ImageLibrary = () => {
   const [images, setImages] = useState([])
@@ -15,7 +15,7 @@ const ImageLibrary = () => {
     const loadImages = async () => {
       setLoading(true)
       try {
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3002/api'
+        const API_BASE = import.meta.env.VITE_API_URL || '/api'
         const response = await fetch(`${API_BASE}/gallery-images?page=${currentPage}&limit=${ITEMS_PER_PAGE}`)
         const result = await response.json()
 
@@ -37,11 +37,44 @@ const ImageLibrary = () => {
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
 
+  // Navigate to previous/next image
+  const goToPreviousImage = () => {
+    const currentIndex = images.findIndex(img => img.id === selectedImage?.id)
+    if (currentIndex > 0) {
+      setSelectedImage(images[currentIndex - 1])
+    }
+  }
+
+  const goToNextImage = () => {
+    const currentIndex = images.findIndex(img => img.id === selectedImage?.id)
+    if (currentIndex < images.length - 1) {
+      setSelectedImage(images[currentIndex + 1])
+    }
+  }
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (!selectedImage) return
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setSelectedImage(null)
+      } else if (e.key === 'ArrowLeft') {
+        goToPreviousImage()
+      } else if (e.key === 'ArrowRight') {
+        goToNextImage()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selectedImage, images])
+
   // Get image URL with proxy
   const getImageUrl = (path) => {
     if (!path) return ''
     if (path.startsWith('http')) return path
-    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3002/api'
+    const API_BASE = import.meta.env.VITE_API_URL || '/api'
     return `${API_BASE}/image?path=${encodeURIComponent(path)}`
   }
 
@@ -180,7 +213,7 @@ const ImageLibrary = () => {
           </div>
         ) : images.length > 0 ? (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2 md:gap-3">
               {images.map((img, index) => (
                 <motion.div
                   key={img.id}
@@ -198,15 +231,6 @@ const ImageLibrary = () => {
                       loading="lazy"
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                     />
-                  </div>
-                  <div
-                    className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                  >
-                    {img.title && (
-                      <div className="absolute bottom-0 left-0 right-0 p-3">
-                        <p className="text-white font-bold text-sm line-clamp-2">{img.title}</p>
-                      </div>
-                    )}
                   </div>
                 </motion.div>
               ))}
@@ -247,29 +271,63 @@ const ImageLibrary = () => {
       {/* Lightbox */}
       {selectedImage && (
         <div
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 md:p-8 lg:p-16"
           onClick={() => setSelectedImage(null)}
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="relative max-w-4xl w-full"
+            className="relative max-w-5xl w-full h-full flex flex-col justify-center"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              onClick={() => setSelectedImage(null)}
-              className="absolute -top-12 right-0 text-white/70 hover:text-white transition-colors"
-            >
-              <span className="material-symbols-outlined text-3xl">close</span>
-            </button>
-            <img
-              src={getImageUrl(selectedImage.image_path)}
-              alt={selectedImage.title || 'Gallery image'}
-              className="w-full rounded-xl shadow-2xl"
-              onContextMenu={(e) => handleImageRightClick(e, getImageUrl(selectedImage.image_path), selectedImage.title)}
-            />
+            {/* Top bar with counter and close button */}
+            <div className="absolute -top-4 md:-top-12 left-0 right-0 flex justify-between items-center">
+              <div className="text-white/70 text-sm md:text-base font-medium">
+                {images.findIndex(img => img.id === selectedImage.id) + 1} / {images.length}
+              </div>
+              <button
+                onClick={() => setSelectedImage(null)}
+                className="text-white/70 hover:text-white transition-colors"
+              >
+                <span className="material-symbols-outlined text-2xl md:text-3xl">close</span>
+              </button>
+            </div>
+
+            {/* Previous Button */}
+            {images.findIndex(img => img.id === selectedImage.id) > 0 && (
+              <button
+                onClick={goToPreviousImage}
+                className="absolute left-2 md:-left-16 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-2 md:p-3 rounded-full transition-all duration-300 hover:scale-110 z-10"
+                aria-label="Previous image"
+              >
+                <span className="material-symbols-outlined text-2xl md:text-3xl">chevron_left</span>
+              </button>
+            )}
+
+            {/* Next Button */}
+            {images.findIndex(img => img.id === selectedImage.id) < images.length - 1 && (
+              <button
+                onClick={goToNextImage}
+                className="absolute right-2 md:-right-16 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-2 md:p-3 rounded-full transition-all duration-300 hover:scale-110 z-10"
+                aria-label="Next image"
+              >
+                <span className="material-symbols-outlined text-2xl md:text-3xl">chevron_right</span>
+              </button>
+            )}
+
+            {/* Image container with max height */}
+            <div className="relative max-h-[70vh] md:max-h-[80vh] flex items-center justify-center">
+              <img
+                src={getImageUrl(selectedImage.image_path)}
+                alt={selectedImage.title || 'Gallery image'}
+                className="max-w-full max-h-[70vh] md:max-h-[80vh] w-auto h-auto object-contain rounded-lg md:rounded-xl shadow-2xl"
+                onContextMenu={(e) => handleImageRightClick(e, getImageUrl(selectedImage.image_path), selectedImage.title)}
+              />
+            </div>
+
+            {/* Image title */}
             {selectedImage.title && (
-              <p className="mt-4 text-center text-white text-lg">{selectedImage.title}</p>
+              <p className="mt-4 text-center text-white text-base md:text-lg font-medium">{selectedImage.title}</p>
             )}
           </motion.div>
         </div>
