@@ -220,6 +220,7 @@ export const supabase = {
             limit: function (n) { this._limit = n; return this; },
             range: function (from, to) { this._range = { from, to }; return this; },
             single: function () { this._single = true; return this; },
+            maybeSingle: function () { this._single = true; this._maybeSingle = true; return this; },
 
             then: async function (resolve, reject) {
                 try {

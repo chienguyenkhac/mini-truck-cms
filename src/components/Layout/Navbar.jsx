@@ -34,7 +34,8 @@ const Navbar = ({ isScrolled }) => {
                 // Load categories
                 const { data: catData, error: catError } = await supabase
                     .from('categories')
-                    .select('*')
+                    .select('id, name, slug, is_vehicle_name, is_visible')
+                    .eq('is_visible', true)
                     .order('name')
                 if (!catError && catData) {
                     setVehicleCategories(catData.filter(c => c.is_vehicle_name))
@@ -58,6 +59,22 @@ const Navbar = ({ isScrolled }) => {
         }
         loadData()
     }, [])
+
+    // Close dropdown when clicking outside or scrolling
+    useEffect(() => {
+        const handleClickOutside = () => setOpenDropdown(null)
+        const handleScroll = () => setOpenDropdown(null)
+        
+        if (openDropdown !== null) {
+            document.addEventListener('click', handleClickOutside)
+            window.addEventListener('scroll', handleScroll)
+        }
+        
+        return () => {
+            document.removeEventListener('click', handleClickOutside)
+            window.removeEventListener('scroll', handleScroll)
+        }
+    }, [openDropdown])
 
     const menuItems = [
         { path: '/', label: 'TRANG CHỦ' },
@@ -144,6 +161,7 @@ const Navbar = ({ isScrolled }) => {
                                     className="relative"
                                     onMouseEnter={() => setOpenDropdown(i)}
                                     onMouseLeave={() => setOpenDropdown(null)}
+                                    onClick={(e) => e.stopPropagation()}
                                 >
                                     <button
                                         className={`text-sm font-medium transition-colors relative group flex items-center gap-1 py-2 ${location.pathname.includes('/products') ? 'text-primary' : 'text-slate-700 hover:text-primary'}`}
@@ -160,6 +178,7 @@ const Navbar = ({ isScrolled }) => {
                                             <div className="bg-white rounded-xl shadow-xl border border-slate-200 py-2">
                                                 <Link
                                                     to="/products"
+                                                    onClick={() => setOpenDropdown(null)}
                                                     className="block px-4 py-2 text-sm text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors font-medium uppercase"
                                                 >
                                                     TẤT CẢ
@@ -168,7 +187,8 @@ const Navbar = ({ isScrolled }) => {
                                                 {getDropdownItems(item.dropdownType).map((cat) => (
                                                     <Link
                                                         key={cat.id}
-                                                        to={`/products?category=${cat.id}`}
+                                                        to={cat.slug ? `/products/${cat.slug}` : `/products?category=${cat.id}`}
+                                                        onClick={() => setOpenDropdown(null)}
                                                         className="block px-4 py-2 text-sm text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors uppercase"
                                                     >
                                                         {cat.name}
@@ -264,16 +284,16 @@ const Navbar = ({ isScrolled }) => {
                                                                     >
                                                                         Tất cả
                                                                     </Link>
-                                                                    {getDropdownItems(item.dropdownType).map((cat) => (
-                                                                        <Link
-                                                                            key={cat.id}
-                                                                            to={`/products?${item.dropdownType === 'vehicle' ? 'vehicle' : 'category'}=${cat.id}`}
-                                                                            onClick={() => setIsMobileMenuOpen(false)}
-                                                                            className="block text-slate-500 hover:text-primary py-1"
-                                                                        >
-                                                                            {cat.name}
-                                                                        </Link>
-                                                                    ))}
+                                                    {getDropdownItems(item.dropdownType).map((cat) => (
+                                                        <Link
+                                                            key={cat.id}
+                                                            to={cat.slug ? `/products/${cat.slug}` : `/products?${item.dropdownType === 'vehicle' ? 'vehicle' : 'category'}=${cat.id}`}
+                                                            onClick={() => setIsMobileMenuOpen(false)}
+                                                            className="block text-slate-500 hover:text-primary py-1"
+                                                        >
+                                                            {cat.name}
+                                                        </Link>
+                                                    ))}
                                                                 </div>
                                                             </motion.div>
                                                         )}

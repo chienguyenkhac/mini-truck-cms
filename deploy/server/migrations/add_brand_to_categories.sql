@@ -26,3 +26,4 @@ COMMENT ON COLUMN categories.brand IS 'Brand name for vehicle categories (e.g., 
 
 
 
+

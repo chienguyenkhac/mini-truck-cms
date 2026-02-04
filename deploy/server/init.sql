@@ -93,6 +93,7 @@ DROP INDEX IF EXISTS realtime.ix_realtime_subscription_entity;
 DROP INDEX IF EXISTS public.idx_products_vehicle_ids;
 DROP INDEX IF EXISTS public.idx_products_manufacturer_code;
 DROP INDEX IF EXISTS public.idx_product_images_product;
+DROP INDEX IF EXISTS public.idx_categories_slug;
 DROP INDEX IF EXISTS public.idx_product_images_image;
 DROP INDEX IF EXISTS auth.users_is_anonymous_idx;
 DROP INDEX IF EXISTS auth.users_instance_id_idx;
@@ -163,6 +164,7 @@ ALTER TABLE IF EXISTS ONLY public.images DROP CONSTRAINT IF EXISTS images_pkey;
 ALTER TABLE IF EXISTS ONLY public.gallery_images DROP CONSTRAINT IF EXISTS gallery_images_pkey;
 ALTER TABLE IF EXISTS ONLY public.categories DROP CONSTRAINT IF EXISTS categories_pkey;
 ALTER TABLE IF EXISTS ONLY public.categories DROP CONSTRAINT IF EXISTS categories_name_key;
+ALTER TABLE IF EXISTS ONLY public.categories DROP CONSTRAINT IF EXISTS categories_slug_key;
 ALTER TABLE IF EXISTS ONLY public.catalog_articles DROP CONSTRAINT IF EXISTS catalog_articles_slug_key;
 ALTER TABLE IF EXISTS ONLY public.catalog_articles DROP CONSTRAINT IF EXISTS catalog_articles_pkey;
 ALTER TABLE IF EXISTS ONLY public.admin_users DROP CONSTRAINT IF EXISTS admin_users_username_key;
@@ -1043,6 +1045,52 @@ CREATE FUNCTION public.update_updated_at_column() RETURNS trigger
     AS $$
 BEGIN
     NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: generate_slug(text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.generate_slug(text_input text) RETURNS text
+    LANGUAGE plpgsql IMMUTABLE
+    AS $$
+DECLARE
+    slug_output TEXT;
+BEGIN
+    slug_output := LOWER(TRIM(text_input));
+    
+    -- Replace Vietnamese characters
+    slug_output := TRANSLATE(slug_output,
+        'àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ',
+        'aaaaaaaaaaaaaaaeeeeeeeeeeeiiiiioooooooooooooooouuuuuuuuuuuyyyyyd'
+    );
+    
+    -- Replace spaces and special characters with hyphens
+    slug_output := REGEXP_REPLACE(slug_output, '[^a-z0-9]+', '-', 'g');
+    
+    -- Remove leading/trailing hyphens
+    slug_output := TRIM(BOTH '-' FROM slug_output);
+    
+    RETURN slug_output;
+END;
+$$;
+
+
+--
+-- Name: auto_generate_category_slug(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.auto_generate_category_slug() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    -- Only generate slug if it's not provided or empty
+    IF NEW.slug IS NULL OR NEW.slug = '' THEN
+        NEW.slug := public.generate_slug(NEW.name);
+    END IF;
     RETURN NEW;
 END;
 $$;
@@ -3322,7 +3370,8 @@ CREATE TABLE public.categories (
     code character varying(50),
     thumbnail character varying(500),
     is_visible boolean DEFAULT true,
-    brand character varying(100)
+    brand character varying(100),
+    slug character varying(255)
 );
 
 
@@ -4051,21 +4100,21 @@ COPY public.catalog_articles (id, title, slug, content, thumbnail, is_published,
 -- Data for Name: categories; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.categories (id, name, created_at, updated_at, is_vehicle_name, code, thumbnail, is_visible) FROM stdin;
-1	Cabin & Thân vỏ	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
-2	Động cơ	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
-3	Hộp số	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
-4	Hệ thống cầu	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
-5	Ly hợp	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
-6	Giằng treo	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
-7	Truyền động	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
-8	Hệ thống lái	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
-9	Hệ thống hút xả	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
-10	Hệ thống làm mát	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
-11	Hệ thống điện	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
-12	Hệ thống nhiên liệu	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
-13	Hệ thống moay ơ	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
-14	Hệ thống phanh	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t
+COPY public.categories (id, name, created_at, updated_at, is_vehicle_name, code, thumbnail, is_visible, brand, slug) FROM stdin;
+1	Cabin & Thân vỏ	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t	\N	cabin-than-vo
+2	Động cơ	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t	\N	dong-co
+3	Hộp số	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t	\N	hop-so
+4	Hệ thống cầu	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t	\N	he-thong-cau
+5	Ly hợp	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t	\N	ly-hop
+6	Giằng treo	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t	\N	giang-treo
+7	Truyền động	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t	\N	truyen-dong
+8	Hệ thống lái	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t	\N	he-thong-lai
+9	Hệ thống hút xả	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t	\N	he-thong-hut-xa
+10	Hệ thống làm mát	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t	\N	he-thong-lam-mat
+11	Hệ thống điện	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t	\N	he-thong-dien
+12	Hệ thống nhiên liệu	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t	\N	he-thong-nhien-lieu
+13	Hệ thống moay ơ	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t	\N	he-thong-moay-o
+14	Hệ thống phanh	2025-12-23 20:21:27.641607	2025-12-23 20:21:27.641607	f	\N	\N	t	\N	he-thong-phanh
 \.
 
 
@@ -4724,6 +4773,14 @@ ALTER TABLE ONLY public.categories
 
 
 --
+-- Name: categories categories_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.categories
+    ADD CONSTRAINT categories_slug_key UNIQUE (slug);
+
+
+--
 -- Name: categories categories_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -5264,6 +5321,13 @@ CREATE INDEX idx_products_vehicle_ids ON public.products USING gin (vehicle_ids)
 
 
 --
+-- Name: idx_categories_slug; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_categories_slug ON public.categories USING btree (slug);
+
+
+--
 -- Name: ix_realtime_subscription_entity; Type: INDEX; Schema: realtime; Owner: -
 --
 
@@ -5373,6 +5437,13 @@ CREATE TRIGGER update_admin_users_updated_at BEFORE UPDATE ON public.admin_users
 --
 
 CREATE TRIGGER update_categories_updated_at BEFORE UPDATE ON public.categories FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+
+--
+-- Name: categories trigger_auto_generate_category_slug; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trigger_auto_generate_category_slug BEFORE INSERT OR UPDATE ON public.categories FOR EACH ROW EXECUTE FUNCTION public.auto_generate_category_slug();
 
 
 --

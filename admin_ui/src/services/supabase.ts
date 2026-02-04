@@ -54,6 +54,7 @@ export interface Product {
 export interface Category {
     id: number;
     name: string;
+    slug?: string;
     code?: string;
     thumbnail?: string;
     is_vehicle_name?: boolean;

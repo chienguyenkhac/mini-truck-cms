@@ -322,7 +322,7 @@ const Products: React.FC = () => {
                                 <th className="w-36">Mã SP (PN)</th>
                                 <th>Tên sản phẩm</th>
                                 <th className="w-32">Danh mục</th>
-                                <th className="w-24 text-center">Trang chủ</th>
+                                <th className="w-24 text-center">Show on Homepage</th>
                                 <th className="text-right px-6 w-40">Thao tác</th>
                             </tr>
                         </thead>

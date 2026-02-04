@@ -103,7 +103,7 @@ const ProductGrid = () => {
     useEffect(() => {
         const loadProducts = async () => {
             try {
-                const data = await getProducts(20, false, { orderBy: 'created_at', ascending: false })
+                const data = await getProducts(20, true, { orderBy: 'created_at', ascending: false })
                 setProducts(data.length > 0 ? data : fallbackProducts)
             } catch (err) {
                 console.error('Error loading products:', err)

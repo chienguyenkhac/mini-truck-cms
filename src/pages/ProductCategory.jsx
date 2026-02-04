@@ -13,26 +13,60 @@ const ProductCategory = () => {
     const loadCategoryData = async () => {
       setLoading(true)
       try {
-        // Fetch category by ID or slug
+        // Fetch category by slug, ID, or name
         const categoryId = parseInt(category)
+        console.log('🔍 Loading category:', category, 'isNumber:', !isNaN(categoryId))
+        
         let categoryQuery = supabase.from('categories').select('*')
 
+        let catData = null
+        let catError = null
+
         if (!isNaN(categoryId)) {
-          categoryQuery = categoryQuery.eq('id', categoryId)
+          // Try by ID first
+          const result = await supabase
+            .from('categories')
+            .select('*')
+            .eq('id', categoryId)
+            .single()
+          catData = result.data
+          catError = result.error
         } else {
-          // Try to match by name (slug-like)
-          categoryQuery = categoryQuery.ilike('name', `%${category.replace(/-/g, ' ')}%`)
+          // Try by slug first (preferred method)
+          const result = await supabase
+            .from('categories')
+            .select('*')
+            .eq('slug', category)
+            .maybeSingle()  // Use maybeSingle() instead of single()
+          catData = result.data
+          catError = result.error
+        }
+        
+        console.log('📊 Slug lookup result:', catData, 'Error:', catError)
+
+        // If slug lookup fails, try matching by name
+        if (catError && isNaN(categoryId)) {
+          console.log('⚠️ Slug not found, trying name match:', category.replace(/-/g, ' '))
+          const { data: nameData, error: nameError } = await supabase
+            .from('categories')
+            .select('*')
+            .ilike('name', `%${category.replace(/-/g, ' ')}%`)
+            .single()
+          
+          console.log('📊 Name lookup result:', nameData, 'Error:', nameError)
+          catData = nameData
+          catError = nameError
         }
 
-        const { data: catData, error: catError } = await categoryQuery.single()
-
         if (catError || !catData) {
+          console.log('❌ Category not found')
           setCategoryData({ name: 'Danh mục', description: '' })
           setProducts([])
           setLoading(false)
           return
         }
 
+        console.log('✅ Category found:', catData)
         setCategoryData(catData)
 
         // Fetch products for this category
@@ -99,52 +133,66 @@ const ProductCategory = () => {
 
       <div className="container mx-auto px-4 md:px-10 lg:px-20 pb-20">
         {products.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
             {products.map((product, index) => (
-              <Link
+              <motion.div
                 key={product.id}
-                to={`/product/${product.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
+                initial={{ y: 30, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                transition={{ delay: Math.min(index * 0.05, 0.3) }}
+                viewport={{ once: true }}
               >
-                <motion.div
-                  initial={{ y: 30, opacity: 0 }}
-                  whileInView={{ y: 0, opacity: 1 }}
-                  transition={{ delay: index * 0.05 }}
-                  viewport={{ once: true }}
-                  whileHover={{ y: -5 }}
-                  className="group bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-lg"
+                <Link
+                  to={`/product/${product.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-primary/40 transition-colors duration-300 shadow-sm hover:shadow-lg flex flex-col h-full will-change-transform"
                 >
-                  <div className="aspect-square relative overflow-hidden">
+                  <div className="aspect-square overflow-hidden relative bg-gradient-to-br from-gray-100 to-gray-200">
                     {product.image ? (
                       <img
                         src={getImageUrl(product.image)}
                         alt={product.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        loading="lazy"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         onError={(e) => { e.target.style.display = 'none' }}
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                        <span className="material-symbols-outlined text-6xl text-gray-300">settings</span>
+                      <div className="w-full h-full flex items-center justify-center">
+                        <span className="material-symbols-outlined text-7xl text-gray-300">settings</span>
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent opacity-60"></div>
+                    {product.manufacturer_code && (
+                      <div className="absolute top-4 left-4 bg-[#1e9ba8] text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">
+                        {product.manufacturer_code}
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent opacity-50"></div>
                   </div>
-                  <div className="p-6 space-y-4">
-                    <div>
-                      <h3 className="text-slate-800 font-bold text-lg group-hover:text-primary transition-colors line-clamp-2">
+
+                  <div className="p-3 flex flex-col flex-1">
+                    <div className="flex-1">
+                      <h3 className="text-slate-800 font-bold text-base group-hover:text-primary transition-colors line-clamp-2 min-h-[2.8rem]">
                         {product.name}
                       </h3>
-                      {product.code && (
-                        <p className="text-slate-400 text-xs mt-2 font-mono">Mã: {product.code}</p>
-                      )}
+                      <p className="text-slate-400 text-xs line-clamp-1 mt-0.5">{product.description || 'Phụ tùng chính hãng'}</p>
                     </div>
-                    <button className="w-full py-3 bg-primary/10 text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all">
-                      Xem Chi Tiết
-                    </button>
+
+                    <div className="flex gap-2 mt-auto pt-3">
+                      <div className="flex-1 py-2 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:border-primary hover:text-primary transition-all flex items-center justify-center">
+                        Chi Tiết
+                      </div>
+                      <a
+                        href="tel:0382890990"
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex-1 py-2 bg-[#c41e1e] text-white font-medium text-sm rounded-xl hover:bg-[#a01818] transition-all flex items-center justify-center"
+                      >
+                        Đặt Hàng
+                      </a>
+                    </div>
                   </div>
-                </motion.div>
-              </Link>
+                </Link>
+              </motion.div>
             ))}
           </div>
         ) : (

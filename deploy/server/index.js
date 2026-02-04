@@ -476,7 +476,7 @@ app.delete('/api/products/:id', async (req, res) => {
 // GET /api/categories - Get all categories
 app.get('/api/categories', async (req, res) => {
     try {
-        const { is_visible, is_vehicle_name } = req.query;
+        const { is_visible, is_vehicle_name, slug } = req.query;
 
         let query = 'SELECT * FROM categories WHERE 1=1';
         const params = [];
@@ -489,6 +489,12 @@ app.get('/api/categories', async (req, res) => {
         if (is_vehicle_name !== undefined) {
             query += ` AND is_vehicle_name = $${paramIndex++}`;
             params.push(is_vehicle_name === 'true');
+        }
+
+        // Add slug filter support
+        if (slug) {
+            query += ` AND slug = $${paramIndex++}`;
+            params.push(slug);
         }
 
         query += ' ORDER BY name';

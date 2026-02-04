@@ -68,10 +68,10 @@ const Footer = () => {
               <h4 className="text-slate-800 font-bold mb-8 uppercase tracking-widest text-sm">Phụ Tùng</h4>
               <ul className="space-y-4 text-sm text-slate-500">
                 {[
-                  { label: 'Phụ tùng động cơ', path: '/products' },
-                  { label: 'Phụ tùng phanh', path: '/products' },
-                  { label: 'Phụ tùng cabin', path: '/products' },
-                  { label: 'Phụ tùng hộp số', path: '/products' },
+                  { label: 'Động cơ', path: '/products/dong-co' },
+                  { label: 'Hộp số', path: '/products/hop-so' },
+                  { label: 'Hệ thống cầu', path: '/products/he-thong-cau' },
+                  { label: 'Ly hợp', path: '/products/ly-hop' },
                 ].map((link) => (
                   <li key={link.label}>
                     <Link to={link.path} className="hover:text-primary transition-colors">{link.label}</Link>
