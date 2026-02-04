@@ -226,16 +226,14 @@ const ImageLibrary: React.FC = () => {
                                 alt={img.title || 'Gallery image'}
                                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                             />
-                            {/* Overlay */}
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); setDeleteImage(img); }}
-                                    className="w-10 h-10 bg-red-500 text-white rounded-lg flex items-center justify-center hover:bg-red-600 transition-colors"
-                                    title="Xóa"
-                                >
-                                    <span className="material-symbols-outlined text-xl">delete</span>
-                                </button>
-                            </div>
+                            {/* Delete button - Bottom right corner */}
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setDeleteImage(img); }}
+                                className="absolute bottom-2 right-2 w-7 h-7 bg-red-500 text-white rounded-lg flex items-center justify-center hover:bg-red-600 transition-all opacity-0 group-hover:opacity-100 shadow-lg"
+                                title="Xóa"
+                            >
+                                <span className="material-symbols-outlined text-base">delete</span>
+                            </button>
                         </div>
                     ))}
                 </div>

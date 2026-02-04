@@ -38,43 +38,22 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         setIsLoading(true);
 
         try {
-            // Try Supabase login first
+            // Login via API
             const user = await loginUser(username, password);
 
-            if (user) {
-                localStorage.setItem('isAuthenticated', 'true');
-                localStorage.setItem('userId', String(user.id));
-                localStorage.setItem('username', user.username);
-                localStorage.setItem('sinotruk_admin_name', user.full_name);
-                if (user.avatar) {
-                    localStorage.setItem('sinotruk_admin_avatar', user.avatar);
-                }
-
-                if (onLogin) {
-                    onLogin();
-                } else {
-                    window.location.reload();
-                }
-                return;
-            }
-
-            // Fallback to mock credentials for demo
-            const validCredentials = [
-                { username: 'admin', password: 'admin' },
-                { username: 'admin', password: '123456' },
-            ];
-
-            const isValid = validCredentials.some(
-                cred => cred.username === username && cred.password === password
-            );
-
-            if (!isValid) {
+            if (!user) {
                 setError('Tên đăng nhập hoặc mật khẩu không đúng');
                 return;
             }
 
+            // Save user info to localStorage
             localStorage.setItem('isAuthenticated', 'true');
-            localStorage.setItem('username', username);
+            localStorage.setItem('userId', String(user.id));
+            localStorage.setItem('username', user.username);
+            localStorage.setItem('sinotruk_admin_name', user.full_name);
+            if (user.avatar) {
+                localStorage.setItem('sinotruk_admin_avatar', user.avatar);
+            }
 
             if (onLogin) {
                 onLogin();

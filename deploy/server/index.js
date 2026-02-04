@@ -5,6 +5,7 @@ const sharp = require('sharp');
 const path = require('path');
 const fs = require('fs');
 const { Pool } = require('pg');
+const bcrypt = require('bcrypt');
 
 // Load environment variables
 require('dotenv').config();
@@ -790,16 +791,29 @@ app.delete('/api/product-images/:id', async (req, res) => {
 app.post('/api/admin/login', async (req, res) => {
     try {
         const { username, password } = req.body;
+        
+        // Get user with password hash
         const { rows } = await pool.query(
-            'SELECT id, username, full_name, avatar, is_admin FROM admin_users WHERE username = $1 AND password = $2',
-            [username, password]
+            'SELECT id, username, password, full_name, avatar, is_admin FROM admin_users WHERE username = $1',
+            [username]
         );
 
         if (rows.length === 0) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        res.json(rows[0]);
+        const user = rows[0];
+        
+        // Compare password with hash
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        
+        if (!isValidPassword) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        // Don't send password hash to client
+        const { password: _, ...userWithoutPassword } = user;
+        res.json(userWithoutPassword);
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ error: 'Login failed' });
@@ -846,8 +860,10 @@ app.put('/api/admin/profile/:userId', async (req, res) => {
             params.push(username);
         }
         if (password) {
+            // Hash password before saving
+            const hashedPassword = await bcrypt.hash(password, 10);
             updates.push(`password = $${paramIndex++}`);
-            params.push(password);
+            params.push(hashedPassword);
         }
         if (avatar !== undefined) {
             updates.push(`avatar = $${paramIndex++}`);

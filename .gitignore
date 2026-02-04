@@ -9,10 +9,10 @@ yarn-error.log*
 .env
 .env.local
 .env.development
-.env.production
 *.env
 
-# BUT allow template files
+# BUT allow these files
+!.env.production
 !*.env.template
 !env.*.template
 
