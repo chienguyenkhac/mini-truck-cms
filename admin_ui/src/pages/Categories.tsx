@@ -21,6 +21,7 @@ const Categories: React.FC = () => {
     const editFileInputRef = useRef<HTMLInputElement>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [deleteCategory, setDeleteCategory] = useState<CategoryWithExtras | null>(null);
+    const [productCount, setProductCount] = useState<number>(0);
 
     // New category form - use 'type' field: 'vehicle' or 'part'
     const [newForm, setNewForm] = useState({
@@ -178,12 +179,46 @@ const Categories: React.FC = () => {
         }
     };
 
+    // Count products in category before showing delete modal
+    const handleDeleteClick = async (cat: CategoryWithExtras) => {
+        try {
+            const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
+            const response = await fetch(`${API_BASE}/products?category_id=${cat.id}`);
+            const products = await response.json();
+            const count = Array.isArray(products) ? products.length : 0;
+            setProductCount(count);
+            setDeleteCategory(cat);
+        } catch (error) {
+            console.error('Error counting products:', error);
+            setProductCount(0);
+            setDeleteCategory(cat);
+        }
+    };
+
     const confirmDelete = async () => {
         if (!deleteCategory) return;
         try {
-            await categoryService.delete(deleteCategory.id);
-            notification.success(`Đã xóa "${deleteCategory.name}"`);
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3002/api'}/categories/${deleteCategory.id}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const result = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(result.error || 'Có lỗi xảy ra');
+            }
+            
+            // Show success message with info about affected products
+            if (result.productsAffected > 0) {
+                notification.success(
+                    `Đã xóa "${deleteCategory.name}". ${result.productsAffected} sản phẩm đã được chuyển sang trạng thái "Không có danh mục".`
+                );
+            } else {
+                notification.success(`Đã xóa "${deleteCategory.name}"`);
+            }
+            
             setDeleteCategory(null);
+            setProductCount(0);
             loadCategories();
         } catch (error: any) {
             notification.error(error.message || 'Có lỗi xảy ra');
@@ -329,7 +364,7 @@ const Categories: React.FC = () => {
                         <button onClick={() => handleEdit(cat)} className="text-slate-400 hover:text-blue-600 hover:bg-blue-50 p-1.5 rounded-lg">
                             <span className="material-symbols-outlined text-sm">edit</span>
                         </button>
-                        <button onClick={() => setDeleteCategory(cat)} className="text-slate-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg">
+                        <button onClick={() => handleDeleteClick(cat)} className="text-slate-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg">
                             <span className="material-symbols-outlined text-sm">delete</span>
                         </button>
                     </div>
@@ -539,10 +574,14 @@ const Categories: React.FC = () => {
             {deleteCategory && (
                 <ConfirmDeleteModal
                     isOpen={!!deleteCategory}
-                    onClose={() => setDeleteCategory(null)}
+                    onClose={() => { setDeleteCategory(null); setProductCount(0); }}
                     onConfirm={confirmDelete}
                     title="Xác nhận xóa danh mục"
-                    message="Bạn có chắc chắn muốn xóa danh mục này?"
+                    message={
+                        productCount > 0 
+                            ? `Danh mục này đang có ${productCount} sản phẩm. Các sản phẩm sẽ được chuyển sang trạng thái "Không có danh mục" (không bị xóa). Bạn có chắc chắn muốn xóa danh mục này?`
+                            : "Bạn có chắc chắn muốn xóa danh mục này?"
+                    }
                     itemName={deleteCategory.name}
                 />
             )}

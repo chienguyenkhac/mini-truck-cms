@@ -556,9 +556,31 @@ app.put('/api/categories/:id', async (req, res) => {
 app.delete('/api/categories/:id', async (req, res) => {
     try {
         const { id } = req.params;
+        
+        // First, check how many products belong to this category
+        const { rows: productCheck } = await pool.query(
+            'SELECT COUNT(*) as count FROM products WHERE category_id = $1',
+            [id]
+        );
+        const productCount = parseInt(productCheck[0].count);
+        
+        // Set category_id to NULL for all products in this category
+        if (productCount > 0) {
+            await pool.query(
+                'UPDATE products SET category_id = NULL WHERE category_id = $1',
+                [id]
+            );
+        }
+        
+        // Now delete the category
         const { rowCount } = await pool.query('DELETE FROM categories WHERE id = $1', [id]);
         if (rowCount === 0) return res.status(404).json({ error: 'Category not found' });
-        res.json({ success: true, message: 'Category deleted' });
+        
+        res.json({ 
+            success: true, 
+            message: 'Category deleted',
+            productsAffected: productCount 
+        });
     } catch (error) {
         console.error('Error deleting category:', error);
         res.status(500).json({ error: 'Failed to delete category' });
