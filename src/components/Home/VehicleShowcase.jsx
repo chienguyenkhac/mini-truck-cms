@@ -110,7 +110,7 @@ const VehicleShowcase = () => {
                                 transition={{ delay: index * 0.05 }}
                             >
                                 <Link
-                                    to={`/products?vehicle=${vehicle.id}`}
+                                    to={`/products?category=${vehicle.slug || vehicle.id}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="group block text-center"

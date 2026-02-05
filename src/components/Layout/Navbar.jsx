@@ -187,7 +187,7 @@ const Navbar = ({ isScrolled }) => {
                                                 {getDropdownItems(item.dropdownType).map((cat) => (
                                                     <Link
                                                         key={cat.id}
-                                                        to={cat.slug ? `/products/${cat.slug}` : `/products?category=${cat.id}`}
+                                                        to={`/products?category=${cat.slug || cat.id}`}
                                                         onClick={() => setOpenDropdown(null)}
                                                         className="block px-4 py-2 text-sm text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors uppercase"
                                                     >
@@ -287,7 +287,7 @@ const Navbar = ({ isScrolled }) => {
                                                     {getDropdownItems(item.dropdownType).map((cat) => (
                                                         <Link
                                                             key={cat.id}
-                                                            to={cat.slug ? `/products/${cat.slug}` : `/products?${item.dropdownType === 'vehicle' ? 'vehicle' : 'category'}=${cat.id}`}
+                                                            to={`/products?category=${cat.slug || cat.id}`}
                                                             onClick={() => setIsMobileMenuOpen(false)}
                                                             className="block text-slate-500 hover:text-primary py-1"
                                                         >

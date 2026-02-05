@@ -346,15 +346,41 @@ app.get('/api/health', (req, res) => {
 // GET /api/products - Get products with optional filters
 app.get('/api/products', async (req, res) => {
     try {
-        const { limit = 50, category_id, show_on_homepage, search, manufacturer_code } = req.query;
+        const { limit = 50, category_id, category, show_on_homepage, search, manufacturer_code } = req.query;
 
         let query = 'SELECT * FROM products WHERE 1=1';
         const params = [];
         let paramIndex = 1;
 
+        // Handle category filtering by ID or slug
         if (category_id) {
             query += ` AND category_id = $${paramIndex++}`;
             params.push(category_id);
+        } else if (category) {
+            // First try to find category by slug, then by ID (if numeric)
+            let categoryQuery = 'SELECT id, is_vehicle_name FROM categories WHERE slug = $1';
+            let categoryParams = [category];
+            
+            // If category is numeric, also check by ID
+            if (!isNaN(category)) {
+                categoryQuery = 'SELECT id, is_vehicle_name FROM categories WHERE slug = $1 OR id = $2';
+                categoryParams = [category, parseInt(category)];
+            }
+            
+            const { rows: categoryRows } = await pool.query(categoryQuery, categoryParams);
+            
+            if (categoryRows.length > 0) {
+                const cat = categoryRows[0];
+                if (cat.is_vehicle_name) {
+                    // For vehicle categories, filter by vehicle_ids array (PostgreSQL array contains)
+                    query += ` AND $${paramIndex++} = ANY(vehicle_ids)`;
+                    params.push(cat.id);
+                } else {
+                    // For regular categories, filter by category_id
+                    query += ` AND category_id = $${paramIndex++}`;
+                    params.push(cat.id);
+                }
+            }
         }
 
         if (show_on_homepage === 'true') {

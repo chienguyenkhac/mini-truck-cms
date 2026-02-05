@@ -77,7 +77,7 @@ const CategoryShowcase = () => {
                             viewport={{ once: true }}
                         >
                             <Link
-                                to={`/products/${category.id}`}
+                                to={`/products/${category.slug || category.id}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="group block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100"

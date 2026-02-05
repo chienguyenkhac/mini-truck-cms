@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { supabase, getCategories, getImageUrl } from '../services/supabase'
+import { getProducts, getCategories, getImageUrl } from '../services/api'
 
-const ITEMS_PER_PAGE = 9
+const ITEMS_PER_PAGE = 30
 
 // Format price
 const formatPrice = (price) => {
@@ -29,12 +29,23 @@ const Products = () => {
   // Update selectedCategory when URL changes and show filters
   useEffect(() => {
     if (categoryFromUrl) {
-      setSelectedCategory(categoryFromUrl)
+      // If categoryFromUrl is a slug, find the corresponding category
+      const categoryBySlug = categories.find(c => c.slug === categoryFromUrl)
+      const categoryById = categories.find(c => String(c.id) === categoryFromUrl)
+      
+      if (categoryBySlug) {
+        setSelectedCategory(categoryBySlug.slug || String(categoryBySlug.id))
+      } else if (categoryById) {
+        setSelectedCategory(categoryById.slug || String(categoryById.id))
+      } else {
+        // Fallback to using the value directly
+        setSelectedCategory(categoryFromUrl)
+      }
       setShowFilters(true) // Auto show filter panel when navigating with category
     } else {
       setSelectedCategory('all')
     }
-  }, [categoryFromUrl])
+  }, [categoryFromUrl, categories])
 
   // Load categories
   useEffect(() => {
@@ -45,7 +56,7 @@ const Products = () => {
     loadCategories()
   }, [])
 
-  // Load products with cursor pagination
+  // Load products with pagination
   const loadProducts = useCallback(async (reset = false) => {
     if (reset) {
       setLoading(true)
@@ -57,66 +68,49 @@ const Products = () => {
     }
 
     try {
-      let query = supabase
-        .from('products')
-        .select('*')
-        .order('id', { ascending: true })
-        .limit(ITEMS_PER_PAGE)
-
-      // Cursor pagination: get products after lastId
-      if (!reset && lastId) {
-        query = query.gt('id', lastId)
-      }
-
-      // Category filter - check if selected category is vehicle or part
+      // Build API options
+      const options = {}
+      
+      // Category filter - use slug or ID
       if (selectedCategory !== 'all') {
-        const selectedCat = categories.find(c => String(c.id) === selectedCategory)
-        if (selectedCat && selectedCat.is_vehicle_name) {
-          // Filter by vehicle_ids array contains
-          query = query.contains('vehicle_ids', [parseInt(selectedCategory)])
-        } else {
-          // Filter by category_id
-          query = query.eq('category_id', parseInt(selectedCategory))
-        }
+        options.category = selectedCategory
       }
 
       // Search filter
       if (searchTerm) {
-        query = query.or(`name.ilike.%${searchTerm}%,code.ilike.%${searchTerm}%,manufacturer_code.ilike.%${searchTerm}%`)
+        options.search = searchTerm
       }
 
       // Manufacturer code filter
       if (manufacturerTerm) {
-        query = query.ilike('manufacturer_code', `%${manufacturerTerm}%`)
+        options.manufacturer_code = manufacturerTerm
       }
 
-      const { data, error } = await query
-
-      if (error) {
-        console.error('Error fetching products:', error)
-        return
-      }
+      // For pagination, we'll load more items and handle client-side
+      const limit = reset ? ITEMS_PER_PAGE : ITEMS_PER_PAGE * 2
+      const data = await getProducts(limit, false, options)
 
       if (reset) {
         setProducts(data || [])
       } else {
-        setProducts(prev => [...prev, ...(data || [])])
+        // Simple pagination - just load more
+        setProducts(data || [])
       }
 
-      // Check if there are more products
+      // Check if there are more products (simplified)
+      setHasMore((data || []).length >= limit)
       if (data && data.length > 0) {
         setLastId(data[data.length - 1].id)
-        setHasMore(data.length === ITEMS_PER_PAGE)
-      } else {
-        setHasMore(false)
       }
     } catch (err) {
       console.error('Error:', err)
+      setProducts([])
+      setHasMore(false)
     } finally {
       setLoading(false)
       setLoadingMore(false)
     }
-  }, [selectedCategory, searchTerm, manufacturerTerm, lastId, categories])
+  }, [selectedCategory, searchTerm, manufacturerTerm, categories])
 
   // Initial load and filter changes
   useEffect(() => {
@@ -198,11 +192,11 @@ const Products = () => {
                 {categories.filter(c => !c.is_vehicle_name).map((cat) => (
                   <button
                     key={cat.id}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${selectedCategory === String(cat.id)
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${selectedCategory === (cat.slug || String(cat.id))
                       ? 'bg-primary text-white'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-800'
                       }`}
-                    onClick={() => setSelectedCategory(String(cat.id))}
+                    onClick={() => setSelectedCategory(cat.slug || String(cat.id))}
                   >
                     {cat.name}
                   </button>
@@ -219,11 +213,11 @@ const Products = () => {
                 {categories.filter(c => c.is_vehicle_name).map((cat) => (
                   <button
                     key={cat.id}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${selectedCategory === String(cat.id)
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${selectedCategory === (cat.slug || String(cat.id))
                       ? 'bg-blue-500 text-white'
                       : 'bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-800 border border-blue-200'
                       }`}
-                    onClick={() => setSelectedCategory(String(cat.id))}
+                    onClick={() => setSelectedCategory(cat.slug || String(cat.id))}
                   >
                     {cat.name}
                   </button>

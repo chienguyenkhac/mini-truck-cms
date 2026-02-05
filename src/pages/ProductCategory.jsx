@@ -70,13 +70,22 @@ const ProductCategory = () => {
         setCategoryData(catData)
 
         // Fetch products for this category
-        const { data: productsData, error: productsError } = await supabase
+        let productsQuery = supabase
           .from('products')
           .select('*')
-          .eq('category_id', catData.id)
-          .eq('show_on_homepage', true)
           .order('name')
           .limit(50)
+
+        // Check if this is a vehicle category or regular category
+        if (catData.is_vehicle_name) {
+          // Filter by vehicle_ids array contains
+          productsQuery = productsQuery.contains('vehicle_ids', [catData.id])
+        } else {
+          // Filter by category_id for regular categories
+          productsQuery = productsQuery.eq('category_id', catData.id)
+        }
+
+        const { data: productsData, error: productsError } = await productsQuery
 
         if (!productsError) {
           setProducts(productsData || [])
