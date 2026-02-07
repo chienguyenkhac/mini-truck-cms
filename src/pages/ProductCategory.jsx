@@ -152,7 +152,7 @@ const ProductCategory = () => {
                 viewport={{ once: true }}
               >
                 <Link
-                  to={`/product/${product.id}`}
+                  to={`/product/${product.slug || product.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group relative bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-primary/40 transition-colors duration-300 shadow-sm hover:shadow-lg flex flex-col h-full will-change-transform"

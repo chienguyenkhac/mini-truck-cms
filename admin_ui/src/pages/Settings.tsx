@@ -235,7 +235,7 @@ const Settings: React.FC = () => {
                     <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
                         <div>
                             <label className="block text-sm font-medium text-slate-700">Bật watermark</label>
-                            <p className="text-xs text-slate-400 mt-1">Tự động thêm watermark vào ảnh sản phẩm khi upload</p>
+                            <p className="text-xs text-slate-400 mt-1">Tự động thêm watermark vào ảnh sản phẩm khi tải xuống</p>
                         </div>
                         <label className="relative inline-flex items-center cursor-pointer">
                             <input

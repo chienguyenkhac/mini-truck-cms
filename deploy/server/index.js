@@ -340,13 +340,67 @@ app.get('/api/health', (req, res) => {
 });
 
 // ============================================
+// UTILITY FUNCTIONS
+// ============================================
+
+// Function to generate slug from product name
+function generateSlug(name) {
+    if (!name) return '';
+    
+    return name
+        .toLowerCase()
+        .trim()
+        // Replace Vietnamese characters
+        .replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, 'a')
+        .replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, 'e')
+        .replace(/ì|í|ị|ỉ|ĩ/g, 'i')
+        .replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, 'o')
+        .replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, 'u')
+        .replace(/ỳ|ý|ỵ|ỷ|ỹ/g, 'y')
+        .replace(/đ/g, 'd')
+        // Replace special characters with hyphens
+        .replace(/[^a-z0-9]+/g, '-')
+        // Remove leading/trailing hyphens
+        .replace(/^-+|-+$/g, '')
+        // Replace multiple hyphens with single hyphen
+        .replace(/-+/g, '-');
+}
+
+// Function to ensure unique slug
+async function ensureUniqueSlug(baseSlug, productId = null) {
+    let slug = baseSlug;
+    let counter = 1;
+    
+    while (true) {
+        let query = 'SELECT id FROM products WHERE slug = $1';
+        let params = [slug];
+        
+        // If updating existing product, exclude current product from check
+        if (productId) {
+            query += ' AND id != $2';
+            params.push(productId);
+        }
+        
+        const { rows } = await pool.query(query, params);
+        
+        if (rows.length === 0) {
+            return slug; // Slug is unique
+        }
+        
+        // Generate new slug with counter
+        slug = `${baseSlug}-${counter}`;
+        counter++;
+    }
+}
+
+// ============================================
 // DATABASE API ROUTES (Replace Supabase calls)
 // ============================================
 
 // GET /api/products - Get products with optional filters
 app.get('/api/products', async (req, res) => {
     try {
-        const { limit = 50, category_id, category, show_on_homepage, search, manufacturer_code } = req.query;
+        const { limit = 50, category_id, category, show_on_homepage, search, manufacturer_code, slug } = req.query;
 
         let query = 'SELECT * FROM products WHERE 1=1';
         const params = [];
@@ -398,6 +452,11 @@ app.get('/api/products', async (req, res) => {
             params.push(`%${manufacturer_code}%`);
         }
 
+        if (slug) {
+            query += ` AND slug = $${paramIndex++}`;
+            params.push(slug);
+        }
+
         query += ' ORDER BY created_at DESC';
         query += ` LIMIT $${paramIndex}`;
         params.push(parseInt(limit));
@@ -410,11 +469,22 @@ app.get('/api/products', async (req, res) => {
     }
 });
 
-// GET /api/products/:id - Get single product
-app.get('/api/products/:id', async (req, res) => {
+// GET /api/products/:identifier - Get single product by ID or slug
+app.get('/api/products/:identifier', async (req, res) => {
     try {
-        const { id } = req.params;
-        const { rows } = await pool.query('SELECT * FROM products WHERE id = $1', [id]);
+        const { identifier } = req.params;
+        
+        // Try to find by slug first, then by ID if it's numeric
+        let query = 'SELECT * FROM products WHERE slug = $1';
+        let params = [identifier];
+        
+        // If identifier is numeric, also try to find by ID
+        if (!isNaN(identifier)) {
+            query = 'SELECT * FROM products WHERE slug = $1 OR id = $2';
+            params = [identifier, parseInt(identifier)];
+        }
+        
+        const { rows } = await pool.query(query, params);
         if (rows.length === 0) {
             return res.status(404).json({ error: 'Product not found' });
         }
@@ -433,11 +503,15 @@ app.post('/api/products', async (req, res) => {
             vehicle_ids, show_on_homepage, thumbnail, manufacturer_code
         } = req.body;
 
+        // Generate unique slug from product name
+        const baseSlug = generateSlug(name);
+        const slug = await ensureUniqueSlug(baseSlug);
+
         const { rows } = await pool.query(
-            `INSERT INTO products (code, name, category_id, image, description, vehicle_ids, show_on_homepage, thumbnail, manufacturer_code, created_at, updated_at)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
+            `INSERT INTO products (code, name, category_id, image, description, slug, vehicle_ids, show_on_homepage, thumbnail, manufacturer_code, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
              RETURNING *`,
-            [code, name, category_id, image, description, vehicle_ids || [], show_on_homepage || true, thumbnail, manufacturer_code]
+            [code, name, category_id, image, description, slug, vehicle_ids || [], show_on_homepage || true, thumbnail, manufacturer_code]
         );
 
         res.status(201).json(rows[0]);
@@ -456,6 +530,13 @@ app.put('/api/products/:id', async (req, res) => {
             vehicle_ids, show_on_homepage, thumbnail, manufacturer_code
         } = req.body;
 
+        // If name is being updated, generate new slug
+        let slug = undefined;
+        if (name) {
+            const baseSlug = generateSlug(name);
+            slug = await ensureUniqueSlug(baseSlug, id);
+        }
+
         const { rows } = await pool.query(
             `UPDATE products SET
                 code = COALESCE($1, code),
@@ -463,14 +544,15 @@ app.put('/api/products/:id', async (req, res) => {
                 category_id = COALESCE($3, category_id),
                 image = COALESCE($4, image),
                 description = COALESCE($5, description),
-                vehicle_ids = COALESCE($6, vehicle_ids),
-                show_on_homepage = COALESCE($7, show_on_homepage),
-                thumbnail = COALESCE($8, thumbnail),
-                manufacturer_code = COALESCE($9, manufacturer_code),
+                slug = COALESCE($6, slug),
+                vehicle_ids = COALESCE($7, vehicle_ids),
+                show_on_homepage = COALESCE($8, show_on_homepage),
+                thumbnail = COALESCE($9, thumbnail),
+                manufacturer_code = COALESCE($10, manufacturer_code),
                 updated_at = NOW()
-             WHERE id = $10
+             WHERE id = $11
              RETURNING *`,
-            [code, name, category_id, image, description, vehicle_ids, show_on_homepage, thumbnail, manufacturer_code, id]
+            [code, name, category_id, image, description, slug, vehicle_ids, show_on_homepage, thumbnail, manufacturer_code, id]
         );
 
         if (rows.length === 0) {
@@ -838,6 +920,72 @@ app.delete('/api/product-images/:id', async (req, res) => {
     } catch (error) {
         console.error('Error unlinking image:', error);
         res.status(500).json({ error: 'Failed to unlink image' });
+    }
+});
+
+// DELETE /api/product-images/:productId/:imageId - Remove image link from product by productId and imageId
+app.delete('/api/product-images/:productId/:imageId', async (req, res) => {
+    try {
+        const { productId, imageId } = req.params;
+        const { rowCount } = await pool.query(
+            'DELETE FROM product_images WHERE product_id = $1 AND image_id = $2',
+            [productId, imageId]
+        );
+        if (rowCount === 0) return res.status(404).json({ error: 'Link not found' });
+        res.json({ success: true, message: 'Image unlinked from product' });
+    } catch (error) {
+        console.error('Error unlinking image:', error);
+        res.status(500).json({ error: 'Failed to unlink image' });
+    }
+});
+
+// PUT /api/product-images/:productId/:imageId/order - Update image sort order
+app.put('/api/product-images/:productId/:imageId/order', async (req, res) => {
+    try {
+        const { productId, imageId } = req.params;
+        const { sort_order } = req.body;
+        
+        const { rows } = await pool.query(
+            'UPDATE product_images SET sort_order = $1 WHERE product_id = $2 AND image_id = $3 RETURNING *',
+            [sort_order, productId, imageId]
+        );
+        
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'Product image link not found' });
+        }
+        
+        res.json(rows[0]);
+    } catch (error) {
+        console.error('Error updating image order:', error);
+        res.status(500).json({ error: 'Failed to update image order' });
+    }
+});
+
+// PUT /api/product-images/:productId/:imageId/primary - Set image as primary
+app.put('/api/product-images/:productId/:imageId/primary', async (req, res) => {
+    try {
+        const { productId, imageId } = req.params;
+        
+        // First, set all images for this product to not primary
+        await pool.query(
+            'UPDATE product_images SET is_primary = false WHERE product_id = $1',
+            [productId]
+        );
+        
+        // Then set the specified image as primary
+        const { rows } = await pool.query(
+            'UPDATE product_images SET is_primary = true WHERE product_id = $1 AND image_id = $2 RETURNING *',
+            [productId, imageId]
+        );
+        
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'Product image link not found' });
+        }
+        
+        res.json(rows[0]);
+    } catch (error) {
+        console.error('Error setting primary image:', error);
+        res.status(500).json({ error: 'Failed to set primary image' });
     }
 });
 

@@ -8,7 +8,7 @@ const ProductCard = ({ product, index }) => {
 
   return (
     <div ref={cardRef} className="product-card">
-      <Link to={`/products/${product.id}`} className="product-card-link">
+      <Link to={`/product/${product.slug || product.id}`} className="product-card-link">
         <div className="product-image-wrapper">
           <div className="product-image-placeholder">
             <Package className="product-placeholder-icon" />

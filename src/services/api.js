@@ -65,14 +65,17 @@ export const getProducts = async (limit = 12, onlyHomepage = false, options = {}
     }
 };
 
-export const getProductById = async (id) => {
+export const getProductById = async (identifier) => {
     try {
-        return await fetchAPI(`/products/${id}`);
+        return await fetchAPI(`/products/${identifier}`);
     } catch (error) {
         console.error('Error fetching product:', error);
         return null;
     }
 };
+
+// Alias for backward compatibility
+export const getProductBySlug = getProductById;
 
 // Categories
 export const getCategories = async (options = {}) => {
@@ -212,6 +215,13 @@ export const supabase = {
                     // Build query params from filters
                     const params = new URLSearchParams();
                     if (this._limit) params.append('limit', this._limit);
+                    
+                    // Handle filters
+                    for (const filter of this._filters) {
+                        if (filter.type === 'eq') {
+                            params.append(filter.col, filter.val);
+                        }
+                    }
 
                     // Map table to API endpoint
                     const endpoints = {

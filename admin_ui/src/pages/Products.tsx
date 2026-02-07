@@ -179,7 +179,10 @@ const Products: React.FC = () => {
         const baseUrl = origin.includes(':5174') 
             ? origin.replace(':5174', ':5173')  // Local dev: switch from admin port to client port
             : origin; // Production: same origin, just remove /secret path
-        const url = `${baseUrl}/product/${product.id}`;
+        
+        // Use slug if available, otherwise fallback to id
+        const productIdentifier = product.slug || product.id;
+        const url = `${baseUrl}/product/${productIdentifier}`;
         navigator.clipboard.writeText(url);
         notification.success('Đã copy link sản phẩm');
     };

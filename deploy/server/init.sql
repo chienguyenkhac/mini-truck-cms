@@ -92,6 +92,7 @@ DROP INDEX IF EXISTS realtime.messages_inserted_at_topic_index;
 DROP INDEX IF EXISTS realtime.ix_realtime_subscription_entity;
 DROP INDEX IF EXISTS public.idx_products_vehicle_ids;
 DROP INDEX IF EXISTS public.idx_products_manufacturer_code;
+DROP INDEX IF EXISTS public.idx_products_slug;
 DROP INDEX IF EXISTS public.idx_product_images_product;
 DROP INDEX IF EXISTS public.idx_categories_slug;
 DROP INDEX IF EXISTS public.idx_product_images_image;
@@ -3505,6 +3506,7 @@ CREATE TABLE public.products (
     category_id integer,
     image text,
     description text,
+    slug character varying(255) UNIQUE,
     created_at timestamp without time zone DEFAULT now(),
     updated_at timestamp without time zone DEFAULT now(),
     vehicle_ids integer[] DEFAULT '{}'::integer[],
@@ -5318,6 +5320,13 @@ CREATE INDEX idx_products_manufacturer_code ON public.products USING btree (manu
 --
 
 CREATE INDEX idx_products_vehicle_ids ON public.products USING gin (vehicle_ids);
+
+
+---
+-- Name: idx_products_slug; Type: INDEX; Schema: public; Owner: -
+---
+
+CREATE UNIQUE INDEX idx_products_slug ON public.products USING btree (slug);
 
 
 --

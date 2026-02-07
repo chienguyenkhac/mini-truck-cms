@@ -4,10 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { supabase, getProductImages, getImageUrl } from '../services/supabase'
 
 const ProductDetail = () => {
-    const { id } = useParams()
+    const { slug } = useParams()
     const navigate = useNavigate()
     const [product, setProduct] = useState(null)
     const [category, setCategory] = useState(null)
+    const [vehicles, setVehicles] = useState([])
     const [relatedProducts, setRelatedProducts] = useState([])
     const [loading, setLoading] = useState(true)
     const [images, setImages] = useState([])
@@ -35,15 +36,47 @@ const ProductDetail = () => {
     useEffect(() => {
         const loadProduct = async () => {
             try {
-                // Fetch product
-                const { data: productData, error: productError } = await supabase
-                    .from('products')
-                    .select('*')
-                    .eq('id', parseInt(id))
-                    .single()
+                let productData = null
+                let productError = null
+
+                // Try to parse slug as ID first
+                const productId = parseInt(slug)
+                
+                if (!isNaN(productId)) {
+                    // If slug is a number, search by ID
+                    const result = await supabase
+                        .from('products')
+                        .select('*')
+                        .eq('id', productId)
+                        .single()
+                    productData = result.data
+                    productError = result.error
+                } else {
+                    // If slug is not a number, search by slug field
+                    const result = await supabase
+                        .from('products')
+                        .select('*')
+                        .eq('slug', slug)
+                        .maybeSingle()
+                    productData = result.data
+                    productError = result.error
+                }
+
+                // If slug search fails and slug is not numeric, try searching by name similarity
+                if ((!productData || productError) && isNaN(parseInt(slug))) {
+                    // As a last resort, try to find product by name similarity
+                    const result = await supabase
+                        .from('products')
+                        .select('*')
+                        .ilike('name', `%${slug.replace(/-/g, ' ')}%`)
+                        .limit(1)
+                        .maybeSingle()
+                    productData = result.data
+                    productError = result.error
+                }
 
                 if (productError || !productData) {
-                    navigate('/products')
+                    setLoading(false)
                     return
                 }
 
@@ -78,6 +111,16 @@ const ProductDetail = () => {
                         .limit(3)
                     setRelatedProducts(relatedData || [])
                 }
+
+                // Fetch vehicle types if product has vehicle_ids
+                if (productData.vehicle_ids && productData.vehicle_ids.length > 0) {
+                    const { data: vehicleData } = await supabase
+                        .from('categories')
+                        .select('*')
+                        .in('id', productData.vehicle_ids)
+                        .eq('is_vehicle_name', true)
+                    setVehicles(vehicleData || [])
+                }
             } catch (err) {
                 console.error('Error loading product:', err)
                 navigate('/products')
@@ -86,7 +129,7 @@ const ProductDetail = () => {
             }
         }
         loadProduct()
-    }, [id, navigate])
+    }, [slug, navigate])
 
     if (loading) {
         return (
@@ -97,7 +140,21 @@ const ProductDetail = () => {
     }
 
     if (!product) {
-        return null
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="text-center">
+                    <div className="text-6xl mb-4">😕</div>
+                    <h1 className="text-2xl font-bold text-slate-800 mb-2">Không tìm thấy sản phẩm</h1>
+                    <p className="text-slate-600 mb-4">Sản phẩm với slug "{slug}" không tồn tại.</p>
+                    <Link 
+                        to="/products" 
+                        className="inline-block px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                    >
+                        Quay lại danh sách sản phẩm
+                    </Link>
+                </div>
+            </div>
+        )
     }
 
     return (
@@ -123,14 +180,14 @@ const ProductDetail = () => {
                         animate={{ opacity: 1, x: 0 }}
                         className="relative max-w-2xl mx-auto"
                     >
-                        <div className="aspect-[4/3] rounded-3xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 border border-gray-200 shadow-lg relative">
+                        <div className="w-full h-[500px] rounded-3xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 border border-gray-200 shadow-lg relative">
                             <AnimatePresence mode="wait">
                                 {images.length > 0 ? (
                                     <motion.img
                                         key={currentImageIndex}
                                         src={images[currentImageIndex]}
                                         alt={product.name}
-                                        className="w-full h-full object-cover"
+                                        className="w-full h-full object-contain bg-white"
                                         initial={{ opacity: 0, x: 50 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, x: -50 }}
@@ -212,11 +269,22 @@ const ProductDetail = () => {
                         animate={{ opacity: 1, x: 0 }}
                         className="space-y-8"
                     >
-                        {category && (
-                            <span className="inline-block px-4 py-1 bg-primary/10 text-primary text-sm font-medium rounded-full">
-                                {category.name}
-                            </span>
-                        )}
+                        {/* Category and Vehicle Tags */}
+                        <div className="flex flex-wrap gap-2">
+                            {category && (
+                                <span className="inline-block px-4 py-1 bg-primary/10 text-primary text-sm font-medium rounded-full">
+                                    {category.name}
+                                </span>
+                            )}
+                            {vehicles.map((vehicle) => (
+                                <span 
+                                    key={vehicle.id}
+                                    className="inline-block px-4 py-1 bg-blue-50 text-blue-600 text-sm font-medium rounded-full border border-blue-200"
+                                >
+                                    {vehicle.name}
+                                </span>
+                            ))}
+                        </div>
 
                         <h1 className="text-3xl md:text-4xl font-bold text-slate-800 leading-tight">
                             {product.name}
@@ -284,7 +352,7 @@ const ProductDetail = () => {
                                 {relatedProducts.map((p) => (
                                     <Link
                                         key={p.id}
-                                        to={`/product/${p.id}`}
+                                        to={`/product/${p.slug || p.id}`}
                                         className="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-primary/50 transition-all shadow-sm hover:shadow-md"
                                     >
                                         <div className="aspect-video relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">

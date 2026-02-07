@@ -142,7 +142,7 @@ const ProductGrid = () => {
     const productCards = useMemo(() => displayProducts.map((p, idx) => (
         <Link
             key={p.id || idx}
-            to={`/product/${p.id}`}
+            to={`/product/${p.slug || p.id}`}
             className="product-card group relative bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-primary/40 transition-colors duration-300 shadow-sm hover:shadow-lg opacity-0 flex flex-col h-full will-change-transform"
         >
             <div className="aspect-square overflow-hidden relative bg-gradient-to-br from-gray-100 to-gray-200">

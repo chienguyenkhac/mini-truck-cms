@@ -39,6 +39,7 @@ export interface Product {
     id: number;
     code: string;
     name: string;
+    slug?: string;
     category_id: number | null;
     category_ids?: number[];
     vehicle_ids?: number[];

@@ -215,6 +215,7 @@ export const supabase = {
             lte: function (col, val) { this._filters.push({ type: 'lte', col, val }); return this; },
             not: function (col, operator, val) { this._filters.push({ type: 'not', col, operator, val }); return this; },
             ilike: function (col, val) { this._filters.push({ type: 'ilike', col, val }); return this; },
+            in: function (col, val) { this._filters.push({ type: 'in', col, val }); return this; },
             or: function (conditions) { this._filters.push({ type: 'or', conditions }); return this; },
             order: function (col, opts) { this._order = { col, ...opts }; return this; },
             limit: function (n) { this._limit = n; return this; },
@@ -233,7 +234,13 @@ export const supabase = {
 
                     // Add other filters to params (excluding id)
                     this._filters.forEach(f => {
-                        if (f.type === 'eq' && f.col !== 'id') params.append(f.col, f.val);
+                        if (f.type === 'eq' && f.col !== 'id') {
+                            params.append(f.col, f.val);
+                        } else if (f.type === 'ilike') {
+                            params.append(`${f.col}__ilike`, f.val);
+                        } else if (f.type === 'in') {
+                            params.append(`${f.col}__in`, Array.isArray(f.val) ? f.val.join(',') : f.val);
+                        }
                     });
 
                     // Map table to API endpoint
@@ -268,8 +275,13 @@ export const supabase = {
                         resolve({ data, error: null, count: Array.isArray(data) ? data.length : 0 });
                     }
                 } catch (error) {
-                    if (reject) reject({ data: null, error });
-                    else resolve({ data: null, error });
+                    // For maybeSingle, don't treat "not found" as error
+                    if (this._maybeSingle) {
+                        resolve({ data: null, error: null });
+                    } else {
+                        if (reject) reject({ data: null, error });
+                        else resolve({ data: null, error });
+                    }
                 }
             }
         })

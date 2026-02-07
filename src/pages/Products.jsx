@@ -273,7 +273,7 @@ const Products = () => {
                     whileHover={{ y: -5 }}
                     className="group bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-lg flex flex-col h-full"
                   >
-                    <Link to={`/product/${product.id}`}>
+                    <Link to={`/product/${product.slug || product.id}`}>
                       <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
                         {product.image ? (
                           <img
@@ -297,7 +297,7 @@ const Products = () => {
                       </div>
                     </Link>
                     <div className="p-3 flex flex-col flex-1">
-                      <Link to={`/product/${product.id}`}>
+                      <Link to={`/product/${product.slug || product.id}`}>
                         <h3 className="text-slate-800 font-bold text-base group-hover:text-primary transition-colors line-clamp-2 min-h-[2.8rem]">
                           {product.name}
                         </h3>
@@ -306,7 +306,7 @@ const Products = () => {
 
                       <div className="flex gap-2 mt-auto pt-3">
                         <Link
-                          to={`/product/${product.id}`}
+                          to={`/product/${product.slug || product.id}`}
                           className="flex-1 py-2 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:border-primary hover:text-primary transition-all flex items-center justify-center"
                         >
                           Chi Tiết
