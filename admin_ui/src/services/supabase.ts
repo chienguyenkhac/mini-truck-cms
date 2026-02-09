@@ -197,12 +197,12 @@ export const supabase = {
             const promise = doFetch();
             return {
                 order: () => ({
-                    limit: () => ({ then: (r: Function) => promise.then(r) }),
-                    then: (r: Function) => promise.then(r)
+                    limit: () => ({ then: (r: (value: any) => any) => promise.then(r) }),
+                    then: (r: (value: any) => any) => promise.then(r)
                 }),
-                eq: () => ({ single: async () => ({ data: null, error: null }), then: (r: Function) => promise.then(r) }),
+                eq: () => ({ single: async () => ({ data: null, error: null }), then: (r: (value: any) => any) => promise.then(r) }),
                 single: async () => ({ data: null, error: null }),
-                then: (r: Function) => promise.then(r)
+                then: (r: (value: any) => any) => promise.then(r)
             };
         },
         insert: (data: unknown) => {
@@ -221,7 +221,7 @@ export const supabase = {
             // Return thenable that also has select().single() chain
             const promise = doInsert();
             return {
-                then: (resolve: Function) => promise.then(resolve),
+                then: (resolve: (value: any) => any) => promise.then(resolve),
                 select: () => ({
                     single: () => promise
                 })
@@ -243,14 +243,14 @@ export const supabase = {
                 };
                 const promise = doUpdate();
                 return {
-                    then: (r: Function) => promise.then(r),
+                    then: (r: (value: any) => any) => promise.then(r),
                     select: () => ({ single: () => promise })
                 };
             }
         }),
         delete: () => ({
-            eq: (field: string, value: unknown) => ({
-                then: async (r: Function) => {
+            eq: (_field: string, value: unknown) => ({
+                then: async (r: (value: any) => any) => {
                     try {
                         await fetchAPI(`/${table.replace('_', '-')}/${value}`, { method: 'DELETE' });
                         r({ error: null });

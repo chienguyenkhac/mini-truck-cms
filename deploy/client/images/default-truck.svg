@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <!-- Background -->
+  <rect width="400" height="300" fill="#f1f5f9"/>
+  
+  <!-- Truck illustration -->
+  <g transform="translate(50, 80)">
+    <!-- Cabin -->
+    <rect x="0" y="60" width="80" height="70" fill="#64748b" rx="5"/>
+    <rect x="10" y="70" width="30" height="35" fill="#94a3b8" rx="2"/>
+    <rect x="50" y="70" width="20" height="35" fill="#94a3b8" rx="2"/>
+    
+    <!-- Container -->
+    <rect x="80" y="40" width="180" height="90" fill="#475569" rx="5"/>
+    <line x1="120" y1="40" x2="120" y2="130" stroke="#334155" stroke-width="2"/>
+    <line x1="160" y1="40" x2="160" y2="130" stroke="#334155" stroke-width="2"/>
+    <line x1="200" y1="40" x2="200" y2="130" stroke="#334155" stroke-width="2"/>
+    <line x1="240" y1="40" x2="240" y2="130" stroke="#334155" stroke-width="2"/>
+    
+    <!-- Wheels -->
+    <circle cx="40" cy="145" r="18" fill="#1e293b" stroke="#0f172a" stroke-width="3"/>
+    <circle cx="40" cy="145" r="8" fill="#475569"/>
+    
+    <circle cx="110" cy="145" r="18" fill="#1e293b" stroke="#0f172a" stroke-width="3"/>
+    <circle cx="110" cy="145" r="8" fill="#475569"/>
+    
+    <circle cx="220" cy="145" r="18" fill="#1e293b" stroke="#0f172a" stroke-width="3"/>
+    <circle cx="220" cy="145" r="8" fill="#475569"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="200" y="240" font-family="Arial, sans-serif" font-size="16" fill="#64748b" text-anchor="middle" font-weight="bold">
+    SINOTRUK HANOI
+  </text>
+  <text x="200" y="260" font-family="Arial, sans-serif" font-size="12" fill="#94a3b8" text-anchor="middle">
+    Phụ tùng chính hãng
+  </text>
+</svg>
+

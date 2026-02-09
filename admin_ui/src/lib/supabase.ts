@@ -176,7 +176,7 @@ export const updateSiteSetting = async (key: string, value: string): Promise<boo
 // Mock supabase object for backward compatibility
 export const supabase = {
     from: (table: string) => ({
-        select: (columns = '*') => {
+        select: (_columns?: string) => {
             const state = {
                 _table: table,
                 _filters: [] as { type: string; col: string; val: unknown }[],

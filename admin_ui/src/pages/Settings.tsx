@@ -25,8 +25,8 @@ const Settings: React.FC = () => {
         try {
             const { data, error } = await supabase
                 .from('site_settings')
-                .select('*')
-                .order('id');
+                .select()
+                .order();
 
             if (error) throw error;
 
