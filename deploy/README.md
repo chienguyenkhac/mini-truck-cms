@@ -1,159 +1,155 @@
-# SINOTRUK Hà Nội - Hướng dẫn Deploy trên aaPanel
+# SINOTRUK Hà Nội - Deploy Đơn Giản
 
-## Yêu cầu hệ thống
+## 🚀 Chỉ Cần 1 Lệnh!
 
-- **Server**: Ubuntu 20.04+ hoặc CentOS 7+
-- **RAM**: Tối thiểu 2GB (khuyến nghị 4GB)
-- **Disk**: Tối thiểu 20GB
-- **aaPanel**: Đã cài đặt và hoạt động
-- **Docker**: Sẽ được cài qua aaPanel
-
----
-
-## Bước 1: Cài Docker trên aaPanel
-
-1. Đăng nhập vào **aaPanel**
-2. Vào **App Store** → **Installed** → tìm **Docker Manager**
-3. Nhấn **Install** để cài Docker
-4. Chờ quá trình cài đặt hoàn tất
-
----
-
-## Bước 2: Upload files lên server
-
-### Cách 1: Qua aaPanel File Manager
-1. Vào **Files** → điều hướng đến `/www/wwwroot/`
-2. Tạo thư mục mới: `sinotruk`
-3. Upload toàn bộ thư mục `deploy/` vào `/www/wwwroot/sinotruk/`
-
-### Cách 2: Qua SSH
+### Bước 1: Upload Files
 ```bash
-cd /www/wwwroot/
-mkdir sinotruk
-cd sinotruk
-# Upload files qua SCP hoặc SFTP
+# Upload thư mục deploy lên server
+scp -r deploy/ user@your-server:/www/wwwroot/sinotruk/
+
+# SSH vào server
+ssh user@your-server
+cd /www/wwwroot/sinotruk
+chmod +x deploy.sh
 ```
 
----
-
-## Bước 3: Upload ảnh lên server
-
-Copy toàn bộ ảnh từ thư mục `images/` vào:
-```
-/www/wwwroot/sinotruk/uploads/original/
-```
-
----
-
-## Bước 4: Cấu hình Environment
-
+### Bước 2: Chạy 1 Lệnh Duy Nhất
 ```bash
-cd /www/wwwroot/sinotruk/deploy
-cp .env.example .env
-nano .env
+# Deploy tự động tất cả (install + setup + deploy)
+sudo ./deploy.sh auto
 ```
 
-Chỉnh sửa:
-```
-DB_PASSWORD=mat_khau_postgresql_cua_ban
-```
+**🎉 Xong! Chỉ 1 lệnh duy nhất!**
 
 ---
 
-## Bước 5: Khởi động Docker containers
+## 🛠 Quản Lý Đơn Giản
 
+### Tất Cả Trong 1 Script
 ```bash
-cd /www/wwwroot/sinotruk/deploy
-docker-compose up -d
+./deploy.sh auto       # Deploy tự động tất cả
+./deploy.sh status     # Kiểm tra trạng thái
+./deploy.sh logs       # Xem logs
+./deploy.sh health     # Kiểm tra sức khỏe
+./deploy.sh start      # Khởi động
+./deploy.sh stop       # Dừng
+./deploy.sh restart    # Khởi động lại
+./deploy.sh backup     # Backup
+./deploy.sh cleanup    # Dọn dẹp
 ```
 
-Kiểm tra containers đang chạy:
+### Các Lệnh Từng Bước (Nếu Cần)
 ```bash
-docker-compose ps
+sudo ./deploy.sh install    # Chỉ cài đặt dependencies
+./deploy.sh setup           # Chỉ setup environment  
+sudo ./deploy.sh deploy     # Chỉ deploy ứng dụng
 ```
 
 ---
 
-## Bước 6: Cấu hình Domain trên aaPanel
+## 🔧 Cấu Hình aaPanel (Sau khi deploy)
 
-1. Vào **Website** → **Add site**
-2. Nhập domain của bạn (ví dụ: `sinotruk.example.com`)
-3. Chọn **PHP Version**: Pure Static
-4. Sau khi tạo xong, vào **Config** → **Reverse Proxy**
-5. Thêm:
-   - **Target URL**: `http://127.0.0.1:80`
-   - **Send Domain**: `$host`
+### 1. Tạo Website
+1. **Website** → **Add site**
+2. Domain: `yourdomain.com`
+3. PHP Version: **Pure Static**
 
----
+### 2. Cấu Hình Reverse Proxy
+1. **Website** → Chọn domain → **Config** → **Reverse Proxy**
+2. **Target URL**: `http://127.0.0.1:80`
+3. **Send Domain**: `$host`
 
-## Bước 7: Cấu hình SSL (HTTPS)
-
-1. Vào **Website** → chọn domain → **SSL**
-2. Chọn **Let's Encrypt**
-3. Nhấn **Apply** để lấy chứng chỉ miễn phí
+### 3. Cài SSL Certificate
+1. **Website** → Chọn domain → **SSL**
+2. **Let's Encrypt** → **Apply**
 
 ---
 
-## Các lệnh hữu ích
+## 🚨 Khắc Phục Sự Cố
 
+### Kiểm Tra & Sửa Lỗi
 ```bash
-# Xem logs
-docker-compose logs -f
+./deploy.sh health     # Kiểm tra tổng thể
+./deploy.sh logs       # Xem logs lỗi
+./deploy.sh restart    # Khởi động lại
+./deploy.sh cleanup    # Dọn dẹp nếu lỗi
+```
 
-# Restart containers
-docker-compose restart
+### Lỗi Thường Gặp
+```bash
+# Container không chạy
+./deploy.sh restart
 
-# Stop tất cả
-docker-compose down
+# API lỗi  
+curl http://localhost:3001/api/health
 
-# Rebuild và khởi động lại
-docker-compose up -d --build
-
-# Vào database
-docker exec -it sinotruk-db psql -U postgres -d sinotruk
+# Disk đầy
+./deploy.sh cleanup
 ```
 
 ---
 
-## Cấu trúc thư mục
+## 🔒 Security & Performance
+
+### Tự Động Được Cấu Hình
+- ✅ Firewall rules
+- ✅ SSL certificate support  
+- ✅ Secure passwords generation
+- ✅ File permissions
+- ✅ System optimization
+- ✅ Log rotation
+- ✅ Health monitoring
+
+### Cần Cấu Hình Thủ Công
+- Domain DNS settings
+- aaPanel reverse proxy
+- SSL certificate installation
+- Regular backups schedule
+
+---
+
+## 📁 Cấu Trúc Đơn Giản
 
 ```
 /www/wwwroot/sinotruk/
-├── deploy/
-│   ├── docker-compose.yml
-│   ├── Dockerfile
-│   ├── .env
-│   ├── nginx/
-│   │   └── default.conf
-│   ├── server/
-│   │   ├── index.js
-│   │   └── package.json
-│   └── sinotruk_full_backup.sql
-└── uploads/
-    ├── original/     ← Ảnh gốc
-    └── watermarked/  ← Ảnh đã watermark (tự động tạo)
+├── deploy.sh            # Script chính duy nhất
+├── commands/            # Các module nhỏ
+│   ├── install.sh       # Cài đặt
+│   ├── setup.sh         # Thiết lập
+│   ├── deploy-app.sh    # Deploy
+│   └── ...              # Các lệnh khác
+├── docker-compose.yml   # Docker config
+├── server/              # Backend API
+├── client/              # Frontend  
+├── admin/               # Admin panel
+└── uploads/             # Ảnh upload
 ```
 
 ---
 
-## Troubleshooting
+## 🚨 Emergency Commands
 
-### Container không khởi động
 ```bash
-docker-compose logs api
-docker-compose logs db
+# Dừng tất cả services
+./manage.sh stop
+
+# Khôi phục từ backup
+./manage.sh restore
+
+# Rebuild hoàn toàn
+docker-compose down -v
+sudo ./auto-deploy.sh
+
+# Kiểm tra logs lỗi
+./manage.sh logs | grep -i error
 ```
-
-### Lỗi database connection
-- Kiểm tra file `.env` có đúng password
-- Kiểm tra database đã import thành công: `docker exec -it sinotruk-db psql -U postgres -c "\dt"`
-
-### Ảnh không hiển thị
-- Kiểm tra ảnh đã upload vào `/uploads/original/`
-- Kiểm tra permission: `chmod -R 755 uploads/`
 
 ---
 
-## Liên hệ hỗ trợ
+## 📞 Support
 
-Nếu gặp vấn đề, vui lòng liên hệ đội ngũ phát triển.
+---
+
+**🎉 Đơn giản vậy thôi!**
+
+Xem file `GUIDE.md` để có hướng dẫn chi tiết hơn.
