@@ -126,7 +126,7 @@ CREATE TABLE public.site_settings (
 -- SAMPLE DATA: admin_users
 -- =============================================
 INSERT INTO public.admin_users (username, password, full_name, phone, is_admin) VALUES
-('admin', '$2b$10$U1/jNEU7FelY8AFDbBnv0ed480uggKu8YwyJzCdupGBBCdWYHSDQ6', 'Administrator', '0382.890.990', true),
+('admin', '$2b$10$U1/jNEU7FelY8AFDbBnv0ed480uggKu8YwyJzCdupGBBCdWYHSDQ6', 'Administrator', '0382.890.990', true);
 
 -- Note: Default password for both users is "123456"
 
