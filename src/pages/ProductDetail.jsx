@@ -178,9 +178,9 @@ const ProductDetail = () => {
                     <motion.div
                         initial={{ opacity: 0, x: -30 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="relative max-w-2xl mx-auto"
+                        className="relative"
                     >
-                        <div className="w-full h-[500px] rounded-3xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 border border-gray-200 shadow-lg relative">
+                        <div className="w-full max-w-[600px] h-[400px] sm:h-[500px] mx-auto rounded-3xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 border border-gray-200 shadow-lg relative">
                             <AnimatePresence mode="wait">
                                 {images.length > 0 ? (
                                     <motion.img
@@ -307,21 +307,21 @@ const ProductDetail = () => {
                         )}
 
                         {/* CTA Buttons */}
-                        <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="flex flex-col sm:flex-row gap-3">
                             <a
                                 href="tel:0382890990"
-                                className="flex-1 py-4 px-8 bg-[#c41e1e] text-white font-bold rounded-xl hover:bg-[#a01818] transition-colors flex items-center justify-center gap-2 shadow-lg"
+                                className="flex-1 py-3 px-6 bg-[#c41e1e] text-white font-semibold rounded-lg hover:bg-[#a01818] transition-colors flex items-center justify-center gap-2 shadow-md text-sm"
                             >
-                                <span className="material-symbols-outlined">call</span>
+                                <span className="material-symbols-outlined text-lg">call</span>
                                 Đặt Hàng Ngay
                             </a>
                             <a
                                 href="https://zalo.me/0382890990"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex-1 py-4 px-8 bg-white border border-slate-200 text-slate-800 font-bold rounded-xl hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-2"
+                                className="flex-1 py-3 px-6 bg-[#0068ff] text-white font-semibold rounded-lg hover:bg-[#0056d6] transition-colors flex items-center justify-center gap-2 text-sm"
                             >
-                                <span className="material-symbols-outlined">chat</span>
+                                <span className="material-symbols-outlined text-lg">chat</span>
                                 Chat Zalo
                             </a>
                         </div>
@@ -329,7 +329,7 @@ const ProductDetail = () => {
                         {/* Features */}
                         <div className="grid grid-cols-2 gap-4">
                             {[
-                                { icon: 'verified', label: 'Chính hãng 100%' },
+                                { icon: 'verified', label: 'Chính hãng, Original Parts' },
                                 { icon: 'local_shipping', label: 'Giao toàn quốc' },
                                 { icon: 'shield', label: 'Bảo hành uy tín' },
                                 { icon: 'support_agent', label: 'Hỗ trợ 24/7' },
