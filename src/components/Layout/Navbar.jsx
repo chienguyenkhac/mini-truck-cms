@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { gsap } from 'gsap'
-import { supabase } from '../../services/supabase'
+import { fetchAPI } from '../../services/api'
 
 const Navbar = ({ isScrolled }) => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -10,7 +10,7 @@ const Navbar = ({ isScrolled }) => {
     const [openMobileDropdown, setOpenMobileDropdown] = useState(null)
     const [vehicleCategories, setVehicleCategories] = useState([])
     const [partCategories, setPartCategories] = useState([])
-    const [siteSettings, setSiteSettings] = useState({ company_logo: '', company_name: 'SINOTRUK Hà Nội' })
+    const [siteSettings, setSiteSettings] = useState({ site_logo: '', site_name: 'SINOTRUK Hà Nội' })
     const location = useLocation()
     const logoRef = useRef(null)
     const navRef = useRef(null)
@@ -32,21 +32,15 @@ const Navbar = ({ isScrolled }) => {
         const loadData = async () => {
             try {
                 // Load categories
-                const { data: catData, error: catError } = await supabase
-                    .from('categories')
-                    .select('id, name, slug, is_vehicle_name, is_visible')
-                    .eq('is_visible', true)
-                    .order('name')
-                if (!catError && catData) {
-                    setVehicleCategories(catData.filter(c => c.is_vehicle_name))
-                    setPartCategories(catData.filter(c => !c.is_vehicle_name))
+                const categoriesData = await fetchAPI('/categories?is_visible=true')
+                if (categoriesData) {
+                    setVehicleCategories(categoriesData.filter(c => c.is_vehicle_name))
+                    setPartCategories(categoriesData.filter(c => !c.is_vehicle_name))
                 }
 
                 // Load site settings
-                const { data: settingsData, error: settingsError } = await supabase
-                    .from('site_settings')
-                    .select('*')
-                if (!settingsError && settingsData) {
+                const settingsData = await fetchAPI('/site-settings')
+                if (settingsData) {
                     const settings = {}
                     settingsData.forEach(s => {
                         settings[s.key] = s.value
@@ -143,8 +137,8 @@ const Navbar = ({ isScrolled }) => {
                 <div className="container mx-auto px-4 md:px-10 lg:px-20 flex items-center justify-between">
                     {/* Logo */}
                     <Link ref={logoRef} to="/" className="group cursor-pointer">
-                        {siteSettings.company_logo ? (
-                            <img src={siteSettings.company_logo} alt="Logo" className="h-12 w-auto object-contain transition-transform group-hover:scale-110 duration-300" />
+                        {siteSettings.site_logo ? (
+                            <img src={siteSettings.site_logo} alt="Logo" className="h-12 w-auto object-contain transition-transform group-hover:scale-110 duration-300" />
                         ) : (
                             <div className="w-12 h-12 text-primary transition-transform group-hover:scale-110 group-hover:rotate-12 duration-300">
                                 <span className="material-symbols-outlined text-5xl font-bold">local_shipping</span>

@@ -4,7 +4,7 @@
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 // Helper function for API calls
-async function fetchAPI(endpoint, options = {}) {
+export async function fetchAPI(endpoint, options = {}) {
     const url = `${API_BASE}${endpoint}`;
     const response = await fetch(url, {
         headers: {

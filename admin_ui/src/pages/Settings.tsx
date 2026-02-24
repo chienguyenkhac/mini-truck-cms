@@ -128,7 +128,7 @@ const Settings: React.FC = () => {
                 const bucketInfo = result.availableBuckets ? ` (Buckets: ${result.availableBuckets})` : '';
                 throw new Error(`${errorMsg}${bucketInfo}`);
             }
-            handleChange('company_logo', result.url);
+            handleChange('site_logo', result.url);
             notification.success('Đã tải logo lên');
         } catch (err: any) {
             console.error('Error uploading logo:', err);
@@ -185,8 +185,8 @@ const Settings: React.FC = () => {
                     {/* Logo */}
                     <div className="flex items-start gap-6">
                         <div className="w-32 h-32 bg-slate-100 rounded-xl flex items-center justify-center overflow-hidden border-2 border-dashed border-slate-300">
-                            {formData.company_logo ? (
-                                <img src={formData.company_logo} alt="Logo" className="w-full h-full object-contain" />
+                            {formData.site_logo ? (
+                                <img src={formData.site_logo} alt="Logo" className="w-full h-full object-contain" />
                             ) : (
                                 <span className="material-symbols-outlined text-4xl text-slate-300">image</span>
                             )}
@@ -208,8 +208,8 @@ const Settings: React.FC = () => {
                         <label className="block text-sm font-medium text-slate-700 mb-2">Tên công ty</label>
                         <input
                             type="text"
-                            value={formData.company_name || ''}
-                            onChange={(e) => handleChange('company_name', e.target.value)}
+                            value={formData.site_name || ''}
+                            onChange={(e) => handleChange('site_name', e.target.value)}
                             className="input"
                             placeholder="SINOTRUK Hà Nội"
                         />
@@ -220,8 +220,8 @@ const Settings: React.FC = () => {
                         <label className="block text-sm font-medium text-slate-700 mb-2">Số hotline</label>
                         <input
                             type="text"
-                            value={formData.hotline || ''}
-                            onChange={(e) => handleChange('hotline', e.target.value)}
+                            value={formData.contact_phone || ''}
+                            onChange={(e) => handleChange('contact_phone', e.target.value)}
                             className="input"
                             placeholder="0382890990"
                         />

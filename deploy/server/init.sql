@@ -255,13 +255,13 @@ ALTER TABLE ONLY public.site_settings
 
 -- Thêm foreign keys
 ALTER TABLE ONLY public.products
-    ADD CONSTRAINT products_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.categories(id);
+    ADD CONSTRAINT products_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.categories(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY public.product_images
-    ADD CONSTRAINT product_images_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.products(id);
+    ADD CONSTRAINT product_images_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.products(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY public.product_images
-    ADD CONSTRAINT product_images_image_id_fkey FOREIGN KEY (image_id) REFERENCES public.images(id);
+    ADD CONSTRAINT product_images_image_id_fkey FOREIGN KEY (image_id) REFERENCES public.images(id) ON DELETE CASCADE;
 
 -- Tạo indexes
 CREATE INDEX idx_categories_slug ON public.categories USING btree (slug);
@@ -331,7 +331,8 @@ INSERT INTO public.site_settings (id, key, value, type, description, created_at,
 (2, 'site_description', 'Phụ tùng xe tải SINOTRUK chính hãng', 'text', 'Mô tả website', now(), now()),
 (3, 'contact_phone', '0382.890.990', 'text', 'Số điện thoại liên hệ', now(), now()),
 (4, 'contact_email', 'info@sinotruk.vn', 'email', 'Email liên hệ', now(), now()),
-(5, 'show_homepage_products', 'true', 'boolean', 'Hiển thị sản phẩm trên trang chủ', now(), now());
+(5, 'show_homepage_products', 'true', 'boolean', 'Hiển thị sản phẩm trên trang chủ', now(), now()),
+(6, 'site_logo', '', 'text', 'Logo website', now(), now());
 
 -- Cập nhật sequences
 SELECT setval('public.admin_users_id_seq', (SELECT MAX(id) FROM public.admin_users));
