@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNotification } from '../components/shared/Notification';
-import { supabase } from '../services/supabase';
 
 interface Setting {
     id: number;
@@ -21,23 +20,30 @@ const Settings: React.FC = () => {
         loadSettings();
     }, []);
 
-    const loadSettings = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('site_settings')
-                .select()
-                .order();
-
-            if (error) throw error;
-
-            setSettings(data || []);
-
-            // Initialize form data
+    // Separate useEffect to update formData when settings change
+    useEffect(() => {
+        if (settings.length > 0) {
             const initialData: Record<string, string> = {};
-            (data || []).forEach((s: Setting) => {
+            settings.forEach((s: Setting) => {
                 initialData[s.key] = s.value || '';
             });
             setFormData(initialData);
+        }
+    }, [settings]);
+
+    const loadSettings = async () => {
+        try {
+            const response = await fetch('/api/site-settings', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch settings: ${response.status}`);
+            }
+
+            const data = await response.json();
+            setSettings(data || []);
         } catch (err) {
             console.error('Error loading settings:', err);
             notification.error('Không thể tải cấu hình');
@@ -53,12 +59,24 @@ const Settings: React.FC = () => {
     const handleSave = async () => {
         setSaving(true);
         try {
-            // Build updates object with changed values
+            // Build updates object - send all current formData
             const updates: Record<string, string | null> = {};
-            for (const setting of settings) {
-                if (formData[setting.key] !== setting.value) {
-                    updates[setting.key] = formData[setting.key] || null;
-                }
+            
+            // Send all formData values (including empty ones as null)
+            Object.keys(formData).forEach(key => {
+                updates[key] = formData[key] || null;
+            });
+            
+            // If formData is empty but we have settings, use current form values
+            if (Object.keys(updates).length === 0 && settings.length > 0) {
+                settings.forEach(setting => {
+                    updates[setting.key] = formData[setting.key] || setting.value || null;
+                });
+            }
+
+            if (Object.keys(updates).length === 0) {
+                notification.error('Không có dữ liệu để lưu');
+                return;
             }
 
             // Send all updates in one request
