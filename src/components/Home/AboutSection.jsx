@@ -92,7 +92,7 @@ const AboutSection = () => {
     ]
 
     return (
-        <section className="relative py-32 overflow-hidden bg-background">
+        <section className="relative pt-28 pb-16 md:pt-32 md:pb-20 overflow-hidden bg-background">
             {/* 3D Background - hidden on mobile for performance */}
             <div className="absolute inset-0 z-0 opacity-40 hidden lg:block">
                 <Canvas camera={{ position: [0, 0, 5], fov: 45 }} dpr={[1, 1.5]}>
@@ -113,7 +113,7 @@ const AboutSection = () => {
             <div className="absolute inset-0 z-[2] bg-gradient-to-r from-background via-transparent to-background" />
 
             <div className="relative z-10 container mx-auto px-4 md:px-10 lg:px-20">
-                <div className="grid lg:grid-cols-2 gap-16 items-center">
+                <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
                     {/* Left: Text Content */}
                     <motion.div
                         initial={{ x: -50, opacity: 0 }}
@@ -169,16 +169,20 @@ const AboutSection = () => {
                             <motion.div
                                 key={i}
                                 whileHover={{ x: 8, scale: 1.02 }}
-                                className="group flex items-center gap-5 p-5 bg-gray-100 border border-gray-300 rounded-2xl hover:border-primary/30 transition-all cursor-pointer shadow-sm"
+                                className="group flex items-center gap-4 sm:gap-5 px-4 py-3 sm:p-5 bg-gray-100 border border-gray-300 rounded-2xl hover:border-primary/30 transition-all cursor-pointer shadow-sm"
                             >
-                                <div className="w-14 h-14 flex-shrink-0 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/30 text-primary group-hover:bg-primary group-hover:text-white transition-all">
-                                    <span className="material-symbols-outlined text-2xl">{item.icon}</span>
+                                <div className="w-11 h-11 sm:w-14 sm:h-14 flex-shrink-0 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/30 text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                                    <span className="material-symbols-outlined text-xl sm:text-2xl">{item.icon}</span>
                                 </div>
                                 <div className="min-w-0">
-                                    <h4 className="text-slate-800 font-bold text-lg group-hover:text-primary transition-colors">{item.label}</h4>
-                                    <p className="text-slate-400 text-sm mt-0.5">{item.desc}</p>
+                                    <h4 className="text-slate-800 font-bold text-sm sm:text-lg leading-snug group-hover:text-primary transition-colors">
+                                        {item.label}
+                                    </h4>
+                                    <p className="text-slate-400 text-[11px] sm:text-sm leading-snug mt-0.5">
+                                        {item.desc}
+                                    </p>
                                 </div>
-                                <span className="material-symbols-outlined text-slate-400 group-hover:text-primary ml-auto flex-shrink-0 text-2xl transition-colors">
+                                <span className="material-symbols-outlined text-slate-400 group-hover:text-primary ml-auto flex-shrink-0 text-xl sm:text-2xl transition-colors">
                                     arrow_forward
                                 </span>
                             </motion.div>
