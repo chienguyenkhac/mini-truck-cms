@@ -325,10 +325,6 @@ const ImageLibrary = () => {
               />
             </div>
 
-            {/* Image title */}
-            {selectedImage.title && (
-              <p className="mt-4 text-center text-white text-base md:text-lg font-medium">{selectedImage.title}</p>
-            )}
           </motion.div>
         </div>
       )}

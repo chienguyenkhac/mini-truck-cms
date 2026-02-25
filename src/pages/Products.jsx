@@ -147,7 +147,7 @@ const Products = () => {
 
       <div className="container mx-auto px-4 md:px-10 lg:px-20 pb-20">
         {/* Search & Filter */}
-        <div className="flex flex-col md:flex-row gap-4 mb-10">
+        <div className="flex flex-col md:flex-row gap-3 md:gap-4 mb-6 md:mb-10">
           <div className="flex-grow relative">
             <input
               type="text"
@@ -171,7 +171,7 @@ const Products = () => {
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
-            className="mb-10 p-6 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-6"
+            className="mb-6 md:mb-10 p-5 md:p-6 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-5 md:space-y-6"
           >
             {/* Part Categories */}
             <div>
@@ -248,7 +248,7 @@ const Products = () => {
         {/* Products Grid */}
         {
           loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-8">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div key={i} className="bg-white border border-slate-200 rounded-3xl overflow-hidden animate-pulse">
                   <div className="aspect-square bg-slate-200"></div>
@@ -262,7 +262,7 @@ const Products = () => {
             </div>
           ) : products.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-8">
                 {products.map((product, index) => (
                   <motion.div
                     key={product.id}
@@ -289,7 +289,7 @@ const Products = () => {
                           </div>
                         )}
                         {product.manufacturer_code && (
-                          <div className="absolute top-4 left-4 text-amber-500 text-[10px] font-bold uppercase tracking-wider">
+                          <div className="absolute top-4 left-4 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">
                             {product.manufacturer_code}
                           </div>
                         )}

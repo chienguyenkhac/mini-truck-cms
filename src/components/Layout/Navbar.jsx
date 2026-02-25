@@ -255,7 +255,7 @@ const Navbar = ({ isScrolled }) => {
                                                 <div className="py-2 border-b border-border/50">
                                                     <button
                                                         onClick={() => setOpenMobileDropdown(openMobileDropdown === i ? null : i)}
-                                                        className="w-full flex items-center justify-between text-lg font-medium text-slate-700 py-1"
+                                                        className="w-full flex items-center justify-between text-base font-medium text-slate-700 py-1"
                                                     >
                                                         {item.label}
                                                         <span className={`material-symbols-outlined transition-transform duration-300 ${openMobileDropdown === i ? 'rotate-180' : ''}`}>
@@ -274,7 +274,7 @@ const Navbar = ({ isScrolled }) => {
                                                                     <Link
                                                                         to="/products"
                                                                         onClick={() => setIsMobileMenuOpen(false)}
-                                                                        className="block text-slate-500 hover:text-primary py-1"
+                                                                        className="block text-sm text-slate-500 hover:text-primary py-1"
                                                                     >
                                                                         Tất cả
                                                                     </Link>
@@ -283,7 +283,7 @@ const Navbar = ({ isScrolled }) => {
                                                             key={cat.id}
                                                             to={`/products?category=${cat.slug || cat.id}`}
                                                             onClick={() => setIsMobileMenuOpen(false)}
-                                                            className="block text-slate-500 hover:text-primary py-1"
+                                                            className="block text-sm text-slate-500 hover:text-primary py-1"
                                                         >
                                                             {cat.name}
                                                         </Link>
@@ -297,7 +297,7 @@ const Navbar = ({ isScrolled }) => {
                                                 <Link
                                                     to={item.path}
                                                     onClick={() => setIsMobileMenuOpen(false)}
-                                                    className={`text-lg font-medium py-3 border-b border-border/50 block ${isActive(item.path) ? 'text-primary' : 'text-slate-700'}`}
+                                                    className={`text-base font-medium py-3 border-b border-border/50 block ${isActive(item.path) ? 'text-primary' : 'text-slate-700'}`}
                                                 >
                                                     {item.label}
                                                 </Link>
@@ -308,7 +308,7 @@ const Navbar = ({ isScrolled }) => {
                                         <Link
                                             to="/contact"
                                             onClick={() => setIsMobileMenuOpen(false)}
-                                            className="flex items-center justify-center gap-2 px-6 py-4 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20"
+                                            className="flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white text-sm font-semibold rounded-lg shadow-md shadow-primary/20"
                                         >
                                             Nhận Báo Giá
                                             <span className="material-symbols-outlined">arrow_forward</span>

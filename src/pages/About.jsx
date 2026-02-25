@@ -159,7 +159,7 @@ const About = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 md:px-10 lg:px-20 pb-20 space-y-16 relative z-20">
+      <div className="container mx-auto px-4 md:px-10 lg:px-20 pb-10 space-y-6 md:space-y-8 lg:space-y-10 relative z-20">
         {/* Stats */}
         <motion.div
           initial={{ y: 30, opacity: 0 }}

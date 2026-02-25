@@ -160,7 +160,7 @@ const ProductGrid = () => {
                     </div>
                 )}
                 {p.manufacturer_code && (
-                    <div className="absolute top-4 left-4 bg-[#1e9ba8] text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">
+                    <div className="absolute top-4 left-4 bg-primary text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-lg">
                         {p.manufacturer_code}
                     </div>
                 )}
@@ -207,7 +207,7 @@ const ProductGrid = () => {
                 </div>
 
                 {loading ? (
-                    <div className="grid md:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
                         {[1, 2, 3].map((i) => (
                             <div key={i} className="bg-white border border-slate-200 rounded-3xl overflow-hidden animate-pulse">
                                 <div className="aspect-[16/10] bg-slate-200" />
@@ -220,7 +220,7 @@ const ProductGrid = () => {
                         ))}
                     </div>
                 ) : (
-                    <div ref={containerRef} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+                    <div ref={containerRef} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
                         {productCards}
                     </div>
                 )}

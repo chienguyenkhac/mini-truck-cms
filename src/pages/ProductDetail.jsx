@@ -108,8 +108,18 @@ const ProductDetail = () => {
                         .eq('category_id', productData.category_id)
                         .eq('show_on_homepage', true)
                         .neq('id', productData.id)
-                        .limit(3)
-                    setRelatedProducts(relatedData || [])
+                        .limit(5)
+
+                    // Double-check on client side: luôn loại bỏ sản phẩm hiện tại
+                    const safeRelated =
+                        (relatedData || []).filter(
+                            (p) =>
+                                p.id !== productData.id &&
+                                p.slug !== productData.slug &&
+                                p.manufacturer_code !== productData.manufacturer_code
+                        )
+
+                    setRelatedProducts(safeRelated)
                 }
 
                 // Fetch vehicle types if product has vehicle_ids
@@ -180,7 +190,7 @@ const ProductDetail = () => {
                         animate={{ opacity: 1, x: 0 }}
                         className="relative"
                     >
-                        <div className="w-full max-w-[600px] h-[400px] sm:h-[500px] mx-auto rounded-3xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 border border-gray-200 shadow-lg relative">
+                        <div className="w-full max-w-[600px] h-[400px] sm:h-[500px] rounded-3xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 border border-gray-200 shadow-lg relative">
                             <AnimatePresence mode="wait">
                                 {images.length > 0 ? (
                                     <motion.img
@@ -236,7 +246,7 @@ const ProductDetail = () => {
 
                         {/* Thumbnail Gallery */}
                         {images.length > 1 && (
-                            <div className="flex gap-3 mt-4 overflow-x-auto pb-2">
+                            <div className="flex gap-3 mt-4 overflow-x-auto pb-2 w-full max-w-[600px]">
                                 {images.map((img, idx) => (
                                     <button
                                         key={idx}
@@ -348,7 +358,7 @@ const ProductDetail = () => {
                     relatedProducts.length > 0 && (
                         <div className="mt-16">
                             <h2 className="text-xl font-bold text-slate-800 mb-4">Sản Phẩm Liên Quan</h2>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                                 {relatedProducts.map((p) => (
                                     <Link
                                         key={p.id}
@@ -362,7 +372,6 @@ const ProductDetail = () => {
                                                     alt={p.name}
                                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                                     onError={(e) => { e.target.style.display = 'none' }}
-
                                                     draggable={false}
                                                 />
                                             ) : (
@@ -370,9 +379,14 @@ const ProductDetail = () => {
                                                     <span className="material-symbols-outlined text-6xl text-gray-300">settings</span>
                                                 </div>
                                             )}
+                                            {p.manufacturer_code && (
+                                                <div className="absolute top-4 left-4 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">
+                                                    {p.manufacturer_code}
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="p-3">
-                                            <h3 className="text-slate-800 font-medium text-xs group-hover:text-primary transition-colors line-clamp-2">
+                                            <h3 className="text-slate-800 font-bold text-xs group-hover:text-primary transition-colors line-clamp-2">
                                                 {p.name}
                                             </h3>
                                         </div>

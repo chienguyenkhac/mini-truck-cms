@@ -83,19 +83,19 @@ const Contact = () => {
               ].map((item, i) => (
                 <div
                   key={i}
-                  className="flex items-start gap-5 p-6 bg-white border border-slate-200 rounded-2xl hover:border-primary/50 transition-all shadow-sm"
+                  className="flex items-start gap-4 p-4 md:p-6 bg-white border border-slate-200 rounded-xl md:rounded-2xl hover:border-primary/50 transition-all shadow-sm"
                 >
-                  <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary border border-primary/30 flex-shrink-0">
-                    <span className="material-symbols-outlined text-2xl">{item.icon}</span>
+                  <div className="w-11 h-11 md:w-14 md:h-14 bg-primary/10 rounded-xl md:rounded-2xl flex items-center justify-center text-primary border border-primary/30 flex-shrink-0">
+                    <span className="material-symbols-outlined text-xl md:text-2xl">{item.icon}</span>
                   </div>
                   <div>
-                    <h3 className="text-slate-800 font-bold text-lg mb-1">{item.title}</h3>
+                    <h3 className="text-slate-800 font-bold text-base md:text-lg mb-1">{item.title}</h3>
                     {item.href ? (
-                      <a href={item.href} className="text-slate-500 hover:text-primary transition-colors text-lg">
+                      <a href={item.href} className="text-slate-500 hover:text-primary transition-colors text-sm md:text-base">
                         {item.content}
                       </a>
                     ) : (
-                      <p className="text-slate-500">{item.content}</p>
+                      <p className="text-slate-500 text-sm md:text-base">{item.content}</p>
                     )}
                     {item.sub && <p className="text-slate-400 text-sm mt-1">{item.sub}</p>}
                   </div>
