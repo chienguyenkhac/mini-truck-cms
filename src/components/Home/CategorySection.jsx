@@ -78,7 +78,7 @@ const CategorySection = () => {
     }, [])
 
     return (
-        <section className="pt-8 md:pt-10 pb-14 bg-gray-100">
+    <section className="pt-0 sm:pt-3 md:pt-10 pb-14 bg-gray-100">
             <div className="container mx-auto px-4 md:px-10 lg:px-20">
                 <div className="text-center mb-10 space-y-3">
                     <h2 className="text-3xl md:text-4xl font-bold text-gray-800 tracking-tight">Danh Mục Phụ Tùng</h2>

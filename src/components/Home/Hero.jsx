@@ -186,14 +186,16 @@ const Hero = () => {
               Khám Phá Ngay
               <span className="material-symbols-outlined ml-2 text-lg group-hover:rotate-180 transition-transform duration-500">view_in_ar</span>
             </Link>
-            <Link
+            <a
               ref={btn2Ref}
-              to="/contact"
-              className="flex items-center justify-center h-11 sm:h-12 px-6 sm:px-8 border border-slate-300 hover:border-primary hover:bg-primary/5 rounded-xl text-slate-700 font-bold text-sm sm:text-base transition-all group will-change-transform backdrop-blur-sm"
+              href="https://zalo.me/0382890990"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center h-11 sm:h-12 px-6 sm:px-8 bg-[#0068ff] text-white font-bold text-sm sm:text-base rounded-xl hover:bg-[#0056d6] transition-colors group will-change-transform backdrop-blur-sm shadow-md"
             >
-              Tư Vấn Ngay
-              <span className="material-symbols-outlined ml-2 text-lg group-hover:translate-x-1 transition-transform">chat_bubble</span>
-            </Link>
+              Chat Zalo
+              <span className="material-symbols-outlined ml-2 text-lg group-hover:translate-x-1 transition-transform">chat</span>
+            </a>
           </motion.div>
         </div>
       </div>

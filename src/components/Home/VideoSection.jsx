@@ -1,10 +1,10 @@
 const VideoSection = () => {
     return (
-        <section className="pt-4 md:pt-8 pb-8 md:pb-16 bg-gray-50 overflow-hidden">
+        <section className="pt-4 md:pt-8 pb-2 md:pb-16 bg-gray-50 overflow-hidden">
             <div className="container mx-auto px-4 md:px-10 lg:px-20">
                 <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-                    {/* Card - shows first on mobile */}
-                    <div className="relative group order-1 lg:order-2">
+                    {/* Card - hidden on mobile, shown from md and up */}
+                    <div className="relative group order-1 lg:order-2 hidden md:block">
                         <div className="absolute -inset-4 bg-primary/20 rounded-[2.5rem] blur-2xl group-hover:bg-primary/30 transition-all"></div>
                         <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border border-border bg-white">
                             <div
