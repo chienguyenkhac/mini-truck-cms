@@ -70,7 +70,7 @@ const ProductCategories = () => {
           DANH MỤC SẢN PHẨM
         </h2>
         <p className="section-subtitle">
-          Chuyên cung cấp phụ tùng chính hãng cho các dòng xe tải Sinotruk
+          Chuyên cung cấp phụ tùng chính hãng cho các dòng xe tải hạng nặng
         </p>
 
         <div className="categories-grid">

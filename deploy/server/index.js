@@ -732,22 +732,65 @@ app.put('/api/site-settings', async (req, res) => {
 });
 
 
-// GET /api/catalog-articles - Get catalog articles
+// GET /api/catalog-articles - Get catalog articles with search and pagination
 app.get('/api/catalog-articles', async (req, res) => {
     try {
-        const { is_published } = req.query;
-        let query = 'SELECT * FROM catalog_articles';
+        const { 
+            is_published, 
+            limit = 20, 
+            offset = 0, 
+            search = '',
+            page 
+        } = req.query;
+        
+        // Calculate offset from page if provided
+        const actualOffset = page ? (parseInt(page) - 1) * parseInt(limit) : parseInt(offset);
+        
+        // Build WHERE conditions
+        const whereConditions = [];
         const params = [];
+        let paramIndex = 1;
 
+        // Published filter
         if (is_published !== undefined) {
-            query += ' WHERE is_published = $1';
+            whereConditions.push(`is_published = $${paramIndex}`);
             params.push(is_published === 'true');
+            paramIndex++;
         }
 
-        query += ' ORDER BY created_at DESC';
+        // Search filter (title and content)
+        if (search && search.trim()) {
+            whereConditions.push(`(title ILIKE $${paramIndex} OR content::text ILIKE $${paramIndex})`);
+            params.push(`%${search.trim()}%`);
+            paramIndex++;
+        }
 
-        const { rows } = await pool.query(query, params);
-        res.json(rows);
+        const whereClause = whereConditions.length > 0 ? ' WHERE ' + whereConditions.join(' AND ') : '';
+
+        // Get total count for pagination
+        const countQuery = `SELECT COUNT(*) as total FROM catalog_articles${whereClause}`;
+        const { rows: countRows } = await pool.query(countQuery, params);
+        const total = parseInt(countRows[0].total);
+
+        // Get data with pagination
+        const dataQuery = `SELECT * FROM catalog_articles${whereClause} ORDER BY created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+        const dataParams = [...params, parseInt(limit), actualOffset];
+        const { rows } = await pool.query(dataQuery, dataParams);
+        
+        // Return paginated response
+        res.json({
+            data: rows,
+            pagination: {
+                total,
+                limit: parseInt(limit),
+                offset: actualOffset,
+                page: page ? parseInt(page) : Math.floor(actualOffset / parseInt(limit)) + 1,
+                totalPages: Math.ceil(total / parseInt(limit)),
+                hasNext: actualOffset + parseInt(limit) < total,
+                hasPrev: actualOffset > 0
+            },
+            search: search || ''
+        });
     } catch (error) {
         console.error('Error fetching catalog articles:', error);
         res.status(500).json({ error: 'Failed to fetch catalog articles' });

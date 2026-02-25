@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase, getProductImages, getImageUrl } from '../services/supabase'
+import { useSiteSettings } from '../context/SiteSettingsContext'
 
 const ProductDetail = () => {
     const { slug } = useParams()
@@ -13,6 +14,8 @@ const ProductDetail = () => {
     const [loading, setLoading] = useState(true)
     const [images, setImages] = useState([])
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
+    const { settings } = useSiteSettings()
+    const hotline = settings.contact_phone || '0382890990'
 
     // Auto-slide images every 7 seconds
     useEffect(() => {
@@ -319,7 +322,7 @@ const ProductDetail = () => {
                         {/* CTA Buttons */}
                         <div className="flex flex-col sm:flex-row gap-3">
                             <a
-                                href="tel:0382890990"
+                                href={`tel:${hotline}`}
                                 className="flex-1 py-3 px-6 bg-[#c41e1e] text-white font-semibold rounded-lg hover:bg-[#a01818] transition-colors flex items-center justify-center gap-2 shadow-md text-sm"
                             >
                                 <span className="material-symbols-outlined text-lg">call</span>

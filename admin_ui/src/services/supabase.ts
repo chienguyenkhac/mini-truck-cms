@@ -131,7 +131,8 @@ export const categoryService = {
 export const catalogService = {
     getAll: async (publishedOnly: boolean = false) => {
         const query = publishedOnly ? '?is_published=true' : '';
-        return fetchAPI<CatalogArticle[]>(`/catalog-articles${query}`);
+        const response = await fetchAPI<{data: CatalogArticle[], pagination: any, search: string}>(`/catalog-articles${query}`);
+        return response.data;
     },
 
     getById: async (id: number) => fetchAPI<CatalogArticle>(`/catalog-articles/${id}`),

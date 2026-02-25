@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { getProducts, getCategories, getImageUrl } from '../services/api'
+import { useSiteSettings } from '../context/SiteSettingsContext'
 
 const ITEMS_PER_PAGE = 30
 
@@ -14,6 +15,8 @@ const formatPrice = (price) => {
 const Products = () => {
   const [searchParams] = useSearchParams()
   const categoryFromUrl = searchParams.get('category')
+  const { settings } = useSiteSettings()
+  const hotline = settings.contact_phone || '0382890990'
 
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState(categoryFromUrl || 'all')
@@ -312,7 +315,7 @@ const Products = () => {
                           Chi Tiết
                         </Link>
                         <a
-                          href="tel:0382890990"
+                          href={`tel:${hotline}`}
                           className="flex-1 py-2 bg-[#c41e1e] text-white font-medium text-sm rounded-xl hover:bg-[#a01818] transition-all flex items-center justify-center"
                         >
                           Đặt Hàng

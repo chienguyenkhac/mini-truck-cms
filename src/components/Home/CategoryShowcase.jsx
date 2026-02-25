@@ -62,7 +62,7 @@ const CategoryShowcase = () => {
                         Danh Mục <span className="text-primary">Sản Phẩm</span>
                     </h2>
                     <p className="text-slate-500 text-lg max-w-2xl mx-auto">
-                        Khám phá các dòng phụ tùng chính hãng cho xe tải SINOTRUK
+                        Khám phá các dòng phụ tùng chính hãng cho xe tải hạng nặng và xe chuyên dụng.
                     </p>
                 </motion.div>
 

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { useSiteSettings } from '../context/SiteSettingsContext'
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +11,12 @@ const Contact = () => {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const { settings } = useSiteSettings()
+  const hotline = settings.contact_phone || '0382890990'
+  const address = settings.address || 'Thôn 1, Xã Lại Yên, Hoài Đức, Hà Nội'
+  const email = settings.contact_email || 'hnsinotruk@gmail.com'
+  const siteNameRaw = settings.site_name || 'SINOTRUK Hà Nội'
+  const siteName = siteNameRaw.toUpperCase()
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -38,6 +45,9 @@ const Contact = () => {
           >
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-800 tracking-tighter mb-2">
               LIÊN <span className="text-primary">HỆ</span>
+              <span className="block text-sm sm:text-base md:text-lg text-slate-600 mt-1">
+                {siteName}
+              </span>
             </h1>
             <p className="text-slate-500 text-sm md:text-base max-w-xl mx-auto">
               Chúng tôi luôn sẵn sàng hỗ trợ bạn 24/7
@@ -60,20 +70,19 @@ const Contact = () => {
                 {
                   icon: 'location_on',
                   title: 'Địa chỉ',
-                  content: 'Thôn 1, Xã Lại Yên, Hoài Đức, Hà Nội',
-                  sub: '(Cách cầu vượt An Khánh 300m)'
+                  content: address,
                 },
                 {
                   icon: 'call',
                   title: 'Hotline 24/7',
-                  content: '0382.890.990',
-                  href: 'tel:0382890990'
+                  content: settings.contact_phone || '0382.890.990',
+                  href: `tel:${hotline}`
                 },
                 {
                   icon: 'mail',
                   title: 'Email',
-                  content: 'hnsinotruk@gmail.com',
-                  href: 'mailto:hnsinotruk@gmail.com'
+                  content: email,
+                  href: `mailto:${email}`
                 },
                 {
                   icon: 'schedule',
@@ -204,7 +213,7 @@ const Contact = () => {
             allowFullScreen=""
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
-            title="SINOTRUK HÀ NỘI"
+            title={siteName}
             className="grayscale-[50%] hover:grayscale-0 transition-all duration-500"
           ></iframe>
         </motion.div>

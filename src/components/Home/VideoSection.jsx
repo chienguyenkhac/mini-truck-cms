@@ -1,4 +1,9 @@
+import { useSiteSettings } from '../../context/SiteSettingsContext'
+
 const VideoSection = () => {
+    const { settings } = useSiteSettings()
+    const hotline = settings.contact_phone || '0382890990'
+    const hotlineDisplay = settings.contact_phone || '0382.890.990'
     return (
         <section className="pt-4 md:pt-8 pb-2 md:pb-16 bg-gray-50 overflow-hidden">
             <div className="container mx-auto px-4 md:px-10 lg:px-20">
@@ -58,11 +63,11 @@ const VideoSection = () => {
 
                             <div className="mt-6 md:mt-8">
                                 <a
-                                    href="tel:0382890990"
+                                    href={`tel:${hotline}`}
                                     className="flex items-center gap-2 px-5 md:px-6 py-2.5 md:py-3 bg-primary hover:bg-primary/90 rounded-xl text-white font-bold transition-all group w-fit shadow-lg text-xs md:text-sm"
                                 >
                                     <span className="material-symbols-outlined text-base md:text-lg">call</span>
-                                    Hotline: 0382.890.990
+                                    Hotline: {hotlineDisplay}
                                 </a>
                             </div>
                         </div>

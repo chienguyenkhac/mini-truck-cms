@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { supabase } from '../services/supabase'
+import { useSiteSettings } from '../context/SiteSettingsContext'
 
 const ITEMS_PER_PAGE = 80 // More items per page with smaller grid
 
@@ -10,6 +11,8 @@ const ImageLibrary = () => {
   const [selectedImage, setSelectedImage] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
+  const { settings } = useSiteSettings()
+  const siteName = settings.site_name || 'SINOTRUK Hà Nội'
 
   useEffect(() => {
     const loadImages = async () => {
@@ -199,7 +202,7 @@ const ImageLibrary = () => {
               THƯ VIỆN <span className="text-primary">ẢNH</span>
             </h1>
             <p className="text-slate-500 text-sm md:text-base max-w-xl mx-auto">
-              Hình ảnh sản phẩm phụ tùng SINOTRUK chính hãng
+              Hình ảnh sản phẩm phụ tùng chính hãng của {siteName}
             </p>
           </motion.div>
         </div>

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { getProducts, getImageUrl } from '../../services/supabase'
+import { useSiteSettings } from '../../context/SiteSettingsContext'
 
 // Fallback products for spare parts
 const fallbackProducts = [
@@ -98,6 +99,8 @@ const ProductGrid = () => {
     const hasAnimated = useRef(false)
     const [products, setProducts] = useState([])
     const [loading, setLoading] = useState(true)
+    const { settings } = useSiteSettings()
+    const hotline = settings.contact_phone || '0382890990'
 
     // Fetch products from Supabase
     useEffect(() => {
@@ -178,7 +181,7 @@ const ProductGrid = () => {
                         Chi Tiết
                     </div>
                     <a
-                        href="tel:0382890990"
+                        href={`tel:${hotline}`}
                         onClick={(e) => e.stopPropagation()}
                         className="flex-1 py-2 bg-[#c41e1e] text-white font-medium text-sm rounded-xl hover:bg-[#a01818] transition-all flex items-center justify-center"
                     >

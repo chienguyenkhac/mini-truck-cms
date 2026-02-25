@@ -4,6 +4,7 @@ import { Float, MeshDistortMaterial, PresentationControls } from '@react-three/d
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { supabase } from '../services/supabase'
+import { useSiteSettings } from '../context/SiteSettingsContext'
 
 // 3D Truck Model
 const TruckModel = () => {
@@ -113,6 +114,13 @@ const Scene3D = () => {
 
 const About = () => {
   const [categories, setCategories] = useState([])
+  const { settings } = useSiteSettings()
+  const hotline = settings.contact_phone || '0382.890.990'
+  const address = settings.address || 'Thôn 1, Xã Lại Yên, Hoài Đức, Hà Nội (cách cầu vượt An Khánh 300m)'
+  const email = settings.contact_email || 'hnsinotruk@gmail.com'
+  const companyName =
+    (settings.site_name && settings.site_name.toUpperCase()) ||
+    'CÔNG TY CỔ PHẦN SINOTRUK HÀ NỘI'
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -188,14 +196,18 @@ const About = () => {
           className="bg-white border border-slate-200 rounded-3xl p-8 md:p-12 shadow-sm"
         >
           <h2 className="text-xl md:text-2xl font-bold text-slate-800 mb-6 text-center">
-            CÔNG TY CỔ PHẦN SINOTRUK HÀ NỘI
+            {companyName}
           </h2>
           <div className="text-slate-500 space-y-4 leading-relaxed">
             <p>
-              CÔNG TY CỔ PHẦN SINOTRUK HÀ NỘI xin gửi lời chào trân trọng cùng lời chúc sức khoẻ, tới toàn thể Quý Khách Hàng đã quan tâm và sử dụng các sản phẩm mà Công ty chúng tôi phân phối trên thị trường trong suốt thời gian qua.
+              {companyName} xin gửi lời chào trân trọng cùng lời chúc sức khoẽ, tới toàn thể Quý Khách Hàng đã quan tâm
+              và sử dụng các sản phẩm mà Công ty chúng tôi phân phối trên thị trường trong suốt thời gian qua.
             </p>
             <p>
-              CÔNG TY CỔ PHẦN SINOTRUK HÀ NỘI là công ty chuyên nhập khẩu và phân phối phụ tùng cho xe tải hạng nặng, xe chuyên dụng, xe máy công trình do Trung Quốc sản xuất: HOWO/SINOTRUK, CHENGLONG. Chúng tôi chuyên cung cấp phụ tùng để bảo hành, thay thế cho xe của hãng Sinotruk với các chủng loại HOWO A7, 420, 375, 380 , Xe trộn bê tông/ Xe ben Howo 336-371 và các chủng loại sơ mi rơ mooc CIMC.
+              {companyName} là công ty chuyên nhập khẩu và phân phối phụ tùng cho xe tải hạng nặng, xe chuyên dụng, xe máy
+              công trình do Trung Quốc sản xuất: HOWO/SINOTRUK, CHENGLONG. Chúng tôi chuyên cung cấp phụ tùng để bảo hành,
+              thay thế cho xe của hãng Sinotruk với các chủng loại HOWO A7, 420, 375, 380 , Xe trộn bê tông/ Xe ben Howo
+              336-371 và các chủng loại sơ mi rơ mooc CIMC.
             </p>
             <p>
               Với sự hiểu biết sâu sắc về các chủng loại xe tải nặng do Trung Quốc sản xuất, phong cách phục vụ chuyên nghiệp và giá cả cạnh tranh cùng chế độ bảo hành cho sản phẩm, chúng tôi mong rằng sẽ trở thành đối tác tin cậy của Quý khách hàng trên toàn quốc.
@@ -331,11 +343,11 @@ const About = () => {
 
             <div>
               <h3 className="text-slate-800 font-bold text-lg mb-3">Thông tin liên lạc:</h3>
-              <p className="font-bold text-slate-700 uppercase">CÔNG TY CỔ PHẦN SINOTRUK HÀ NỘI</p>
+              <p className="font-bold text-slate-700 uppercase">{companyName}</p>
               <ul className="mt-2 space-y-1 pl-0 list-none">
-                <li>Địa chỉ: Thôn 1, Xã Lại Yên, Hoài Đức, Hà Nội (cách cầu vượt An Khánh 300m)</li>
-                <li>Điện thoại: 0382.890.990</li>
-                <li>Email: hnsinotruk@gmail.com</li>
+                <li>Địa chỉ: {address}</li>
+                <li>Điện thoại: {hotline}</li>
+                <li>Email: {email}</li>
               </ul>
             </div>
 
@@ -384,7 +396,7 @@ const About = () => {
             <div>
               <h3 className="text-slate-800 font-bold text-lg mb-3">7. Khiếu nại, tố tụng:</h3>
               <p>
-                Nếu Quý khách có khiếu nại về hàng hóa hoặc dịch vụ, vui lòng gọi đường dây nóng quản lý bán hàng: <span className="font-bold text-slate-700">0382.890.990</span>.
+                Nếu Quý khách có khiếu nại về hàng hóa hoặc dịch vụ, vui lòng gọi đường dây nóng quản lý bán hàng: <span className="font-bold text-slate-700">{hotline}</span>.
               </p>
             </div>
           </div>

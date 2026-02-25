@@ -331,8 +331,12 @@ INSERT INTO public.site_settings (id, key, value, type, description, created_at,
 (2, 'site_description', 'Phụ tùng xe tải SINOTRUK chính hãng', 'text', 'Mô tả website', now(), now()),
 (3, 'contact_phone', '0382.890.990', 'text', 'Số điện thoại liên hệ', now(), now()),
 (4, 'contact_email', 'info@sinotruk.vn', 'email', 'Email liên hệ', now(), now()),
-(5, 'show_homepage_products', 'true', 'boolean', 'Hiển thị sản phẩm trên trang chủ', now(), now()),
-(6, 'site_logo', '', 'text', 'Logo website', now(), now());
+(5, 'address', 'TP Hà Nội', 'text', 'Địa chỉ công ty', now(), now()),
+(6, 'show_homepage_products', 'true', 'boolean', 'Hiển thị sản phẩm trên trang chủ', now(), now()),
+(7, 'site_logo', '', 'text', 'Logo website', now(), now()),
+(8, 'watermark_enabled', 'false', 'boolean', 'Bật watermark', now(), now()),
+(9, 'watermark_text', 'SINOTRUK Hà Nội', 'text', 'Text watermark', now(), now()),
+(10, 'watermark_opacity', '40', 'text', 'Độ trong suốt watermark', now(), now());
 
 -- Cập nhật sequences
 SELECT setval('public.admin_users_id_seq', (SELECT MAX(id) FROM public.admin_users));

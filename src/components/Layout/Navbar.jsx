@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { gsap } from 'gsap'
 import { fetchAPI } from '../../services/api'
+import { useSiteSettings } from '../../context/SiteSettingsContext'
 
 const Navbar = ({ isScrolled }) => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -10,7 +11,7 @@ const Navbar = ({ isScrolled }) => {
     const [openMobileDropdown, setOpenMobileDropdown] = useState(null)
     const [vehicleCategories, setVehicleCategories] = useState([])
     const [partCategories, setPartCategories] = useState([])
-    const [siteSettings, setSiteSettings] = useState({ site_logo: '', site_name: 'SINOTRUK Hà Nội' })
+    const { settings: siteSettings } = useSiteSettings()
     const location = useLocation()
     const logoRef = useRef(null)
     const navRef = useRef(null)
@@ -27,25 +28,14 @@ const Navbar = ({ isScrolled }) => {
         }
     }, [isMobileMenuOpen])
 
-    // Load categories and site settings from database
+    // Load categories from database
     useEffect(() => {
         const loadData = async () => {
             try {
-                // Load categories
                 const categoriesData = await fetchAPI('/categories?is_visible=true')
                 if (categoriesData) {
                     setVehicleCategories(categoriesData.filter(c => c.is_vehicle_name))
                     setPartCategories(categoriesData.filter(c => !c.is_vehicle_name))
-                }
-
-                // Load site settings
-                const settingsData = await fetchAPI('/site-settings')
-                if (settingsData) {
-                    const settings = {}
-                    settingsData.forEach(s => {
-                        settings[s.key] = s.value
-                    })
-                    setSiteSettings(settings)
                 }
             } catch (err) {
                 console.error('Error loading data:', err)

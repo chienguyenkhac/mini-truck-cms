@@ -1,8 +1,9 @@
-import { useEffect, useRef, useMemo, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { IMAGES } from '../../constants/images'
+import { useSiteSettings } from '../../context/SiteSettingsContext'
 
 // Banner images for slideshow
 const bannerImages = [
@@ -65,6 +66,15 @@ const Hero = () => {
   const btn2Ref = useRef(null)
   const titleRef = useRef(null)
   const [currentBanner, setCurrentBanner] = useState(0)
+  const { settings } = useSiteSettings()
+  const hotline = settings.contact_phone || '0382890990'
+  const siteNameRaw = settings.site_name || 'SINOTRUK HÀ NỘI'
+  const siteName = siteNameRaw.toUpperCase()
+  const [siteNameFirstPart, ...siteNameRestParts] = siteName.split(' ')
+  const siteNameSecondPart = siteNameRestParts.join(' ')
+  const siteDescription =
+    settings.site_description ||
+    'Chuyên cung cấp phụ tùng chính hãng cho các dòng xe tải HOWO SINOTRUK'
 
   useMagnetic(btn1Ref, 0.35)
   useMagnetic(btn2Ref, 0.25)
@@ -80,26 +90,12 @@ const Hero = () => {
   // Title animation
   useEffect(() => {
     if (!titleRef.current) return
-    const chars = titleRef.current.querySelectorAll('.char')
-    if (chars.length === 0) return
-
-    gsap.fromTo(chars,
-      { y: 80, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.6, stagger: 0.025, ease: 'power3.out', delay: 0.4 }
+    gsap.fromTo(
+      titleRef.current,
+      { y: 40, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out', delay: 0.4 }
     )
   }, [])
-
-  const titleChars = useMemo(() => (
-    'SINOTRUK'.split('').map((char, i) => (
-      <span key={i} className="char inline-block opacity-0">{char}</span>
-    ))
-  ), [])
-
-  const subtitleChars = useMemo(() => (
-    'HÀ NỘI'.split('').map((char, i) => (
-      <span key={i} className="char inline-block opacity-0">{char === ' ' ? '\u00A0' : char}</span>
-    ))
-  ), [])
 
   return (
     <section className="relative w-full h-[500px] md:h-[500px] lg:h-[500px] flex items-center justify-center overflow-hidden bg-background pb-4">
@@ -150,15 +146,16 @@ const Hero = () => {
           <div ref={titleRef} className="overflow-hidden">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-[0.9] tracking-tighter drop-shadow-sm">
               <span className="inline-block hover:scale-105 transition-transform duration-300 cursor-default" style={{ color: '#306269' }}>
-                {titleChars}
+                {siteNameFirstPart}
               </span>
-              <br />
-              <span
-                className="inline-block hover:scale-105 transition-transform duration-300 cursor-default"
-                style={{ color: '#800c0b' }}
-              >
-                {subtitleChars}
-              </span>
+              {siteNameSecondPart && (
+                <>
+                  <br />
+                  <span className="inline-block hover:scale-105 transition-transform duration-300 cursor-default" style={{ color: '#800c0b' }}>
+                    {siteNameSecondPart}
+                  </span>
+                </>
+              )}
             </h1>
           </div>
 
@@ -166,10 +163,9 @@ const Hero = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="text-slate-600 text-base md:text-lg max-w-xl leading-relaxed font-medium px-4 py-3 rounded-lg backdrop-blur-[2px] bg-white/5 shadow-sm"
-            style={{ textShadow: '0 2px 8px rgba(255, 255, 255, 0.8), 0 1px 3px rgba(0, 0, 0, 0.3)' }}
+            className="text-slate-700 text-base md:text-lg max-w-xl leading-relaxed font-medium pl-0 pr-4 py-3 rounded-lg backdrop-blur-[1.5px] bg-white/12 shadow-sm"
           >
-            Chuyên cung cấp phụ tùng chính hãng cho các dòng xe tải HOWO SINOTRUK. Đầy đủ linh kiện từ động cơ, hộp số, gầm, cầu đến các chi tiết nhỏ nhất. Cam kết giá tốt nhất thị trường.
+            {siteDescription}
           </motion.p>
 
           <motion.div
@@ -183,12 +179,12 @@ const Hero = () => {
               to="/products"
               className="flex items-center justify-center h-11 sm:h-12 px-6 sm:px-8 bg-primary hover:brightness-110 rounded-xl text-white font-bold text-sm sm:text-base transition-colors shadow-xl shadow-primary/30 group will-change-transform"
             >
-              Khám Phá Ngay
+              Xem Sản Phẩm
               <span className="material-symbols-outlined ml-2 text-lg group-hover:rotate-180 transition-transform duration-500">view_in_ar</span>
             </Link>
             <a
               ref={btn2Ref}
-              href="https://zalo.me/0382890990"
+              href={`https://zalo.me/${hotline.replace(/[^0-9]/g, '')}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center h-11 sm:h-12 px-6 sm:px-8 bg-[#0068ff] text-white font-bold text-sm sm:text-base rounded-xl hover:bg-[#0056d6] transition-colors group will-change-transform backdrop-blur-sm shadow-md"

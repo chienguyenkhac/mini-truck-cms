@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { getCatalogArticles } from '../services/supabase'
 
@@ -73,40 +73,80 @@ const Catalog = () => {
   const [loading, setLoading] = useState(true)
   const [selectedArticle, setSelectedArticle] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [displayCount, setDisplayCount] = useState(ITEMS_PER_PAGE)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pagination, setPagination] = useState({
+    total: 0,
+    hasNext: false,
+    hasPrev: false,
+    totalPages: 0
+  })
+  const [searchLoading, setSearchLoading] = useState(false)
 
-  // Load articles from database
+  // Debounce search to avoid too many API calls
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
+  
   useEffect(() => {
-    const loadArticles = async () => {
-      try {
-        const data = await getCatalogArticles()
-        setArticles(data)
-      } catch (err) {
-        console.error('Error loading articles:', err)
-      } finally {
-        setLoading(false)
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm)
+    }, 300)
+    
+    return () => clearTimeout(timer)
+  }, [searchTerm])
+
+  // Load articles from database with search and pagination
+  const loadArticles = useCallback(async (page = 1, search = '', isNewSearch = false) => {
+    try {
+      if (isNewSearch) {
+        setSearchLoading(true)
+      } else {
+        setLoading(true)
       }
+      
+      const result = await getCatalogArticles({
+        page,
+        limit: ITEMS_PER_PAGE,
+        search: search.trim(),
+        is_published: true
+      })
+      
+      setArticles(result.data || [])
+      setPagination(result.pagination || {})
+      setCurrentPage(page)
+    } catch (err) {
+      console.error('Error loading articles:', err)
+      setArticles([])
+      setPagination({})
+    } finally {
+      setLoading(false)
+      setSearchLoading(false)
     }
-    loadArticles()
   }, [])
 
-  // Filter articles based on search
-  const filteredArticles = articles.filter(article =>
-    article.title.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  // Initial load
+  useEffect(() => {
+    loadArticles(1, debouncedSearchTerm)
+  }, [loadArticles, debouncedSearchTerm])
 
-  // Get displayed articles
-  const displayedArticles = filteredArticles.slice(0, displayCount)
-  const hasMore = displayCount < filteredArticles.length
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    if (debouncedSearchTerm !== searchTerm && debouncedSearchTerm !== '') {
+      setCurrentPage(1)
+    }
+  }, [debouncedSearchTerm, searchTerm])
 
-  const loadMore = () => {
-    setDisplayCount(prev => prev + ITEMS_PER_PAGE)
+  // Pagination handlers
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      loadArticles(newPage, debouncedSearchTerm)
+    }
   }
 
-  // Reset display count when search changes
-  useEffect(() => {
-    setDisplayCount(ITEMS_PER_PAGE)
-  }, [searchTerm])
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value)
+    if (e.target.value.trim() !== debouncedSearchTerm) {
+      setSearchLoading(true)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -131,17 +171,22 @@ const Catalog = () => {
 
       <div className="container mx-auto px-4 md:px-10 lg:px-20 py-4 md:py-8">
         {/* Search Box */}
-        {!selectedArticle && articles.length > 0 && (
+        {!selectedArticle && (
           <div className="mb-8 flex justify-end">
             <div className="relative w-full md:w-[480px]">
               <input
                 type="text"
                 placeholder="Tìm kiếm bài viết..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary transition-all shadow-sm"
+                onChange={handleSearchChange}
+                className="w-full pl-12 pr-12 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary transition-all shadow-sm"
               />
               <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+              {searchLoading && (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                  <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full"></div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -202,7 +247,7 @@ const Catalog = () => {
           // Articles List - Compact Blog Style
           <>
             <div className="space-y-3">
-              {displayedArticles.map((article, index) => (
+              {articles.map((article, index) => (
                 <motion.article
                   key={article.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -259,23 +304,80 @@ const Catalog = () => {
               ))}
             </div>
 
-            {/* Load More Button */}
-            {hasMore && (
-              <div className="flex justify-center mt-8">
-                <button
-                  onClick={loadMore}
-                  className="px-8 py-3 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-sm hover:shadow-lg flex items-center gap-2"
-                >
-                  <span>Xem thêm bài viết</span>
-                  <span className="material-symbols-outlined text-lg">expand_more</span>
-                </button>
+            {/* Pagination Controls */}
+            {pagination.totalPages > 1 && (
+              <div className="flex flex-col items-center gap-4 mt-8">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={!pagination.hasPrev}
+                    className="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1"
+                  >
+                    <span className="material-symbols-outlined text-sm">chevron_left</span>
+                    Trước
+                  </button>
+                  
+                  <div className="flex items-center gap-1">
+                    {/* Page numbers */}
+                    {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                      let pageNum;
+                      if (pagination.totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= pagination.totalPages - 2) {
+                        pageNum = pagination.totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+                      
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => handlePageChange(pageNum)}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                            currentPage === pageNum
+                              ? 'bg-primary text-white'
+                              : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={!pagination.hasNext}
+                    className="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1"
+                  >
+                    Sau
+                    <span className="material-symbols-outlined text-sm">chevron_right</span>
+                  </button>
+                </div>
+                
+                <div className="text-center text-sm text-slate-500">
+                  Trang {currentPage} / {pagination.totalPages} • Tổng cộng {pagination.total} bài viết
+                </div>
               </div>
             )}
 
-            {/* Show count */}
-            {filteredArticles.length > 0 && (
+            {/* Show count for single page */}
+            {pagination.totalPages <= 1 && pagination.total > 0 && (
               <div className="text-center mt-6 text-sm text-slate-500">
-                Đang hiển thị {displayedArticles.length} / {filteredArticles.length} bài viết
+                Tổng cộng {pagination.total} bài viết
+              </div>
+            )}
+
+            {/* No results message */}
+            {debouncedSearchTerm && pagination.total === 0 && !loading && (
+              <div className="text-center py-16">
+                <span className="material-symbols-outlined text-6xl text-slate-300 mb-4 block">search_off</span>
+                <h3 className="text-lg font-semibold text-slate-600 mb-2">Không tìm thấy bài viết</h3>
+                <p className="text-slate-400">
+                  Không có bài viết nào khớp với từ khóa "<strong>{debouncedSearchTerm}</strong>"
+                </p>
               </div>
             )}
           </>

@@ -116,12 +116,53 @@ export const getSiteSettings = async () => {
 };
 
 // Catalog Articles
-export const getCatalogArticles = async () => {
+export const getCatalogArticles = async (options = {}) => {
     try {
-        return await fetchAPI('/catalog-articles?is_published=true');
+        const { 
+            limit = 20, 
+            page = 1, 
+            search = '',
+            is_published = true 
+        } = options;
+        
+        const params = new URLSearchParams();
+        if (is_published !== undefined) params.append('is_published', is_published);
+        if (limit) params.append('limit', limit);
+        if (page) params.append('page', page);
+        if (search && search.trim()) params.append('search', search.trim());
+        
+        const result = await fetchAPI(`/catalog-articles?${params}`);
+        
+        // Handle both old format (array) and new format (object with data/pagination)
+        if (Array.isArray(result)) {
+            // Backward compatibility - convert old format to new format
+            return {
+                data: result,
+                pagination: {
+                    total: result.length,
+                    hasNext: false,
+                    hasPrev: false,
+                    page: 1,
+                    totalPages: 1
+                },
+                search: ''
+            };
+        }
+        
+        return result;
     } catch (error) {
         console.error('Error fetching catalog articles:', error);
-        return [];
+        return {
+            data: [],
+            pagination: {
+                total: 0,
+                hasNext: false,
+                hasPrev: false,
+                page: 1,
+                totalPages: 0
+            },
+            search: ''
+        };
     }
 };
 

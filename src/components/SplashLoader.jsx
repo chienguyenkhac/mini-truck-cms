@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
+import { useSiteSettings } from '../context/SiteSettingsContext'
 
 const SplashLoader = ({ onComplete }) => {
     const [progress, setProgress] = useState(0)
+    const { settings } = useSiteSettings()
+    const siteNameRaw = settings.site_name || 'SINOTRUK HÀ NỘI'
+    const siteName = siteNameRaw.toUpperCase()
+    const animatedTitle = Array.from(siteName.replace(/\s+/g, ' '))
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -37,8 +42,8 @@ const SplashLoader = ({ onComplete }) => {
                 >
                     {/* Animated SINOTRUCK text */}
                     <div className="mb-8">
-                        <h1 className="text-7xl md:text-9xl font-bold tracking-tighter">
-                            {['S', 'I', 'N', 'O', 'T', 'R', 'U', 'C', 'K'].map((char, index) => (
+                        <h1 className="text-5xl md:text-7xl font-bold tracking-tighter text-center">
+                            {animatedTitle.map((char, index) => (
                                 <motion.span
                                     key={index}
                                     className="inline-block text-primary"
@@ -77,9 +82,9 @@ const SplashLoader = ({ onComplete }) => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 1 }}
-                        className="text-primary text-xs font-bold tracking-[0.5em] uppercase mb-12"
+                        className="text-primary text-xs font-bold tracking-[0.5em] uppercase mb-12 text-center"
                     >
-                        Hà Nội
+                        {siteName}
                     </motion.p>
 
                     <div className="w-64 h-1 bg-white/5 rounded-full overflow-hidden">
@@ -93,8 +98,8 @@ const SplashLoader = ({ onComplete }) => {
                 </motion.div>
             </div>
 
-            <div className="absolute bottom-12 text-gray-700 text-[10px] font-bold tracking-[0.2em] uppercase">
-                Sức mạnh vượt thời gian • Sinotruk Vietnam
+            <div className="absolute bottom-12 text-gray-700 text-[10px] font-bold tracking-[0.2em] uppercase text-center px-4">
+                Sức mạnh vượt thời gian • {siteName}
             </div>
         </motion.div>
     )

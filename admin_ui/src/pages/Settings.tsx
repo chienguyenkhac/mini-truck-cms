@@ -215,6 +215,17 @@ const Settings: React.FC = () => {
                         />
                     </div>
 
+                    {/* Company Description */}
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Mô tả công ty</label>
+                        <textarea
+                            value={formData.site_description || ''}
+                            onChange={(e) => handleChange('site_description', e.target.value)}
+                            className="input min-h-[80px]"
+                            placeholder="Mô tả ngắn gọn về công ty, dịch vụ, thế mạnh..."
+                        />
+                    </div>
+
                     {/* Hotline */}
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-2">Số hotline</label>
@@ -223,7 +234,19 @@ const Settings: React.FC = () => {
                             value={formData.contact_phone || ''}
                             onChange={(e) => handleChange('contact_phone', e.target.value)}
                             className="input"
-                            placeholder="0382890990"
+                            placeholder="0915595166"
+                        />
+                    </div>
+
+                    {/* Email */}
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Email liên hệ</label>
+                        <input
+                            type="email"
+                            value={formData.contact_email || ''}
+                            onChange={(e) => handleChange('contact_email', e.target.value)}
+                            className="input"
+                            placeholder="info@sinotruk.vn"
                         />
                     </div>
 
@@ -234,7 +257,7 @@ const Settings: React.FC = () => {
                             value={formData.address || ''}
                             onChange={(e) => handleChange('address', e.target.value)}
                             className="input min-h-[80px]"
-                            placeholder="Số 123, Đường ABC, Quận XYZ, Hà Nội"
+                            placeholder="Thái Bình Hạy Ho"
                         />
                     </div>
                 </div>

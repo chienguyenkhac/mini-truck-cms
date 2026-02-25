@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import Layout from "./components/Layout/Layout"
+import { SiteSettingsProvider } from "./context/SiteSettingsContext"
 import ScrollToTop from "./components/ScrollToTop"
 import ImageProtection from "./components/ImageProtection"
 import Home from "./pages/Home"
@@ -16,18 +17,20 @@ function App() {
     <Router>
       <ScrollToTop />
       <ImageProtection />
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/product/:slug" element={<ProductDetail />} />
-          <Route path="/products/:category" element={<ProductCategory />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/catalog" element={<Catalog />} />
-          <Route path="/image-library" element={<ImageLibrary />} />
-        </Routes>
-      </Layout>
+      <SiteSettingsProvider>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/product/:slug" element={<ProductDetail />} />
+            <Route path="/products/:category" element={<ProductCategory />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/catalog" element={<Catalog />} />
+            <Route path="/image-library" element={<ImageLibrary />} />
+          </Routes>
+        </Layout>
+      </SiteSettingsProvider>
     </Router>
   )
 }

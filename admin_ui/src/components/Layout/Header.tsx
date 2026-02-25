@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import SettingsModal from '../SettingsModal';
 
 interface HeaderProps {
     onMenuClick?: () => void;
@@ -9,7 +8,6 @@ const ADMIN_NAME_KEY = 'sinotruk_admin_name';
 const ADMIN_AVATAR_KEY = 'sinotruk_admin_avatar';
 
 const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
-    const [showSettings, setShowSettings] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
     const [adminName, setAdminName] = useState(() => localStorage.getItem(ADMIN_NAME_KEY) || 'Admin');
     const [adminAvatar, setAdminAvatar] = useState(() => localStorage.getItem(ADMIN_AVATAR_KEY) || '');
@@ -36,14 +34,6 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
             window.removeEventListener('profileUpdate', handleStorageChange);
         };
     }, []);
-
-    useEffect(() => {
-        if (showSettings) {
-            document.body.classList.add('modal-open');
-        } else {
-            document.body.classList.remove('modal-open');
-        }
-    }, [showSettings]);
 
     const formattedDate = currentTime.toLocaleDateString('vi-VN', {
         weekday: 'short',
@@ -108,19 +98,8 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                         <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                         <span className="text-xs font-bold text-green-600 uppercase tracking-wide hidden sm:inline">Online</span>
                     </div>
-
-                    {/* Settings Button */}
-                    <button
-                        onClick={() => setShowSettings(true)}
-                        className="p-2.5 text-slate-500 hover:text-primary transition-all hover:bg-slate-50 rounded-xl border border-transparent hover:border-slate-100"
-                        title="Cài đặt"
-                    >
-                        <span className="material-symbols-outlined text-xl">settings</span>
-                    </button>
                 </div>
             </header>
-
-            {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
         </>
     );
 };

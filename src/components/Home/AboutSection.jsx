@@ -3,6 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { Float, MeshDistortMaterial } from '@react-three/drei'
 import { motion } from 'framer-motion'
 import { IMAGES } from '../../constants/images'
+import { useSiteSettings } from '../../context/SiteSettingsContext'
 
 // 3D Floating Sphere
 const FloatingSphere = ({ position, color, size = 1, speed = 1 }) => {
@@ -85,6 +86,12 @@ const Scene3D = () => {
 }
 
 const AboutSection = () => {
+    const { settings } = useSiteSettings()
+    const companyName = (settings.site_name || 'SINOTRUK HÀ NỘI').toUpperCase()
+    const companyDescription =
+        settings.site_description ||
+        'Đơn vị cung cấp phụ tùng chính hãng HOWO, SITRAK và các dòng xe tải hạng nặng.'
+
     const features = [
         { label: 'Sản Phẩm Chính Hãng, Original Parts', icon: 'verified_user', desc: 'Nhập khẩu trực tiếp' },
         { label: 'Bảo Hành Uy Tín', icon: 'handyman', desc: 'Đổi mới 100% nếu lỗi do nhà sản xuất' },
@@ -136,9 +143,9 @@ const AboutSection = () => {
 
                         <p className="text-slate-500 text-lg leading-relaxed">
                             Với hơn <span className="text-primary font-bold">15 năm</span> hình thành và phát triển,
-                            SINOTRUK HÀ NỘI tự hào là đơn vị cung cấp phụ tùng chính hãng HOWO, SITRAK hàng đầu.
-                            Chúng tôi cam kết mang đến sản phẩm chất lượng cao, giá cạnh tranh
-                            và dịch vụ hậu mãi chuyên nghiệp nhất.
+                            <span className="text-primary font-bold"> {companyName}</span> tự hào là đơn vị cung cấp
+                            phụ tùng chính hãng các dòng xe tải hạng nặng hàng đầu.Chúng tôi cam kết mang đến
+                            sản phẩm chất lượng cao, giá cạnh tranh và dịch vụ hậu mãi chuyên nghiệp nhất.
                         </p>
 
                         <div className="flex flex-wrap gap-4">
