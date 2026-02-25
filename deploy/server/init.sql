@@ -284,22 +284,20 @@ INSERT INTO public.catalog_articles (id, title, slug, content, thumbnail, is_pub
 
 -- Dữ liệu categories (danh mục sản phẩm)
 INSERT INTO public.categories (id, name, created_at, updated_at, is_vehicle_name, code, thumbnail, is_visible, brand, slug) VALUES 
-(1, 'Cabin & Thân vỏ', now(), now(), false, NULL, NULL, true, NULL, 'cabin-than-vo'),
-(2, 'Động cơ', now(), now(), false, NULL, NULL, true, NULL, 'dong-co'),
-(3, 'Hộp số', now(), now(), false, NULL, NULL, true, NULL, 'hop-so'),
-(4, 'Hệ thống cầu', now(), now(), false, NULL, NULL, true, NULL, 'he-thong-cau'),
-(5, 'Ly hợp', now(), now(), false, NULL, NULL, true, NULL, 'ly-hop'),
-(6, 'Giằng treo', now(), now(), false, NULL, NULL, true, NULL, 'giang-treo'),
-(7, 'Truyền động', now(), now(), false, NULL, NULL, true, NULL, 'truyen-dong'),
-(8, 'Hệ thống lái', now(), now(), false, NULL, NULL, true, NULL, 'he-thong-lai'),
-(9, 'Hệ thống hút xả', now(), now(), false, NULL, NULL, true, NULL, 'he-thong-hut-xa'),
-(10, 'Hệ thống làm mát', now(), now(), false, NULL, NULL, true, NULL, 'he-thong-lam-mat');
+(1, 'CABIN & THÂN VỎ', now(), now(), false, NULL, NULL, true, NULL, 'cabin-than-vo'),
+(2, 'ĐỘNG CƠ', now(), now(), false, NULL, NULL, true, NULL, 'dong-co'),
+(3, 'HỘP SỐ', now(), now(), false, NULL, NULL, true, NULL, 'hop-so'),
+(4, 'HỆ THỐNG CẦU', now(), now(), false, NULL, NULL, true, NULL, 'he-thong-cau'),
+(5, 'LY HỢP', now(), now(), false, NULL, NULL, true, NULL, 'ly-hop'),
+(6, 'GIẰNG TREO', now(), now(), false, NULL, NULL, true, NULL, 'giang-treo'),
+(7, 'TRUYỀN ĐỘNG', now(), now(), false, NULL, NULL, true, NULL, 'truyen-dong'),
+(8, 'HỆ THỐNG LÁI', now(), now(), false, NULL, NULL, true, NULL, 'he-thong-lai'),
+(9, 'HỆ THỐNG HÚT XẢ', now(), now(), false, NULL, NULL, true, NULL, 'he-thong-hut-xa'),
+(10, 'HỆ THỐNG LÀM MÁT', now(), now(), false, NULL, NULL, true, NULL, 'he-thong-lam-mat'),
+(11, 'HỆ THỐNG ĐIỆN', now(), now(), false, NULL, NULL, true, NULL, 'he-thong-dien'),
+(12, 'HỆ THỐNG NHIÊN LIỆU', now(), now(), false, NULL, NULL, true, NULL, 'he-thong-nhien-lieu'),
+(13, 'PHỤ TÙNG KHÁC', now(), now(), false, NULL, NULL, true, NULL, 'phu-tung-khac');
 
--- Dữ liệu gallery_images (hình ảnh gallery mẫu)
-INSERT INTO public.gallery_images (id, title, image_path, created_at, updated_at) VALUES 
-(1, 'Showroom SINOTRUK', '/images/gallery/showroom-1.jpg', now(), now()),
-(2, 'Kho phụ tùng', '/images/gallery/warehouse-1.jpg', now(), now()),
-(3, 'Đội ngũ kỹ thuật', '/images/gallery/team-1.jpg', now(), now());
 
 -- Dữ liệu images mẫu
 INSERT INTO public.images (id, url, public_id, created_at) VALUES 
@@ -327,10 +325,10 @@ INSERT INTO public.product_images (id, product_id, image_id, sort_order, is_prim
 
 -- Dữ liệu site_settings (cài đặt website mẫu)
 INSERT INTO public.site_settings (id, key, value, type, description, created_at, updated_at) VALUES 
-(1, 'site_name', 'SINOTRUK Vietnam', 'text', 'Tên website', now(), now()),
-(2, 'site_description', 'Phụ tùng xe tải SINOTRUK chính hãng', 'text', 'Mô tả website', now(), now()),
-(3, 'contact_phone', '0382.890.990', 'text', 'Số điện thoại liên hệ', now(), now()),
-(4, 'contact_email', 'info@sinotruk.vn', 'email', 'Email liên hệ', now(), now()),
+(1, 'site_name', 'SINOTRUK HÀ NỘI', 'text', 'Tên website', now(), now()),
+(2, 'site_description', 'Phụ tùng xe tải SINOTRUK HÀ NỘI chính hãng', 'text', 'Mô tả website', now(), now()),
+(3, 'contact_phone', '0382890990', 'text', 'Số điện thoại liên hệ', now(), now()),
+(4, 'contact_email', 'hnsinotruk@gmail.com', 'email', 'Email liên hệ', now(), now()),
 (5, 'address', 'TP Hà Nội', 'text', 'Địa chỉ công ty', now(), now()),
 (6, 'show_homepage_products', 'true', 'boolean', 'Hiển thị sản phẩm trên trang chủ', now(), now()),
 (7, 'site_logo', '', 'text', 'Logo website', now(), now()),

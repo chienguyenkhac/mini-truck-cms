@@ -605,7 +605,7 @@ app.get('/api/categories', async (req, res) => {
             params.push(slug);
         }
 
-        query += ' ORDER BY name';
+        query += ' ORDER BY id';
 
         const { rows } = await pool.query(query, params);
         res.json(rows);
