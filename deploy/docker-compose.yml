@@ -61,6 +61,11 @@ services:
       - ./client:/app/client:ro
       - ./admin:/app/admin:ro
       - ./server/index.js:/app/index.js:ro
+    # Create upload directories if they don't exist
+    command: >
+      sh -c "mkdir -p /app/uploads/original /app/uploads/watermarked && 
+             chown -R node:node /app/uploads && 
+             node index.js"
     ports:
       - "3001:3001"
 

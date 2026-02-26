@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useNotification } from '../components/shared/Notification';
 import ConfirmDeleteModal from '../components/shared/ConfirmDeleteModal';
-import { catalogService, CatalogArticle } from '../services/supabase';
+import { catalogService, CatalogArticle, PaginatedResponse } from '../services/supabase';
 import EditorJS from '@editorjs/editorjs';
 import Header from '@editorjs/header';
 import List from '@editorjs/list';
@@ -15,19 +15,58 @@ const Catalogs: React.FC = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [editingArticle, setEditingArticle] = useState<CatalogArticle | null>(null);
     const [formData, setFormData] = useState({ title: '', slug: '', thumbnail: '' });
-    const [_loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
     const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
     const [deleteArticle, setDeleteArticle] = useState<CatalogArticle | null>(null);
     const [showHelp, setShowHelp] = useState(false);
     const editorRef = useRef<EditorJS | null>(null);
     const editorContainerRef = useRef<HTMLDivElement>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+    
+    // Pagination states
+    const [currentPage, setCurrentPage] = useState(0);
+    const [pagination, setPagination] = useState({
+        total: 0,
+        totalPages: 0,
+        currentPage: 1,
+        hasNext: false,
+        hasPrev: false
+    });
+    
+    const PAGE_SIZE = 10;
 
     const loadArticles = async () => {
         setLoading(true);
         try {
-            const data = await catalogService.getAll();
-            setArticles(data);
+            const options: { offset?: number; limit?: number; search?: string } = {
+                limit: PAGE_SIZE,
+                offset: currentPage * PAGE_SIZE
+            };
+            
+            if (debouncedSearchTerm) {
+                options.search = debouncedSearchTerm;
+            }
+            
+            const articlesData = await catalogService.getAll(options);
+            
+            // Handle API response format
+            if (Array.isArray(articlesData)) {
+                // It's a CatalogArticle[] array (fallback for no pagination)
+                setArticles(articlesData);
+                setPagination({
+                    total: articlesData.length,
+                    totalPages: 1,
+                    currentPage: 1,
+                    hasNext: false,
+                    hasPrev: false
+                });
+            } else {
+                // It's a PaginatedResponse
+                const paginatedData = articlesData as PaginatedResponse<CatalogArticle>;
+                setArticles(paginatedData.data);
+                setPagination(paginatedData.pagination);
+            }
         } catch (err) {
             console.error('Error loading articles:', err);
             notification.error('Không thể tải bài viết');
@@ -36,9 +75,29 @@ const Catalogs: React.FC = () => {
         }
     };
 
+    // Initialize debounced search term on mount
+    useEffect(() => {
+        setDebouncedSearchTerm(searchTerm);
+    }, []);
+
+    // Debounce search input
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
+    // Load articles when pagination/search changes
     useEffect(() => {
         loadArticles();
-    }, []);
+    }, [currentPage, debouncedSearchTerm]);
+
+    // Reset to first page when search changes
+    useEffect(() => {
+        setCurrentPage(0);
+    }, [debouncedSearchTerm]);
 
     // Upload image handler for EditorJS
     const uploadImageByFile = async (file: File) => {
@@ -427,12 +486,14 @@ const Catalogs: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {articles.length > 0 ? articles
-                            .filter(article =>
-                                article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                article.slug.toLowerCase().includes(searchTerm.toLowerCase())
-                            )
-                            .map(article => (
+                        {loading ? (
+                            <tr>
+                                <td colSpan={5} className="text-center py-8">
+                                    <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
+                                    <p className="text-slate-500 mt-2">Đang tải...</p>
+                                </td>
+                            </tr>
+                        ) : articles.length > 0 ? articles.map(article => (
                                 <tr key={article.id} className="hover:bg-slate-50/80 transition-colors">
                                     <td>
                                         <div className="w-16 h-12 rounded-lg overflow-hidden bg-slate-100 flex items-center justify-center">
@@ -485,13 +546,27 @@ const Catalogs: React.FC = () => {
                                 </tr>
                             )) : (
                             <tr>
-                                <td colSpan={5} className="py-16 text-center">
-                                    <div className="flex flex-col items-center gap-2 opacity-50">
-                                        <span className="material-symbols-outlined text-5xl">article</span>
-                                        <p className="font-medium">Chưa có bài viết nào</p>
-                                        <button onClick={handleNewArticle} className="text-primary font-bold hover:underline">
-                                            Tạo bài viết đầu tiên
-                                        </button>
+                                <td colSpan={5} className="text-center py-12">
+                                    <div className="flex flex-col items-center gap-3">
+                                        <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center">
+                                            <span className="material-symbols-outlined text-slate-400 text-2xl">article</span>
+                                        </div>
+                                        <div>
+                                            <p className="font-medium text-slate-600">
+                                                {debouncedSearchTerm ? 'Không tìm thấy bài viết nào' : 'Chưa có bài viết nào'}
+                                            </p>
+                                            <p className="text-sm text-slate-400 mt-1">
+                                                {debouncedSearchTerm ? 'Thử tìm kiếm với từ khóa khác' : 'Hãy tạo bài viết đầu tiên'}
+                                            </p>
+                                        </div>
+                                        {!debouncedSearchTerm && (
+                                            <button 
+                                                onClick={handleNewArticle} 
+                                                className="text-primary font-bold hover:underline"
+                                            >
+                                                Tạo bài viết đầu tiên
+                                            </button>
+                                        )}
                                     </div>
                                 </td>
                             </tr>
@@ -499,6 +574,50 @@ const Catalogs: React.FC = () => {
                     </tbody>
                 </table>
             </div>
+
+            {/* Pagination Controls */}
+            {articles.length > 0 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4">
+                    <div className="text-sm text-slate-600">
+                        Hiển thị {currentPage * PAGE_SIZE + 1} - {Math.min((currentPage + 1) * PAGE_SIZE, pagination.total)} trong tổng số {pagination.total} bài viết
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setCurrentPage(0)}
+                            disabled={!pagination.hasPrev}
+                            className="px-3 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Trang đầu"
+                        >
+                            ««
+                        </button>
+                        <button
+                            onClick={() => setCurrentPage(currentPage - 1)}
+                            disabled={!pagination.hasPrev}
+                            className="px-3 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            ‹ Trước
+                        </button>
+                        <span className="px-4 py-2 text-sm bg-primary text-white rounded-lg">
+                            Trang {pagination.currentPage} / {pagination.totalPages}
+                        </span>
+                        <button
+                            onClick={() => setCurrentPage(currentPage + 1)}
+                            disabled={!pagination.hasNext}
+                            className="px-3 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Sau ›
+                        </button>
+                        <button
+                            onClick={() => setCurrentPage(pagination.totalPages - 1)}
+                            disabled={!pagination.hasNext}
+                            className="px-3 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 disabled:cursor-not-allowed"
+                            title="Trang cuối"
+                        >
+                            »»
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <ConfirmDeleteModal
                 isOpen={!!deleteArticle}

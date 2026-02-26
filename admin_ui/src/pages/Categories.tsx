@@ -20,6 +20,7 @@ const Categories: React.FC = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const editFileInputRef = useRef<HTMLInputElement>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
     const [deleteCategory, setDeleteCategory] = useState<CategoryWithExtras | null>(null);
     const [productCount, setProductCount] = useState<number>(0);
 
@@ -103,6 +104,15 @@ const Categories: React.FC = () => {
     useEffect(() => {
         loadCategories();
     }, []);
+
+    // Debounce search input
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
 
     const handleAddCategory = async () => {
         if (!newForm.name.trim()) {
@@ -225,10 +235,10 @@ const Categories: React.FC = () => {
         }
     };
 
-    // Filter categories by search term
+    // Filter categories by debounced search term
     const filteredCategories = categories.filter(c =>
-        c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (c.code?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
+        c.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        (c.code?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || false)
     );
 
     const vehicleCategories = filteredCategories.filter(c => c.is_vehicle_name);

@@ -158,10 +158,15 @@ export const categoryService = {
 
 // Catalog Article Service  
 export const catalogService = {
-    getAll: async (publishedOnly: boolean = false) => {
-        const query = publishedOnly ? '?is_published=true' : '';
-        const response = await fetchAPI<{data: CatalogArticle[], pagination: any, search: string}>(`/catalog-articles${query}`);
-        return response.data;
+    getAll: async (params?: { offset?: number; limit?: number; search?: string; is_published?: boolean }): Promise<PaginatedResponse<CatalogArticle> | CatalogArticle[]> => {
+        const query = new URLSearchParams();
+        if (params?.limit) query.append('limit', String(params.limit));
+        if (params?.offset) query.append('offset', String(params.offset));
+        if (params?.search) query.append('search', params.search);
+        if (params?.is_published !== undefined) query.append('is_published', String(params.is_published));
+        
+        const url = `/catalog-articles${query.toString() ? '?' + query.toString() : ''}`;
+        return fetchAPI<PaginatedResponse<CatalogArticle> | CatalogArticle[]>(url);
     },
 
     getById: async (id: number) => fetchAPI<CatalogArticle>(`/catalog-articles/${id}`),
