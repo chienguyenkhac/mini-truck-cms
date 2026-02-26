@@ -242,7 +242,7 @@ app.get('/api/image', async (req, res) => {
         // Apply watermark
         const settings = await getSiteSettings();
         const isEnabled = settings.watermark_enabled !== 'false';
-        const logoUrl = settings.company_logo || '';
+        const logoUrl = settings.site_logo || settings.company_logo || '';
         const watermarkText = settings.watermark_text || settings.company_name || 'SINOTRUK HÀ NỘI';
         const opacity = parseFloat(settings.watermark_opacity || '40') / 100;
 
@@ -254,64 +254,119 @@ app.get('/api/image', async (req, res) => {
             const height = metadata.height || 600;
 
             try {
-                // Calculate text size based on image dimensions - make it bigger
-                const baseSize = Math.min(width, height);
-                const textSize = Math.max(24, Math.floor(baseSize * 0.05)); // Increase from 0.03 to 0.05
-                const spacing = textSize * 3; // Reduce spacing for better coverage
-                
-                // Create text watermark pattern with better distribution
-                const textElements = [];
-                const cols = Math.ceil(width / spacing) + 1;
-                const rows = Math.ceil(height / spacing) + 1;
-                
-                for (let row = 0; row < rows; row++) {
-                    for (let col = 0; col < cols; col++) {
-                        // Create diagonal offset pattern
-                        const x = (col * spacing) - (row % 2) * (spacing / 2);
-                        const y = (row * spacing) + textSize;
+                // Try to get logo from settings
+                let logoBuffer;
+                if (logoUrl) {
+                    if (logoUrl.startsWith('http')) {
+                        // External URL
+                        const response = await fetch(logoUrl);
+                        logoBuffer = Buffer.from(await response.arrayBuffer());
+                    } else {
+                        // Local file - try different path combinations
+                        const possiblePaths = [
+                            path.join(__dirname, logoUrl.startsWith('/') ? logoUrl.slice(1) : logoUrl),
+                            path.join(__dirname, 'uploads', 'original', path.basename(logoUrl)),
+                            path.join(__dirname, '..', logoUrl),
+                            logoUrl // Direct path
+                        ];
                         
-                        // Skip if text would be outside image bounds
-                        if (x > -textSize && x < width + textSize && y > 0 && y < height + textSize) {
-                            textElements.push(`
-                                <text x="${x}" y="${y}" 
-                                      font-family="Arial Black, Arial, sans-serif" 
-                                      font-size="${textSize}" 
-                                      font-weight="900"
-                                      fill="rgba(255,255,255,${opacity * 0.8})" 
-                                      stroke="rgba(0,0,0,${opacity * 0.4})" 
-                                      stroke-width="2"
-                                      transform="rotate(-30 ${x} ${y})"
-                                      letter-spacing="1px">
-                                    ${watermarkText}
-                                </text>
-                            `);
+                        for (let i = 0; i < possiblePaths.length; i++) {
+                            const logoPath = possiblePaths[i];
+                            
+                            if (fs.existsSync(logoPath)) {
+                                try {
+                                    logoBuffer = fs.readFileSync(logoPath);
+                                    break;
+                                } catch (e) {
+                                    // Continue to next path
+                                }
+                            }
                         }
                     }
+                } else {
+                    // No logoUrl provided
                 }
 
-                const svgWatermark = `
-                    <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <filter id="textShadow">
-                                <feDropShadow dx="2" dy="2" stdDeviation="1" flood-color="rgba(0,0,0,0.3)"/>
-                            </filter>
-                        </defs>
-                        <g filter="url(#textShadow)">
-                            ${textElements.join('')}
-                        </g>
-                    </svg>
-                `;
+                if (logoBuffer) {
+                    // Create logo watermark
+                    const logoSize = Math.floor(Math.min(width, height) * 0.08); // Smaller size
+                    const watermarkOpacity = opacity;
 
-                const watermarkBuffer = Buffer.from(svgWatermark);
+                    // Resize and prepare logo with rotation
+                    const resizedLogo = await sharp(logoBuffer)
+                        .resize(logoSize, logoSize, { fit: 'inside' })
+                        .rotate(-25) // Rotate logo -25 degrees
+                        .ensureAlpha()
+                        .composite([{
+                            input: Buffer.from([255, 255, 255, Math.floor(255 * watermarkOpacity)]),
+                            raw: { width: 1, height: 1, channels: 4 },
+                            tile: true,
+                            blend: 'dest-in'
+                        }])
+                        .png()
+                        .toBuffer();
 
-                // Apply watermark to image with better blending
-                finalBuffer = await sharp(finalBuffer)
-                    .composite([{
-                        input: watermarkBuffer,
-                        blend: 'multiply' // Better blending mode for text
-                    }])
-                    .jpeg({ quality: 95 }) // Higher quality
-                    .toBuffer();
+                    // Get rotated logo dimensions
+                    const rotatedMeta = await sharp(resizedLogo).metadata();
+                    const rotatedWidth = rotatedMeta.width;
+                    const rotatedHeight = rotatedMeta.height;
+
+                    // Create diagonal pattern of logos
+                    const composites = [];
+                    const spacingX = Math.floor(width / 6); // More spacing
+                    const spacingY = Math.floor(height / 5); // More spacing
+                    
+                    // Create diagonal pattern
+                    for (let row = 0; row < 6; row++) {
+                        for (let col = 0; col < 7; col++) {
+                            // Offset every other row for diagonal effect
+                            const offsetX = (row % 2) * (spacingX / 2);
+                            const x = Math.floor(col * spacingX + offsetX - rotatedWidth / 2);
+                            const y = Math.floor(row * spacingY - rotatedHeight / 2);
+                            
+                            // Only add if logo fits within image bounds
+                            if (x >= -rotatedWidth/4 && y >= -rotatedHeight/4 && 
+                                x < width + rotatedWidth/4 && y < height + rotatedHeight/4) {
+                                composites.push({
+                                    input: resizedLogo,
+                                    top: y,
+                                    left: x,
+                                    blend: 'over'
+                                });
+                            }
+                        }
+                    }
+
+                    // Apply logo watermarks
+                    finalBuffer = await sharp(finalBuffer)
+                        .composite(composites)
+                        .jpeg({ quality: 95 })
+                        .toBuffer();
+                } else {
+                    // Fallback to simple text watermark if no logo
+                    const textSize = Math.max(24, Math.floor(Math.min(width, height) * 0.04));
+                    const textWatermark = `
+                        <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+                            <text x="50%" y="50%" 
+                                  font-family="Arial, sans-serif" 
+                                  font-size="${textSize}" 
+                                  font-weight="bold"
+                                  fill="rgba(255,255,255,${opacity})" 
+                                  text-anchor="middle"
+                                  transform="rotate(-30 ${width/2} ${height/2})">
+                                ${watermarkText}
+                            </text>
+                        </svg>
+                    `;
+
+                    finalBuffer = await sharp(finalBuffer)
+                        .composite([{
+                            input: Buffer.from(textWatermark),
+                            blend: 'over'
+                        }])
+                        .jpeg({ quality: 95 })
+                        .toBuffer();
+                }
                     
             } catch (watermarkError) {
                 console.error('Watermark error:', watermarkError);
