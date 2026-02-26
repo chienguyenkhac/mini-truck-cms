@@ -289,17 +289,6 @@ const Settings: React.FC = () => {
                         </label>
                     </div>
 
-                    {/* Watermark Text */}
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">Text watermark</label>
-                        <input
-                            type="text"
-                            value={formData.watermark_text || ''}
-                            onChange={(e) => handleChange('watermark_text', e.target.value)}
-                            className="input"
-                            placeholder="SINOTRUK Hà Nội"
-                        />
-                    </div>
 
                     {/* Watermark Opacity */}
                     <div>

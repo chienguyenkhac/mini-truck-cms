@@ -187,6 +187,9 @@ app.delete('/api/images/:id', async (req, res) => {
     }
 });
 
+// Simple memory cache for logo to avoid repeated disk I/O or network requests
+let globalLogoCache = { url: null, buffer: null };
+
 // API: Get image (with optional watermark)
 app.get('/api/image', async (req, res) => {
     const { path: imagePath, url: externalUrl, watermark } = req.query;
@@ -243,20 +246,22 @@ app.get('/api/image', async (req, res) => {
         const settings = await getSiteSettings();
         const isEnabled = settings.watermark_enabled !== 'false';
         const logoUrl = settings.site_logo || settings.company_logo || '';
-        const watermarkText = settings.watermark_text || settings.company_name || 'SINOTRUK HÀ NỘI';
         const opacity = parseFloat(settings.watermark_opacity || '40') / 100;
 
         let finalBuffer = fs.readFileSync(originalPath);
 
-        if (isEnabled) {
+        if (isEnabled && logoUrl) {
             const metadata = await sharp(finalBuffer).metadata();
             const width = metadata.width || 800;
             const height = metadata.height || 600;
 
             try {
-                // Try to get logo from settings
-                let logoBuffer;
-                if (logoUrl) {
+                let logoBuffer = null;
+                
+                // Try to get logo from cache or load it
+                if (globalLogoCache.url === logoUrl && globalLogoCache.buffer) {
+                    logoBuffer = globalLogoCache.buffer;
+                } else {
                     if (logoUrl.startsWith('http')) {
                         // External URL
                         const response = await fetch(logoUrl);
@@ -270,9 +275,7 @@ app.get('/api/image', async (req, res) => {
                             logoUrl // Direct path
                         ];
                         
-                        for (let i = 0; i < possiblePaths.length; i++) {
-                            const logoPath = possiblePaths[i];
-                            
+                        for (const logoPath of possiblePaths) {
                             if (fs.existsSync(logoPath)) {
                                 try {
                                     logoBuffer = fs.readFileSync(logoPath);
@@ -283,19 +286,22 @@ app.get('/api/image', async (req, res) => {
                             }
                         }
                     }
-                } else {
-                    // No logoUrl provided
+                    
+                    // Update cache
+                    if (logoBuffer) {
+                        globalLogoCache.url = logoUrl;
+                        globalLogoCache.buffer = logoBuffer;
+                    }
                 }
 
                 if (logoBuffer) {
                     // Create logo watermark
-                    const logoSize = Math.floor(Math.min(width, height) * 0.08); // Smaller size
+                    const logoSize = Math.floor(Math.min(width, height) * 0.25); // 25% for better visibility
                     const watermarkOpacity = opacity;
 
-                    // Resize and prepare logo with rotation
-                    const resizedLogo = await sharp(logoBuffer)
+                    // Step 1: Resize and change opacity, getting raw pixel data to avoid PNG encoding overhead
+                    const resizedLogoObj = await sharp(logoBuffer)
                         .resize(logoSize, logoSize, { fit: 'inside' })
-                        .rotate(-25) // Rotate logo -25 degrees
                         .ensureAlpha()
                         .composite([{
                             input: Buffer.from([255, 255, 255, Math.floor(255 * watermarkOpacity)]),
@@ -303,34 +309,48 @@ app.get('/api/image', async (req, res) => {
                             tile: true,
                             blend: 'dest-in'
                         }])
+                        .raw()
+                        .toBuffer({ resolveWithObject: true });
+
+                    // Step 2: Rotate logo with transparent background from raw data
+                    const rotatedLogo = await sharp(resizedLogoObj.data, { raw: resizedLogoObj.info })
+                        .rotate(-30, { background: { r: 0, g: 0, b: 0, alpha: 0 } })
                         .png()
                         .toBuffer();
 
                     // Get rotated logo dimensions
-                    const rotatedMeta = await sharp(resizedLogo).metadata();
+                    const rotatedMeta = await sharp(rotatedLogo).metadata();
                     const rotatedWidth = rotatedMeta.width;
                     const rotatedHeight = rotatedMeta.height;
 
                     // Create diagonal pattern of logos
                     const composites = [];
-                    const spacingX = Math.floor(width / 6); // More spacing
-                    const spacingY = Math.floor(height / 5); // More spacing
+                    // Wide spacing for a clean, non-cluttered look
+                    const spacingX = Math.floor(width / 2.2); 
+                    const spacingY = Math.floor(height / 2.2); 
                     
-                    // Create diagonal pattern
-                    for (let row = 0; row < 6; row++) {
-                        for (let col = 0; col < 7; col++) {
-                            // Offset every other row for diagonal effect
-                            const offsetX = (row % 2) * (spacingX / 2);
-                            const x = Math.floor(col * spacingX + offsetX - rotatedWidth / 2);
-                            const y = Math.floor(row * spacingY - rotatedHeight / 2);
+                    // Create staggered parallel diagonal lines
+                    // Using limits from -1 to 3 is enough to cover the whole image with this spacing
+                    for (let row = -1; row <= 3; row++) {
+                        for (let col = -1; col <= 3; col++) {
+                            // Offset alternating rows by half the X spacing to create a brick/diagonal pattern
+                            const offsetX = (row % 2) * Math.floor(spacingX / 2);
                             
-                            // Only add if logo fits within image bounds
-                            if (x >= -rotatedWidth/4 && y >= -rotatedHeight/4 && 
-                                x < width + rotatedWidth/4 && y < height + rotatedHeight/4) {
+                            // Calculate center points
+                            const x = Math.floor(col * spacingX + offsetX);
+                            const y = Math.floor(row * spacingY);
+                            
+                            // Align logo center to calculated coordinate
+                            const finalX = x - Math.floor(rotatedWidth / 2);
+                            const finalY = y - Math.floor(rotatedHeight / 2);
+                            
+                            // Only add if at least partially visible within bounds
+                            if (finalX >= -rotatedWidth && finalY >= -rotatedHeight && 
+                                finalX < width && finalY < height) {
                                 composites.push({
-                                    input: resizedLogo,
-                                    top: y,
-                                    left: x,
+                                    input: rotatedLogo,
+                                    top: finalY,
+                                    left: finalX,
                                     blend: 'over'
                                 });
                             }
@@ -340,30 +360,6 @@ app.get('/api/image', async (req, res) => {
                     // Apply logo watermarks
                     finalBuffer = await sharp(finalBuffer)
                         .composite(composites)
-                        .jpeg({ quality: 95 })
-                        .toBuffer();
-                } else {
-                    // Fallback to simple text watermark if no logo
-                    const textSize = Math.max(24, Math.floor(Math.min(width, height) * 0.04));
-                    const textWatermark = `
-                        <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-                            <text x="50%" y="50%" 
-                                  font-family="Arial, sans-serif" 
-                                  font-size="${textSize}" 
-                                  font-weight="bold"
-                                  fill="rgba(255,255,255,${opacity})" 
-                                  text-anchor="middle"
-                                  transform="rotate(-30 ${width/2} ${height/2})">
-                                ${watermarkText}
-                            </text>
-                        </svg>
-                    `;
-
-                    finalBuffer = await sharp(finalBuffer)
-                        .composite([{
-                            input: Buffer.from(textWatermark),
-                            blend: 'over'
-                        }])
                         .jpeg({ quality: 95 })
                         .toBuffer();
                 }

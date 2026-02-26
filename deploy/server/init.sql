@@ -333,7 +333,6 @@ INSERT INTO public.site_settings (id, key, value, type, description, created_at,
 (6, 'show_homepage_products', 'true', 'boolean', 'Hiển thị sản phẩm trên trang chủ', now(), now()),
 (7, 'site_logo', '', 'text', 'Logo website', now(), now()),
 (8, 'watermark_enabled', 'false', 'boolean', 'Bật watermark', now(), now()),
-(9, 'watermark_text', 'SINOTRUK Hà Nội', 'text', 'Text watermark', now(), now()),
 (10, 'watermark_opacity', '40', 'text', 'Độ trong suốt watermark', now(), now());
 
 -- Cập nhật sequences
