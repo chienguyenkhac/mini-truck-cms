@@ -80,21 +80,25 @@ const CategorySection = () => {
     return (
     <section className="pt-0 sm:pt-3 md:pt-10 pb-14 bg-gray-100">
             <div className="container mx-auto px-4 md:px-10 lg:px-20">
-                <div className="text-center mb-10 space-y-3">
-                    <h2 className="text-3xl md:text-4xl font-bold text-gray-800 tracking-tight">Danh Mục Phụ Tùng</h2>
-                    <div className="h-1.5 w-24 bg-gradient-to-r from-gray-400 to-primary mx-auto rounded-full shadow-lg shadow-primary/30"></div>
-                    <p className="text-slate-500 max-w-2xl mx-auto">Vui lòng chọn danh mục phụ tùng phù hợp với nhu cầu của bạn.</p>
+                <div className="text-center mb-10 space-y-4">
+                    <div>
+                        <h2 className="text-slate-800 text-xl sm:text-2xl md:text-3xl font-bold leading-tight tracking-tight">
+                            Danh Mục <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-sky-400">Phụ Tùng</span>
+                        </h2>
+                    </div>
+                    <p className="text-slate-500 text-base leading-relaxed max-w-2xl mx-auto">
+                        Vui lòng chọn danh mục phụ tùng phù hợp với nhu cầu của bạn.
+                    </p>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-3 md:gap-4">
                     {categories.map((cat, i) => (
                         <Link to={`/products/${cat.slug}`} key={i} className="group cursor-pointer">
-                            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-300 h-full">
-                                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-2.5 group-hover:bg-primary group-hover:text-white transition-all">
-                                    <span className="material-symbols-outlined text-2xl">{cat.icon}</span>
+                            <div className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-300 text-center">
+                                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary mx-auto mb-2 group-hover:bg-primary group-hover:text-white transition-all">
+                                    <span className="material-symbols-outlined text-xl">{cat.icon}</span>
                                 </div>
-                                <h4 className="text-base font-bold text-slate-800 mb-1 group-hover:text-primary transition-colors">{cat.title}</h4>
-                                {cat.desc && <p className="text-slate-500 text-xs leading-snug">{cat.desc}</p>}
+                                <h4 className="text-slate-800 font-bold text-xs leading-snug group-hover:text-primary transition-colors">{cat.title}</h4>
                             </div>
                         </Link>
                     ))}

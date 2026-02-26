@@ -173,7 +173,7 @@ const About = () => {
           initial={{ y: 30, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4"
+          className="grid grid-cols-2 md:grid-cols-4 gap-3"
         >
           {[
             { value: '15+', label: 'Năm kinh nghiệm' },
@@ -181,9 +181,9 @@ const About = () => {
             { value: '50K+', label: 'Phụ tùng đã bán' },
             { value: '63', label: 'Tỉnh thành phủ sóng' },
           ].map((stat, i) => (
-            <div key={i} className="bg-white/90 backdrop-blur-xl border border-slate-200 rounded-2xl p-6 text-center shadow-sm">
-              <div className="text-primary text-4xl md:text-5xl font-bold">{stat.value}</div>
-              <div className="text-slate-500 text-sm mt-2">{stat.label}</div>
+            <div key={i} className="bg-white/90 backdrop-blur-xl border border-slate-200 rounded-xl p-3 md:p-4 text-center shadow-sm">
+              <div className="text-primary text-2xl md:text-3xl font-bold">{stat.value}</div>
+              <div className="text-slate-500 text-xs mt-1">{stat.label}</div>
             </div>
           ))}
         </motion.div>
