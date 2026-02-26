@@ -19,6 +19,9 @@ const Products = () => {
   const hotline = settings.contact_phone || '0382890990'
 
   const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
+  const [manufacturerTerm, setManufacturerTerm] = useState('')
+  const [debouncedManufacturerTerm, setDebouncedManufacturerTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState(categoryFromUrl || 'all')
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
@@ -27,7 +30,21 @@ const Products = () => {
   const [showFilters, setShowFilters] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [lastId, setLastId] = useState(null)
-  const [manufacturerTerm, setManufacturerTerm] = useState('')
+
+  // Debounce search terms
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [searchTerm])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedManufacturerTerm(manufacturerTerm)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [manufacturerTerm])
 
   // Update selectedCategory when URL changes
   useEffect(() => {
@@ -79,13 +96,13 @@ const Products = () => {
       }
 
       // Search filter
-      if (searchTerm) {
-        options.search = searchTerm
+      if (debouncedSearchTerm) {
+        options.search = debouncedSearchTerm
       }
 
       // Manufacturer code filter
-      if (manufacturerTerm) {
-        options.manufacturer_code = manufacturerTerm
+      if (debouncedManufacturerTerm) {
+        options.manufacturer_code = debouncedManufacturerTerm
       }
 
       // For pagination, we'll load more items and handle client-side
@@ -112,12 +129,12 @@ const Products = () => {
       setLoading(false)
       setLoadingMore(false)
     }
-  }, [selectedCategory, searchTerm, manufacturerTerm, categories])
+  }, [selectedCategory, debouncedSearchTerm, debouncedManufacturerTerm, categories])
 
   // Initial load and filter changes
   useEffect(() => {
     loadProducts(true)
-  }, [selectedCategory, searchTerm, manufacturerTerm])
+  }, [selectedCategory, debouncedSearchTerm, debouncedManufacturerTerm])
 
   // Load more
   const handleLoadMore = () => {

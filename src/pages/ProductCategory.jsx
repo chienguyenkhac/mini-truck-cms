@@ -7,7 +7,32 @@ const ProductCategory = () => {
   const { category } = useParams()
   const [categoryData, setCategoryData] = useState(null)
   const [products, setProducts] = useState([])
+  const [allProducts, setAllProducts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
+
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [searchTerm])
+
+  // Filter products based on search term
+  useEffect(() => {
+    if (!debouncedSearchTerm) {
+      setProducts(allProducts)
+    } else {
+      const filtered = allProducts.filter(product =>
+        product.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        (product.manufacturer_code && product.manufacturer_code.toLowerCase().includes(debouncedSearchTerm.toLowerCase())) ||
+        (product.description && product.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
+      )
+      setProducts(filtered)
+    }
+  }, [debouncedSearchTerm, allProducts])
 
   useEffect(() => {
     const loadCategoryData = async () => {
@@ -59,11 +84,12 @@ const ProductCategory = () => {
         }
 
         if (catError || !catData) {
-          console.log('❌ Category not found')
-          setCategoryData({ name: 'Danh mục', description: '' })
-          setProducts([])
-          setLoading(false)
-          return
+        console.log('❌ Category not found')
+        setCategoryData({ name: 'Danh mục', description: '' })
+        setAllProducts([])
+        setProducts([])
+        setLoading(false)
+        return
         }
 
         console.log('✅ Category found:', catData)
@@ -88,11 +114,13 @@ const ProductCategory = () => {
         const { data: productsData, error: productsError } = await productsQuery
 
         if (!productsError) {
+          setAllProducts(productsData || [])
           setProducts(productsData || [])
         }
       } catch (err) {
         console.error('Error loading category:', err)
         setCategoryData({ name: 'Danh mục', description: '' })
+        setAllProducts([])
         setProducts([])
       } finally {
         setLoading(false)
@@ -141,6 +169,22 @@ const ProductCategory = () => {
       </div>
 
       <div className="container mx-auto px-4 md:px-10 lg:px-20 pb-20">
+        {/* Search Box */}
+        <div className="mb-6 md:mb-10">
+          <div className="relative max-w-md mx-auto">
+            <input
+              type="text"
+              placeholder="Tìm kiếm trong danh mục..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-4 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary transition-all shadow-sm"
+            />
+            <span className="absolute right-4 top-1/2 transform -translate-y-1/2 material-symbols-outlined text-slate-400">
+              search
+            </span>
+          </div>
+        </div>
+
         {products.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
             {products.map((product, index) => (
@@ -206,12 +250,29 @@ const ProductCategory = () => {
           </div>
         ) : (
           <div className="text-center py-20">
-            <span className="material-symbols-outlined text-6xl text-slate-300 mb-4">inventory_2</span>
-            <p className="text-slate-500 text-lg">Đang cập nhật sản phẩm cho danh mục này</p>
-            <Link to="/products" className="inline-flex items-center gap-2 mt-6 text-primary font-bold hover:underline">
-              <span className="material-symbols-outlined">arrow_back</span>
-              Xem tất cả sản phẩm
-            </Link>
+            <span className="material-symbols-outlined text-6xl text-slate-300 mb-4">
+              {debouncedSearchTerm ? 'search_off' : 'inventory_2'}
+            </span>
+            <p className="text-slate-500 text-lg">
+              {debouncedSearchTerm 
+                ? `Không tìm thấy sản phẩm nào với từ khóa "${debouncedSearchTerm}"`
+                : 'Đang cập nhật sản phẩm cho danh mục này'
+              }
+            </p>
+            {debouncedSearchTerm ? (
+              <button 
+                onClick={() => setSearchTerm('')}
+                className="inline-flex items-center gap-2 mt-6 text-primary font-bold hover:underline"
+              >
+                <span className="material-symbols-outlined">clear</span>
+                Xóa tìm kiếm
+              </button>
+            ) : (
+              <Link to="/products" className="inline-flex items-center gap-2 mt-6 text-primary font-bold hover:underline">
+                <span className="material-symbols-outlined">arrow_back</span>
+                Xem tất cả sản phẩm
+              </Link>
+            )}
           </div>
         )}
       </div>
