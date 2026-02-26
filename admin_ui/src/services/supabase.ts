@@ -52,6 +52,21 @@ export interface Product {
     updated_at: string;
 }
 
+export interface PaginationMeta {
+    total: number;
+    limit: number;
+    offset: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+    totalPages: number;
+    currentPage: number;
+}
+
+export interface PaginatedResponse<T> {
+    data: T[];
+    pagination: PaginationMeta;
+}
+
 export interface Category {
     id: number;
     name: string;

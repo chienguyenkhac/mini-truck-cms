@@ -400,7 +400,7 @@ async function ensureUniqueSlug(baseSlug, productId = null) {
 // GET /api/products - Get products with optional filters
 app.get('/api/products', async (req, res) => {
     try {
-        const { limit = 50, category_id, category, show_on_homepage, search, manufacturer_code, slug } = req.query;
+        const { limit = 50, offset = 0, category_id, category, show_on_homepage, search, manufacturer_code, slug } = req.query;
 
         let query = 'SELECT * FROM products WHERE 1=1';
         const params = [];
@@ -458,8 +458,9 @@ app.get('/api/products', async (req, res) => {
         }
 
         query += ' ORDER BY created_at DESC';
-        query += ` LIMIT $${paramIndex}`;
+        query += ` LIMIT $${paramIndex++} OFFSET $${paramIndex}`;
         params.push(parseInt(limit));
+        params.push(parseInt(offset));
 
         const { rows } = await pool.query(query, params);
         res.json(rows);

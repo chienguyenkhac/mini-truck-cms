@@ -7,7 +7,7 @@ import EditProductModal from '../components/EditProductModal';
 import ImportExcelModal from '../components/ImportExcelModal';
 import * as XLSX from 'xlsx';
 
-import { productService, categoryService, getImageUrl, Product, Category } from '../services/supabase';
+import { productService, categoryService, getImageUrl, Product, Category, PaginatedResponse } from '../services/supabase';
 
 const PAGE_SIZE = 10;
 
@@ -15,6 +15,7 @@ const Products: React.FC = () => {
     const notification = useNotification();
     const [searchParams, setSearchParams] = useSearchParams();
     const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [showAddModal, setShowAddModal] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
@@ -22,123 +23,155 @@ const Products: React.FC = () => {
     const [_loading, setLoading] = useState(true);
     const [deleteProduct, setDeleteProduct] = useState<Product | null>(null);
     const [showImportModal, setShowImportModal] = useState(false);
+    const [pagination, setPagination] = useState({
+        total: 0,
+        totalPages: 0,
+        currentPage: 1,
+        hasNext: false,
+        hasPrev: false
+    });
 
-    // Get category and cursor from URL params  
+    // Get category and page from URL params  
     const categoryFilter = searchParams.get('category') || 'ALL';
-    const cursorParam = searchParams.get('cursor');
-    const currentCursor = cursorParam ? parseInt(cursorParam, 10) : null;
+    const pageParam = searchParams.get('page');
+    const currentCursor = pageParam ? parseInt(pageParam, 10) - 1 : 0; // Convert to 0-based index
 
-    // Load products and categories from Supabase
-    const loadData = async () => {
-        setLoading(true);
+    // Load products and categories with server-side pagination
+    // Load categories once
+    const loadCategories = async () => {
         try {
-            const [productsData, categoriesData] = await Promise.all([
-                productService.getAll({ limit: 100 }),
-                categoryService.getAll()
-            ]);
-            setProducts(productsData);
+            const categoriesData = await categoryService.getAll();
             setCategories(categoriesData);
         } catch (err) {
-            console.error('Error loading data:', err);
+            console.error('Error loading categories:', err);
+        }
+    };
+
+    // Load products with server-side pagination
+    const loadProducts = async () => {
+        setLoading(true);
+        try {
+            const offset = currentCursor ? currentCursor * PAGE_SIZE : 0;
+            
+            // Build API options for server-side filtering
+            const options: any = { 
+                limit: PAGE_SIZE, 
+                offset 
+            };
+            
+            // Category filter
+            if (categoryFilter !== 'ALL') {
+                options.category = categoryFilter;
+            }
+            
+            // Search filter
+            if (debouncedSearch) {
+                options.search = debouncedSearch;
+            }
+            
+            const productsData = await productService.getAll(options);
+            
+            // Handle API response format
+            if (Array.isArray(productsData)) {
+                // It's a Product[] array
+                setProducts(productsData);
+                setPagination({
+                    total: productsData.length,
+                    totalPages: 1,
+                    currentPage: 1,
+                    hasNext: false,
+                    hasPrev: false
+                });
+            } else {
+                // It's a PaginatedResponse
+                const paginatedData = productsData as PaginatedResponse<Product>;
+                setProducts(paginatedData.data);
+                setPagination(paginatedData.pagination);
+            }
+        } catch (err) {
+            console.error('Error loading products:', err);
             notification.error('Không thể tải dữ liệu từ database');
         } finally {
             setLoading(false);
         }
     };
 
+    // Debounce search input
     useEffect(() => {
-        loadData();
+        const timer = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    // Load categories once on mount
+    useEffect(() => {
+        loadCategories();
     }, []);
 
-    // Filter products by category and search
-    const filteredProducts = useMemo(() => {
-        return products.filter((p: Product) => {
-            const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
-                (p.code?.toLowerCase().includes(search.toLowerCase()) || false);
+    // Load products when pagination/filter/search changes
+    useEffect(() => {
+        loadProducts();
+    }, [currentCursor, categoryFilter, debouncedSearch]);
 
-            // Find category_id from category name if needed
-            let matchesCategory = categoryFilter === 'ALL';
-            if (!matchesCategory) {
-                // Try to match by category name first (from URL like "ĐỘNG CƠ")
-                const categoryByName = categories.find(c => c.name === categoryFilter);
-                if (categoryByName) {
-                    matchesCategory = p.category_id === categoryByName.id;
-                } else {
-                    // Fallback to parsing as number (if URL has category_id)
-                    matchesCategory = p.category_id === parseInt(categoryFilter);
-                }
-            }
-
-            return matchesSearch && matchesCategory;
-        }).sort((a: Product, b: Product) => a.id - b.id);
-    }, [products, categories, categoryFilter, search]);
-
-    // Cursor-based pagination logic
+    // Server-side pagination with accurate metadata
     const paginatedData = useMemo(() => {
-        let startIndex = 0;
-
-        if (currentCursor !== null) {
-            // Find the index of the product with ID equal to cursor
-            const cursorIndex = filteredProducts.findIndex(p => p.id === currentCursor);
-            if (cursorIndex !== -1) {
-                startIndex = cursorIndex + 1; // Start after the cursor
-            }
-        }
-
-        const pageProducts = filteredProducts.slice(startIndex, startIndex + PAGE_SIZE);
-        const hasNextPage = startIndex + PAGE_SIZE < filteredProducts.length;
-        const hasPrevPage = currentCursor !== null && startIndex > 0;
-
-        // Get the cursors for navigation
-        const nextCursor = pageProducts.length > 0 ? pageProducts[pageProducts.length - 1].id : null;
-        const prevCursor = startIndex > 0 ? filteredProducts[Math.max(0, startIndex - PAGE_SIZE)]?.id || null : null;
-
         return {
-            products: pageProducts,
-            hasNextPage,
-            hasPrevPage,
-            nextCursor,
-            prevCursor,
-            startIndex,
-            totalCount: filteredProducts.length,
+            products: products,
+            hasNextPage: pagination.hasNext,
+            hasPrevPage: pagination.hasPrev,
+            startIndex: currentCursor * PAGE_SIZE,
+            totalCount: pagination.total,
+            totalPages: pagination.totalPages,
+            currentPage: pagination.currentPage
         };
-    }, [filteredProducts, currentCursor]);
+    }, [products, pagination, currentCursor]);
 
     const handleNextPage = () => {
-        if (paginatedData.hasNextPage && paginatedData.nextCursor) {
+        if (paginatedData.hasNextPage) {
             const newParams = new URLSearchParams(searchParams);
-            newParams.set('cursor', paginatedData.nextCursor.toString());
+            newParams.set('page', (currentCursor + 2).toString()); // Convert back to 1-based
             setSearchParams(newParams);
         }
     };
 
     const handlePrevPage = () => {
         const newParams = new URLSearchParams(searchParams);
-        if (paginatedData.prevCursor !== null && paginatedData.startIndex > PAGE_SIZE) {
-            newParams.set('cursor', paginatedData.prevCursor.toString());
+        if (currentCursor > 0) {
+            newParams.set('page', currentCursor.toString()); // Convert back to 1-based
         } else {
-            // Go to first page
-            newParams.delete('cursor');
+            newParams.delete('page');
         }
         setSearchParams(newParams);
     };
 
     const handleFirstPage = () => {
         const newParams = new URLSearchParams(searchParams);
-        newParams.delete('cursor');
+        newParams.delete('page');
         setSearchParams(newParams);
     };
 
-    const handleExportExcel = () => {
-        const ws = XLSX.utils.json_to_sheet(filteredProducts);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Danh mục sản phẩm');
-        XLSX.writeFile(wb, `sinotruk-catalog-${new Date().toISOString().split('T')[0]}.xlsx`);
-        notification.success('Đã xuất danh mục sản phẩm (Excel) thành công');
+    const handleExportExcel = async () => {
+        try {
+            // Export all products, not just current page
+            const allProducts = await productService.getAll({
+                category: categoryFilter !== 'ALL' ? categoryFilter : undefined,
+                search: debouncedSearch || undefined
+            });
+            
+            const ws = XLSX.utils.json_to_sheet(allProducts);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Danh mục sản phẩm');
+            XLSX.writeFile(wb, `sinotruk-catalog-${new Date().toISOString().split('T')[0]}.xlsx`);
+            notification.success('Đã xuất danh mục sản phẩm (Excel) thành công');
+        } catch (error) {
+            notification.error('Có lỗi xảy ra khi xuất Excel');
+        }
     };
 
     const handleImportComplete = () => {
-        loadData();
+        loadProducts();
         setShowImportModal(false);
     };
 
@@ -156,7 +189,7 @@ const Products: React.FC = () => {
             await productService.delete(deleteProduct.id);
             notification.success(`Đã xóa sản phẩm "${deleteProduct.name}"`);
             setDeleteProduct(null);
-            loadData();
+            loadProducts();
         } catch (error: any) {
             notification.error(error.message || 'Có lỗi xảy ra khi xóa sản phẩm');
         }
@@ -166,7 +199,7 @@ const Products: React.FC = () => {
         try {
             await productService.update(product.id, { show_on_homepage: !product.show_on_homepage });
             notification.success(product.show_on_homepage ? 'Đã ẩn sản phẩm khỏi trang chủ' : 'Đã hiển thị sản phẩm trên trang chủ');
-            loadData();
+            loadProducts();
         } catch (error: any) {
             notification.error(error.message || 'Có lỗi xảy ra');
         }
@@ -239,9 +272,9 @@ const Products: React.FC = () => {
                             value={search}
                             onChange={(e) => {
                                 setSearch(e.target.value);
-                                // Reset cursor when searching
+                                // Reset page when searching
                                 const newParams = new URLSearchParams(searchParams);
-                                newParams.delete('cursor');
+                                newParams.delete('page');
                                 setSearchParams(newParams);
                             }}
                         />
@@ -254,7 +287,7 @@ const Products: React.FC = () => {
                         onClick={() => {
                             const newParams = new URLSearchParams(searchParams);
                             newParams.delete('category');
-                            newParams.delete('cursor');
+                            newParams.delete('page');
                             setSearchParams(newParams);
                         }}
                         className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${categoryFilter === 'ALL'
@@ -276,7 +309,7 @@ const Products: React.FC = () => {
                                 onClick={() => {
                                     const newParams = new URLSearchParams(searchParams);
                                     newParams.set('category', String(cat.id));
-                                    newParams.delete('cursor');
+                                    newParams.delete('page');
                                     setSearchParams(newParams);
                                 }}
                                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${categoryFilter === String(cat.id)
@@ -300,7 +333,7 @@ const Products: React.FC = () => {
                                 onClick={() => {
                                     const newParams = new URLSearchParams(searchParams);
                                     newParams.set('category', String(cat.id));
-                                    newParams.delete('cursor');
+                                    newParams.delete('page');
                                     setSearchParams(newParams);
                                 }}
                                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${categoryFilter === String(cat.id)
@@ -415,8 +448,8 @@ const Products: React.FC = () => {
                     {/* First Page Button */}
                     <button
                         onClick={handleFirstPage}
-                        disabled={!paginatedData.hasPrevPage && currentCursor === null}
-                        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${paginatedData.hasPrevPage || currentCursor !== null
+                        disabled={currentCursor === 0}
+                        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${currentCursor > 0
                             ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                             : 'bg-slate-50 text-slate-300 cursor-not-allowed'
                             }`}
@@ -428,8 +461,8 @@ const Products: React.FC = () => {
                     {/* Previous Page Button */}
                     <button
                         onClick={handlePrevPage}
-                        disabled={!paginatedData.hasPrevPage && currentCursor === null}
-                        className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${paginatedData.hasPrevPage || currentCursor !== null
+                        disabled={currentCursor === 0}
+                        className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${currentCursor > 0
                             ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                             : 'bg-slate-50 text-slate-300 cursor-not-allowed'
                             }`}
@@ -440,7 +473,7 @@ const Products: React.FC = () => {
 
                     {/* Page Indicator */}
                     <div className="px-4 py-2 bg-primary/10 text-primary font-bold rounded-lg text-sm">
-                        Trang {Math.floor(paginatedData.startIndex / PAGE_SIZE) + 1} / {Math.ceil(paginatedData.totalCount / PAGE_SIZE)}
+                        Trang {currentCursor + 1}
                     </div>
 
                     {/* Next Page Button */}
@@ -462,7 +495,7 @@ const Products: React.FC = () => {
                 <AddProductModal
                     onClose={() => setShowAddModal(false)}
                     onAdd={() => {
-                        loadData();
+                        loadProducts();
                         setShowAddModal(false);
                     }}
                 />
@@ -473,7 +506,7 @@ const Products: React.FC = () => {
                     product={editingProduct}
                     onClose={() => setEditingProduct(null)}
                     onSave={() => {
-                        loadData();
+                        loadProducts();
                         setEditingProduct(null);
                     }}
                 />
