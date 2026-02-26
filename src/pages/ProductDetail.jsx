@@ -261,17 +261,11 @@ const ProductDetail = () => {
                                             src={img}
                                             alt={`${product.name} ${idx + 1}`}
                                             className="w-full h-full object-cover"
-
+                                            
                                             draggable={false}
                                         />
                                     </button>
                                 ))}
-                            </div>
-                        )}
-
-                        {product.manufacturer_code && (
-                            <div className="absolute top-6 left-6 bg-primary text-white text-xs font-bold px-4 py-2 rounded-full uppercase tracking-wider shadow-lg">
-                                {product.manufacturer_code}
                             </div>
                         )}
                     </motion.div>

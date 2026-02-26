@@ -29,7 +29,7 @@ const Products = () => {
   const [lastId, setLastId] = useState(null)
   const [manufacturerTerm, setManufacturerTerm] = useState('')
 
-  // Update selectedCategory when URL changes and show filters
+  // Update selectedCategory when URL changes
   useEffect(() => {
     if (categoryFromUrl) {
       // If categoryFromUrl is a slug, find the corresponding category
@@ -44,7 +44,6 @@ const Products = () => {
         // Fallback to using the value directly
         setSelectedCategory(categoryFromUrl)
       }
-      setShowFilters(true) // Auto show filter panel when navigating with category
     } else {
       setSelectedCategory('all')
     }
