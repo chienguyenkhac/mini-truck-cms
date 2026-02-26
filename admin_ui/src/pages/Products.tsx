@@ -324,7 +324,7 @@ const Products: React.FC = () => {
                                 <th className="w-20 text-center">Ảnh</th>
                                 <th className="w-36">Mã SP (PN)</th>
                                 <th>Tên sản phẩm</th>
-                                <th className="w-32">Danh mục</th>
+                                <th className="w-44">Danh mục</th>
                                 <th className="w-24 text-center">Show on Homepage</th>
                                 <th className="text-right px-6 w-40">Thao tác</th>
                             </tr>
@@ -351,7 +351,7 @@ const Products: React.FC = () => {
                                             <p className="font-bold text-slate-800 leading-tight truncate">{product.name}</p>
                                             <p className="text-[10px] text-slate-400 uppercase mt-1">Sinotruk Genuine Parts</p>
                                         </td>
-                                        <td>
+                                        <td className="whitespace-nowrap">
                                             <span className="badge badge-gray text-xs">{categories.find(c => c.id === product.category_id)?.name || '-'}</span>
                                         </td>
                                         <td className="text-center">
