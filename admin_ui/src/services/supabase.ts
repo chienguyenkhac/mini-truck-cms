@@ -129,6 +129,20 @@ export const productService = {
     delete: async (id: number) => fetchAPI(`/products/${id}`, { method: 'DELETE' })
 };
 
+// Dashboard Service
+export const dashboardService = {
+    getStats: async () => fetchAPI<{
+        totalProducts: number;
+        categoriesCount: number;
+        articlesCount: number;
+        categoryDistribution: Array<{
+            name: string;
+            value: number;
+            color: string;
+        }>;
+    }>('/dashboard/stats')
+};
+
 // Category Service
 export const categoryService = {
     getAll: async () => fetchAPI<Category[]>('/categories'),

@@ -334,6 +334,43 @@ app.get('/api/image', async (req, res) => {
     }
 });
 
+// Dashboard stats API
+app.get('/api/dashboard/stats', async (req, res) => {
+    try {
+        // Get total counts efficiently
+        const [productCount, categoryCount, articleCount] = await Promise.all([
+            pool.query('SELECT COUNT(*) as count FROM products'),
+            pool.query('SELECT COUNT(*) as count FROM categories'),
+            pool.query('SELECT COUNT(*) as count FROM catalog_articles')
+        ]);
+
+        // Get category distribution for pie chart
+        const categoryDistribution = await pool.query(`
+            SELECT 
+                COALESCE(c.name, 'Chưa phân loại') as category_name,
+                COUNT(p.id) as product_count
+            FROM products p
+            LEFT JOIN categories c ON p.category_id = c.id
+            GROUP BY c.id, c.name
+            ORDER BY product_count DESC
+        `);
+
+        res.json({
+            totalProducts: parseInt(productCount.rows[0].count),
+            categoriesCount: parseInt(categoryCount.rows[0].count),
+            articlesCount: parseInt(articleCount.rows[0].count),
+            categoryDistribution: categoryDistribution.rows.map((row, i) => ({
+                name: row.category_name,
+                value: parseInt(row.product_count),
+                color: ['#18535d', '#10b981', '#f59e0b', '#8b5cf6', '#94a3b8', '#ec4899', '#14b8a6', '#f97316'][i % 8]
+            }))
+        });
+    } catch (error) {
+        console.error('Dashboard stats error:', error);
+        res.status(500).json({ error: 'Failed to fetch dashboard stats' });
+    }
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });

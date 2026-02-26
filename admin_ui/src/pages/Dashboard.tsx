@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-import { productService, categoryService, catalogService } from '../services/supabase';
+import { dashboardService } from '../services/supabase';
 
 const Dashboard: React.FC = () => {
     const [stats, setStats] = useState({
@@ -15,33 +15,15 @@ const Dashboard: React.FC = () => {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const [products, categories, articles] = await Promise.all([
-                    productService.getAll({ limit: 1000 }),
-                    categoryService.getAll(),
-                    catalogService.getAll()
-                ]);
-
+                const dashboardData = await dashboardService.getStats();
+                
                 setStats({
-                    totalProducts: products.length,
-                    categoriesCount: categories.length,
-                    articlesCount: articles.length
+                    totalProducts: dashboardData.totalProducts,
+                    categoriesCount: dashboardData.categoriesCount,
+                    articlesCount: dashboardData.articlesCount
                 });
 
-                // Calculate category distribution for pie chart
-                const catsMap = products.reduce((acc: Record<string, number>, p) => {
-                    const cat = categories.find(c => c.id === p.category_id);
-                    const catName = cat?.name || 'Chưa phân loại';
-                    acc[catName] = (acc[catName] || 0) + 1;
-                    return acc;
-                }, {});
-
-                const colors = ['#18535d', '#10b981', '#f59e0b', '#8b5cf6', '#94a3b8', '#ec4899', '#14b8a6', '#f97316'];
-                const distribution = Object.keys(catsMap).map((cat, i) => ({
-                    name: cat,
-                    value: catsMap[cat],
-                    color: colors[i % colors.length]
-                }));
-                setCategoryDistribution(distribution);
+                setCategoryDistribution(dashboardData.categoryDistribution);
             } catch (err) {
                 console.error('Error loading dashboard data:', err);
             } finally {
