@@ -92,7 +92,8 @@ const ProductDetail = () => {
                 if (productImages.length > 0) {
                     setImages(productImages)
                 } else if (productData.image) {
-                    setImages([getImageUrl(productData.image)])
+                    const mainImageUrl = getImageUrl(productData.image)
+                    setImages([mainImageUrl])
                 }
 
                 // Fetch category
@@ -206,7 +207,7 @@ const ProductDetail = () => {
                                         exit={{ opacity: 0, x: -50 }}
                                         transition={{ duration: 0.3 }}
                                         onError={(e) => { e.target.style.display = 'none' }}
-
+                                        data-protected="true"
                                         draggable={false}
                                     />
                                 ) : (
@@ -261,7 +262,7 @@ const ProductDetail = () => {
                                             src={img}
                                             alt={`${product.name} ${idx + 1}`}
                                             className="w-full h-full object-cover"
-                                            
+                                            data-protected="true"
                                             draggable={false}
                                         />
                                     </button>

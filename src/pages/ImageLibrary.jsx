@@ -152,13 +152,28 @@ const ImageLibrary = () => {
       <span>Tải ảnh xuống</span>
     `
     downloadBtn.onclick = () => {
-      const link = document.createElement('a')
-      link.href = watermarkedUrl
-      link.download = `${imageName || 'image'}_watermarked.jpg`
-      link.style.display = 'none'
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+      // Fetch and download
+      fetch(watermarkedUrl)
+        .then(response => {
+          if (!response.ok) throw new Error('Network error');
+          return response.blob();
+        })
+        .then(blob => {
+          const objectUrl = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = objectUrl;
+          link.download = `${imageName || 'image'}_watermarked.jpg`;
+          link.style.display = 'none';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(objectUrl);
+        })
+        .catch(err => {
+          console.error('Download failed:', err);
+          alert('Không thể tải xuống ảnh. Vui lòng thử lại.');
+        });
+      
       menu.remove()
     }
 

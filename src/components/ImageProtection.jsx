@@ -17,8 +17,8 @@ const ImageProtection = () => {
             if (target.tagName === 'IMG') {
                 const src = target.src;
 
-                // Only intercept images served through our proxy
-                if (src.includes('/api/image')) {
+                // Only intercept protected images served through our proxy
+                if (target.hasAttribute('data-protected') && src.includes('/api/image')) {
                     e.preventDefault();
 
                     // Extract path from URL
@@ -100,13 +100,27 @@ const ImageProtection = () => {
                 if (path) downloadUrl += `&path=${encodeURIComponent(path)}`;
                 if (url) downloadUrl += `&url=${encodeURIComponent(url)}`;
 
-                // Trigger download
-                const a = document.createElement('a');
-                a.href = downloadUrl;
-                a.download = altText || 'image.jpg';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                // Method 2: Fetch and download (more reliable for triggering network request)
+                fetch(downloadUrl)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        const objectUrl = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = objectUrl;
+                        a.download = altText || 'image.jpg';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(objectUrl);
+                    })
+                    .catch(err => {
+                        console.error('Download failed:', err);
+                        alert('Không thể tải xuống ảnh. Vui lòng thử lại.');
+                    });
+                
                 menu.remove();
             };
 
