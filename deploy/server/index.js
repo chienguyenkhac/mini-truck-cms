@@ -254,49 +254,63 @@ app.get('/api/image', async (req, res) => {
             const height = metadata.height || 600;
 
             try {
-                // Calculate text size based on image dimensions
-                const textSize = Math.max(16, Math.floor(Math.min(width, height) * 0.03));
-                const spacing = textSize * 4;
+                // Calculate text size based on image dimensions - make it bigger
+                const baseSize = Math.min(width, height);
+                const textSize = Math.max(24, Math.floor(baseSize * 0.05)); // Increase from 0.03 to 0.05
+                const spacing = textSize * 3; // Reduce spacing for better coverage
                 
-                // Create text watermark pattern
+                // Create text watermark pattern with better distribution
                 const textElements = [];
-                const cols = Math.ceil(width / spacing);
-                const rows = Math.ceil(height / spacing);
+                const cols = Math.ceil(width / spacing) + 1;
+                const rows = Math.ceil(height / spacing) + 1;
                 
                 for (let row = 0; row < rows; row++) {
                     for (let col = 0; col < cols; col++) {
-                        const x = col * spacing + (row % 2) * (spacing / 2); // Offset every other row
-                        const y = row * spacing + textSize;
-                        textElements.push(`
-                            <text x="${x}" y="${y}" 
-                                  font-family="Arial, sans-serif" 
-                                  font-size="${textSize}" 
-                                  font-weight="bold"
-                                  fill="rgba(255,255,255,${opacity})" 
-                                  stroke="rgba(0,0,0,${opacity * 0.3})" 
-                                  stroke-width="1"
-                                  transform="rotate(-45 ${x} ${y})">
-                                ${watermarkText}
-                            </text>
-                        `);
+                        // Create diagonal offset pattern
+                        const x = (col * spacing) - (row % 2) * (spacing / 2);
+                        const y = (row * spacing) + textSize;
+                        
+                        // Skip if text would be outside image bounds
+                        if (x > -textSize && x < width + textSize && y > 0 && y < height + textSize) {
+                            textElements.push(`
+                                <text x="${x}" y="${y}" 
+                                      font-family="Arial Black, Arial, sans-serif" 
+                                      font-size="${textSize}" 
+                                      font-weight="900"
+                                      fill="rgba(255,255,255,${opacity * 0.8})" 
+                                      stroke="rgba(0,0,0,${opacity * 0.4})" 
+                                      stroke-width="2"
+                                      transform="rotate(-30 ${x} ${y})"
+                                      letter-spacing="1px">
+                                    ${watermarkText}
+                                </text>
+                            `);
+                        }
                     }
                 }
 
                 const svgWatermark = `
                     <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-                        ${textElements.join('')}
+                        <defs>
+                            <filter id="textShadow">
+                                <feDropShadow dx="2" dy="2" stdDeviation="1" flood-color="rgba(0,0,0,0.3)"/>
+                            </filter>
+                        </defs>
+                        <g filter="url(#textShadow)">
+                            ${textElements.join('')}
+                        </g>
                     </svg>
                 `;
 
                 const watermarkBuffer = Buffer.from(svgWatermark);
 
-                // Apply watermark to image
+                // Apply watermark to image with better blending
                 finalBuffer = await sharp(finalBuffer)
                     .composite([{
                         input: watermarkBuffer,
-                        blend: 'over'
+                        blend: 'multiply' // Better blending mode for text
                     }])
-                    .jpeg({ quality: 90 })
+                    .jpeg({ quality: 95 }) // Higher quality
                     .toBuffer();
                     
             } catch (watermarkError) {
