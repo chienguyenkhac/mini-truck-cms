@@ -494,7 +494,7 @@ app.get('/api/products', async (req, res) => {
             params.push(slug);
         }
 
-        query += ' ORDER BY created_at DESC';
+        query += ' ORDER BY id DESC';
         query += ` LIMIT $${paramIndex++} OFFSET $${paramIndex}`;
         params.push(parseInt(limit));
         params.push(parseInt(offset));

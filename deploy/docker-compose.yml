@@ -60,6 +60,7 @@ services:
       - /www/wwwroot/hanoi-sinotruk.com/uploads:/app/uploads
       - ./client:/app/client:ro
       - ./admin:/app/admin:ro
+      - ./server/index.js:/app/index.js:ro
     ports:
       - "3001:3001"
 
