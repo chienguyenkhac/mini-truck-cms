@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { getCatalogArticles } from '../services/supabase'
+import { getCatalogArticles, getCatalogArticleById } from '../services/supabase'
 
 // Render EditorJS blocks to HTML
 const renderContent = (content) => {
@@ -72,6 +72,7 @@ const Catalog = () => {
   const [articles, setArticles] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedArticle, setSelectedArticle] = useState(null)
+  const [articleDetailLoading, setArticleDetailLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [pagination, setPagination] = useState({
@@ -93,7 +94,7 @@ const Catalog = () => {
     return () => clearTimeout(timer)
   }, [searchTerm])
 
-  // Load articles from database with search and pagination
+  // Load articles from database with search and pagination (list view - without full content)
   const loadArticles = useCallback(async (page = 1, search = '', isNewSearch = false) => {
     try {
       if (isNewSearch) {
@@ -122,6 +123,34 @@ const Catalog = () => {
     }
   }, [])
 
+  // Load full article content by ID
+  const loadArticleDetail = useCallback(async (articleId) => {
+    try {
+      setArticleDetailLoading(true)
+      const fullArticle = await getCatalogArticleById(articleId)
+      
+      if (fullArticle) {
+        setSelectedArticle(fullArticle)
+      } else {
+        console.error('Article not found')
+        // Fallback to the article from list if full content load fails
+        const listArticle = articles.find(a => a.id === articleId)
+        if (listArticle) {
+          setSelectedArticle(listArticle)
+        }
+      }
+    } catch (err) {
+      console.error('Error loading article detail:', err)
+      // Fallback to the article from list if full content load fails
+      const listArticle = articles.find(a => a.id === articleId)
+      if (listArticle) {
+        setSelectedArticle(listArticle)
+      }
+    } finally {
+      setArticleDetailLoading(false)
+    }
+  }, [articles])
+
   // Initial load
   useEffect(() => {
     loadArticles(1, debouncedSearchTerm)
@@ -145,6 +174,17 @@ const Catalog = () => {
     setSearchTerm(e.target.value)
     if (e.target.value.trim() !== debouncedSearchTerm) {
       setSearchLoading(true)
+    }
+  }
+
+  // Handle article selection with optimized loading
+  const handleArticleSelect = (article) => {
+    // If article already has full content, show it immediately
+    if (article.content && article.content.blocks && article.content.blocks.length > 0) {
+      setSelectedArticle(article)
+    } else {
+      // Load full content from API
+      loadArticleDetail(article.id)
     }
   }
 
@@ -203,45 +243,58 @@ const Catalog = () => {
               Các bài viết hướng dẫn kỹ thuật và thông tin về phụ tùng xe tải sẽ được cập nhật tại đây.
             </p>
           </div>
-        ) : selectedArticle ? (
+        ) : selectedArticle || articleDetailLoading ? (
           // Article Detail View
           <div>
             <button
               onClick={() => setSelectedArticle(null)}
               className="flex items-center gap-2 text-slate-500 hover:text-primary transition-colors mb-8"
+              disabled={articleDetailLoading}
             >
               <span className="material-symbols-outlined">arrow_back</span>
               Quay lại danh sách
             </button>
 
-            <article className="bg-white rounded-3xl shadow-lg border border-slate-200 p-8 md:p-12 lg:p-16">
-              {/* Header with thumbnail */}
-              <div className="flex flex-col md:flex-row gap-6 mb-8 pb-8 border-b border-slate-200">
-                {selectedArticle.thumbnail && (
-                  <div className="md:w-48 flex-shrink-0">
-                    <img
-                      src={selectedArticle.thumbnail}
-                      alt={selectedArticle.title}
-                      className="w-full aspect-video object-cover rounded-xl shadow-md"
-                    />
-                  </div>
-                )}
-                <div className="flex-1">
-                  <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
-                    {selectedArticle.title}
-                  </h1>
-                  <div className="flex items-center gap-4 text-sm text-slate-400">
-                    <span className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-sm">calendar_today</span>
-                      {new Date(selectedArticle.created_at).toLocaleDateString('vi-VN')}
-                    </span>
+            {articleDetailLoading ? (
+              // Loading state for article detail
+              <div className="bg-white rounded-3xl shadow-lg border border-slate-200 p-8 md:p-12 lg:p-16">
+                <div className="flex justify-center items-center py-20">
+                  <div className="text-center">
+                    <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+                    <p className="text-slate-500">Đang tải nội dung bài viết...</p>
                   </div>
                 </div>
               </div>
-              <div className="prose prose-slate max-w-none">
-                {renderContent(selectedArticle.content)}
-              </div>
-            </article>
+            ) : selectedArticle ? (
+              <article className="bg-white rounded-3xl shadow-lg border border-slate-200 p-8 md:p-12 lg:p-16">
+                {/* Header with thumbnail */}
+                <div className="flex flex-col md:flex-row gap-6 mb-8 pb-8 border-b border-slate-200">
+                  {selectedArticle.thumbnail && (
+                    <div className="md:w-48 flex-shrink-0">
+                      <img
+                        src={selectedArticle.thumbnail}
+                        alt={selectedArticle.title}
+                        className="w-full aspect-video object-cover rounded-xl shadow-md"
+                      />
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
+                      {selectedArticle.title}
+                    </h1>
+                    <div className="flex items-center gap-4 text-sm text-slate-400">
+                      <span className="flex items-center gap-1">
+                        <span className="material-symbols-outlined text-sm">calendar_today</span>
+                        {new Date(selectedArticle.created_at).toLocaleDateString('vi-VN')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="prose prose-slate max-w-none">
+                  {renderContent(selectedArticle.content)}
+                </div>
+              </article>
+            ) : null}
           </div>
         ) : (
           // Articles List - Compact Blog Style
@@ -254,7 +307,7 @@ const Catalog = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                   className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all group cursor-pointer"
-                  onClick={() => setSelectedArticle(article)}
+                  onClick={() => handleArticleSelect(article)}
                 >
                   <div className="flex flex-col md:flex-row gap-3 p-3">
                     {/* Thumbnail */}

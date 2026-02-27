@@ -45,9 +45,6 @@ const Contact = () => {
           >
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-800 tracking-tighter mb-2">
               LIÊN <span className="text-primary">HỆ</span>
-              <span className="block text-sm sm:text-base md:text-lg text-slate-600 mt-1">
-                {siteName}
-              </span>
             </h1>
             <p className="text-slate-500 text-sm md:text-base max-w-xl mx-auto">
               Chúng tôi luôn sẵn sàng hỗ trợ bạn 24/7
@@ -92,21 +89,21 @@ const Contact = () => {
               ].map((item, i) => (
                 <div
                   key={i}
-                  className="flex items-start gap-4 p-4 md:p-6 bg-white border border-slate-200 rounded-xl md:rounded-2xl hover:border-primary/50 transition-all shadow-sm"
+                  className="flex items-start gap-3 p-3 md:p-4 bg-white border border-slate-200 rounded-lg md:rounded-xl hover:border-primary/50 transition-all shadow-sm"
                 >
-                  <div className="w-11 h-11 md:w-14 md:h-14 bg-primary/10 rounded-xl md:rounded-2xl flex items-center justify-center text-primary border border-primary/30 flex-shrink-0">
-                    <span className="material-symbols-outlined text-xl md:text-2xl">{item.icon}</span>
+                  <div className="w-9 h-9 md:w-11 md:h-11 bg-primary/10 rounded-lg md:rounded-xl flex items-center justify-center text-primary border border-primary/30 flex-shrink-0">
+                    <span className="material-symbols-outlined text-lg md:text-xl">{item.icon}</span>
                   </div>
                   <div>
-                    <h3 className="text-slate-800 font-bold text-base md:text-lg mb-1">{item.title}</h3>
+                    <h3 className="text-slate-800 font-bold text-sm md:text-base mb-1">{item.title}</h3>
                     {item.href ? (
-                      <a href={item.href} className="text-slate-500 hover:text-primary transition-colors text-sm md:text-base">
+                      <a href={item.href} className="text-slate-500 hover:text-primary transition-colors text-xs md:text-sm">
                         {item.content}
                       </a>
                     ) : (
-                      <p className="text-slate-500 text-sm md:text-base">{item.content}</p>
+                      <p className="text-slate-500 text-xs md:text-sm">{item.content}</p>
                     )}
-                    {item.sub && <p className="text-slate-400 text-sm mt-1">{item.sub}</p>}
+                    {item.sub && <p className="text-slate-400 text-xs mt-1">{item.sub}</p>}
                   </div>
                 </div>
               ))}

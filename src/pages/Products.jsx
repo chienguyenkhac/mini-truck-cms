@@ -264,46 +264,46 @@ const Products = () => {
                     whileInView={{ y: 0, opacity: 1 }}
                     transition={{ delay: Math.min(index * 0.05, 0.3) }}
                     viewport={{ once: true }}
-                    whileHover={{ y: -5 }}
-                    className="group bg-white border border-slate-200 rounded-2xl overflow-hidden hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-lg flex flex-col h-full"
+                    className="group relative bg-white border border-slate-200 rounded-2xl overflow-hidden hover:border-primary/40 transition-colors duration-300 shadow-sm hover:shadow-lg flex flex-col h-full will-change-transform"
                   >
                     <Link to={`/product/${product.slug || product.id}`}>
-                      <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                      <div className="aspect-square overflow-hidden relative bg-gradient-to-br from-gray-100 to-gray-200">
                         {product.image ? (
                           <img
                             src={getImageUrl(product.image)}
                             alt={product.name}
                             loading="lazy"
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                             onError={(e) => { e.target.style.display = 'none' }}
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <span className="material-symbols-outlined text-8xl text-gray-300">settings</span>
+                            <span className="material-symbols-outlined text-7xl text-gray-300">settings</span>
                           </div>
                         )}
-                        {product.manufacturer_code && (
-                          <div className="absolute top-4 left-4 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-lg uppercase tracking-wider shadow-lg">
-                            {product.manufacturer_code}
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent opacity-60"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent opacity-50"></div>
                       </div>
                     </Link>
                     <div className="p-3 flex flex-col flex-1">
-                      <Link to={`/product/${product.slug || product.id}`}>
-                        <h3 className="text-slate-800 font-bold text-base group-hover:text-primary transition-colors line-clamp-2 min-h-[2.8rem]">
-                          {product.name}
-                        </h3>
-                      </Link>
-                      <p className="text-slate-400 text-xs line-clamp-1 mt-0.5">{product.description || 'Phụ tùng chính hãng'}</p>
+                      <div className="flex-1">
+                        <Link to={`/product/${product.slug || product.id}`}>
+                          <h3 className="text-slate-800 font-bold text-base group-hover:text-primary transition-colors line-clamp-2 min-h-[2.8rem]">
+                            {product.name}
+                          </h3>
+                        </Link>
+                        <p className="text-slate-400 text-xs line-clamp-1 mt-0.5">{product.description || 'Phụ tùng chính hãng'}</p>
+                      </div>
 
-                      <div className="flex justify-end mt-auto pt-3">
+                      <div className="flex items-center justify-between mt-auto pt-3">
+                        {product.manufacturer_code && (
+                          <div className="text-red-500 text-xs font-bold uppercase tracking-wider">
+                            {product.manufacturer_code}
+                          </div>
+                        )}
                         <Link
                           to={`/product/${product.slug || product.id}`}
                           className="text-primary hover:text-primary/80 font-medium text-sm transition-colors flex items-center gap-1"
                         >
-                          Chi tiết
                           <span className="material-symbols-outlined text-sm">arrow_forward</span>
                         </Link>
                       </div>

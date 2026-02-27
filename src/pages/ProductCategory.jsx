@@ -209,11 +209,6 @@ const ProductCategory = () => {
                         <span className="material-symbols-outlined text-7xl text-gray-300">settings</span>
                       </div>
                     )}
-                    {product.manufacturer_code && (
-                      <div className="absolute top-4 left-4 bg-primary text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-lg shadow-lg">
-                        {product.manufacturer_code}
-                      </div>
-                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent opacity-50"></div>
                   </div>
 
@@ -225,9 +220,13 @@ const ProductCategory = () => {
                       <p className="text-slate-400 text-xs line-clamp-1 mt-0.5">{product.description || 'Phụ tùng chính hãng'}</p>
                     </div>
 
-                    <div className="flex justify-end mt-auto pt-3">
+                    <div className="flex items-center justify-between mt-auto pt-3">
+                      {product.manufacturer_code && (
+                        <div className="text-red-500 text-xs font-bold uppercase tracking-wider">
+                          {product.manufacturer_code}
+                        </div>
+                      )}
                       <div className="text-primary hover:text-primary/80 font-medium text-sm transition-colors flex items-center gap-1 cursor-pointer">
-                        Chi tiết
                         <span className="material-symbols-outlined text-sm">arrow_forward</span>
                       </div>
                     </div>

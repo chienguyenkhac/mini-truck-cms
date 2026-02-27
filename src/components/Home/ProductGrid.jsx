@@ -162,11 +162,6 @@ const ProductGrid = () => {
                         <span className="material-symbols-outlined text-7xl text-gray-300">settings</span>
                     </div>
                 )}
-                {p.manufacturer_code && (
-                    <div className="absolute top-4 left-4 bg-primary text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-lg shadow-lg">
-                        {p.manufacturer_code}
-                    </div>
-                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent opacity-50"></div>
             </div>
 
@@ -176,9 +171,13 @@ const ProductGrid = () => {
                     <p className="text-slate-400 text-xs line-clamp-1 mt-0.5">{p.description || 'Phụ tùng chính hãng'}</p>
                 </div>
 
-                <div className="flex justify-end mt-auto pt-3">
+                <div className="flex items-center justify-between mt-auto pt-3">
+                    {p.manufacturer_code && (
+                        <div className="text-red-500 text-xs font-bold uppercase tracking-wider">
+                            {p.manufacturer_code}
+                        </div>
+                    )}
                     <div className="text-primary hover:text-primary/80 font-medium text-sm transition-colors flex items-center gap-1 cursor-pointer">
-                        Chi tiết
                         <span className="material-symbols-outlined text-sm">arrow_forward</span>
                     </div>
                 </div>
@@ -191,15 +190,14 @@ const ProductGrid = () => {
             <div className="container mx-auto px-4 md:px-10 lg:px-20 relative z-10">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
                     <div>
-                        <span className="text-primary font-bold tracking-widest text-sm uppercase mb-2 block">Danh mục phụ tùng</span>
-                        <h2 className="text-slate-800 text-2xl md:text-3xl font-bold tracking-tight">Sản phẩm mới nhất</h2>
+                        <span className="text-primary font-bold tracking-widest text-sm uppercase mb-2 block">Sản phẩm nổi bật</span>
                     </div>
                     <Link
                         to="/products"
-                        className="flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-700 font-medium text-sm hover:border-primary/50 transition-colors shadow-sm"
+                        className="flex items-center gap-1.5 px-4 py-2 text-primary hover:text-primary/80 font-medium text-sm transition-colors"
                     >
-                        Tất cả phụ tùng
-                        <span className="material-symbols-outlined text-primary text-lg">arrow_forward</span>
+                        Xem tất cả
+                        <span className="material-symbols-outlined text-sm">arrow_forward</span>
                     </Link>
                 </div>
 

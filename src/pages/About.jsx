@@ -1,9 +1,7 @@
-import { Suspense, useRef, useState, useEffect } from 'react'
+import { Suspense, useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Float, MeshDistortMaterial, PresentationControls } from '@react-three/drei'
 import { motion } from 'framer-motion'
-import { Link } from 'react-router-dom'
-import { supabase } from '../services/supabase'
 import { useSiteSettings } from '../context/SiteSettingsContext'
 
 // 3D Truck Model
@@ -113,7 +111,6 @@ const Scene3D = () => {
 }
 
 const About = () => {
-  const [categories, setCategories] = useState([])
   const { settings } = useSiteSettings()
   const hotline = settings.contact_phone || '0382.890.990'
   const address = settings.address || 'Thôn 1, Xã Lại Yên, Hoài Đức, Hà Nội (cách cầu vượt An Khánh 300m)'
@@ -121,27 +118,6 @@ const About = () => {
   const companyName =
     (settings.site_name && settings.site_name.toUpperCase()) ||
     'CÔNG TY CỔ PHẦN SINOTRUK HÀ NỘI'
-
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('categories')
-          .select('*')
-          .eq('is_visible', true)
-          .eq('is_vehicle_name', true)
-          .order('name')
-
-        if (!error && data) {
-          setCategories(data)
-        }
-      } catch (err) {
-        console.error('Error loading categories:', err)
-      }
-    }
-
-    loadCategories()
-  }, [])
 
   return (
     <div className="min-h-screen bg-background">
@@ -214,56 +190,6 @@ const About = () => {
             </p>
           </div>
         </motion.section>
-
-        {/* Category Showcase - No Title */}
-        {categories.length > 0 && (
-          <motion.section
-            initial={{ y: 30, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            viewport={{ once: true }}
-            className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3"
-          >
-            {categories.map((vehicle, index) => (
-              <motion.div
-                key={vehicle.id}
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                <Link
-                  to={`/products?vehicle=${vehicle.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group block text-center"
-                >
-                  <div className="aspect-square relative mb-2 bg-white rounded-lg p-1.5 border border-slate-100 hover:border-primary/30 hover:shadow-lg transition-all duration-300">
-                    <img
-                      src={vehicle.thumbnail || '/images/default-truck.svg'}
-                      alt={vehicle.name}
-                      className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
-                      onError={(e) => {
-                        // Prevent infinite loop: only try fallback once
-                        if (!e.target.dataset.errorHandled) {
-                          e.target.dataset.errorHandled = 'true'
-                          e.target.src = '/images/default-truck.svg'
-                        } else {
-                          // If fallback also fails, hide the image
-                          e.target.style.display = 'none'
-                        }
-                      }}
-                    />
-                  </div>
-                  <h3 className="text-xs sm:text-sm font-bold text-slate-700 group-hover:text-primary transition-colors uppercase leading-tight line-clamp-2">
-                    {vehicle.name}
-                  </h3>
-                  {vehicle.code && (
-                    <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5 uppercase">{vehicle.code}</p>
-                  )}
-                </Link>
-              </motion.div>
-            ))}
-          </motion.section>
-        )}
 
         {/* Warranty Policy */}
         <motion.section

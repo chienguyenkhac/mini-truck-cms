@@ -115,7 +115,7 @@ export const getSiteSettings = async () => {
     }
 };
 
-// Catalog Articles
+// Catalog Articles - Optimized for list view (without full content)
 export const getCatalogArticles = async (options = {}) => {
     try {
         const { 
@@ -130,6 +130,8 @@ export const getCatalogArticles = async (options = {}) => {
         if (limit) params.append('limit', limit);
         if (page) params.append('page', page);
         if (search && search.trim()) params.append('search', search.trim());
+        // Add parameter to exclude full content for better performance
+        params.append('exclude_content', 'true');
         
         const result = await fetchAPI(`/catalog-articles?${params}`);
         
@@ -163,6 +165,16 @@ export const getCatalogArticles = async (options = {}) => {
             },
             search: ''
         };
+    }
+};
+
+// Get full catalog article by ID (with content)
+export const getCatalogArticleById = async (id) => {
+    try {
+        return await fetchAPI(`/catalog-articles/id/${id}`);
+    } catch (error) {
+        console.error('Error fetching catalog article:', error);
+        return null;
     }
 };
 

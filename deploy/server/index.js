@@ -977,7 +977,8 @@ app.get('/api/catalog-articles', async (req, res) => {
             limit = 20, 
             offset = 0, 
             search = '',
-            page 
+            page,
+            exclude_content = 'false'
         } = req.query;
         
         // Calculate offset from page if provided
@@ -1009,8 +1010,13 @@ app.get('/api/catalog-articles', async (req, res) => {
         const { rows: countRows } = await pool.query(countQuery, params);
         const total = parseInt(countRows[0].total);
 
+        // Optimize SELECT query based on exclude_content parameter
+        const selectFields = exclude_content === 'true' 
+            ? 'id, title, slug, thumbnail, is_published, created_at, updated_at'
+            : '*';
+        
         // Get data with pagination
-        const dataQuery = `SELECT * FROM catalog_articles${whereClause} ORDER BY created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+        const dataQuery = `SELECT ${selectFields} FROM catalog_articles${whereClause} ORDER BY created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
         const dataParams = [...params, parseInt(limit), actualOffset];
         const { rows } = await pool.query(dataQuery, dataParams);
         
@@ -1031,6 +1037,24 @@ app.get('/api/catalog-articles', async (req, res) => {
     } catch (error) {
         console.error('Error fetching catalog articles:', error);
         res.status(500).json({ error: 'Failed to fetch catalog articles' });
+    }
+});
+
+// GET /api/catalog-articles/id/:id - Get article by ID (with full content)
+app.get('/api/catalog-articles/id/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { rows } = await pool.query(
+            'SELECT * FROM catalog_articles WHERE id = $1 AND is_published = true',
+            [parseInt(id)]
+        );
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'Article not found' });
+        }
+        res.json(rows[0]);
+    } catch (error) {
+        console.error('Error fetching article:', error);
+        res.status(500).json({ error: 'Failed to fetch article' });
     }
 });
 

@@ -3,9 +3,9 @@ import { useSiteSettings } from '../../context/SiteSettingsContext'
 
 const Footer = () => {
   const { settings: siteSettings } = useSiteSettings()
+  
   const hotline = siteSettings.contact_phone || '0382890990'
   const email = siteSettings.contact_email || 'hnsinotruk@gmail.com'
-  const logoUrl = siteSettings.company_logo || siteSettings.site_logo || ''
   const siteName = siteSettings.site_name || 'Phụ Tùng Chính Hãng'
   const siteDescription =
     siteSettings.site_description ||
@@ -16,17 +16,18 @@ const Footer = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 mb-10">
           {/* Brand Column */}
           <div className="lg:col-span-4 space-y-8">
-            <Link to="/" className="flex items-center gap-3 group cursor-pointer">
-              {logoUrl ? (
-                <img src={logoUrl} alt="Logo" className="h-10 w-auto object-contain transition-transform group-hover:scale-105" />
+            <Link to="/" className="group cursor-pointer inline-block">
+              {siteSettings.site_logo ? (
+                <img 
+                  src={siteSettings.site_logo} 
+                  alt="Logo" 
+                  className="h-10 w-auto object-contain transition-transform group-hover:scale-105" 
+                />
               ) : (
-                <div className="w-10 h-10 text-primary transition-transform group-hover:scale-110">
-                  <span className="material-symbols-outlined text-4xl font-bold">local_shipping</span>
+                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary transition-all group-hover:scale-110 group-hover:bg-primary/20">
+                  <span className="material-symbols-outlined text-2xl font-bold">local_shipping</span>
                 </div>
               )}
-              <span className="text-slate-800 font-bold text-base md:text-lg tracking-tight">
-                {siteName}
-              </span>
             </Link>
 
             <p className="text-slate-500 leading-relaxed text-sm max-w-sm">
