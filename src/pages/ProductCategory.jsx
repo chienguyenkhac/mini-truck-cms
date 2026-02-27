@@ -210,7 +210,7 @@ const ProductCategory = () => {
                       </div>
                     )}
                     {product.manufacturer_code && (
-                      <div className="absolute top-4 left-4 bg-[#1e9ba8] text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">
+                      <div className="absolute top-4 left-4 bg-primary text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-lg shadow-lg">
                         {product.manufacturer_code}
                       </div>
                     )}

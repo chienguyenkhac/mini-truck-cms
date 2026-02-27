@@ -283,7 +283,7 @@ const Products = () => {
                           </div>
                         )}
                         {product.manufacturer_code && (
-                          <div className="absolute top-4 left-4 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">
+                          <div className="absolute top-4 left-4 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-lg uppercase tracking-wider shadow-lg">
                             {product.manufacturer_code}
                           </div>
                         )}
