@@ -20,8 +20,6 @@ const Products = () => {
 
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
-  const [manufacturerTerm, setManufacturerTerm] = useState('')
-  const [debouncedManufacturerTerm, setDebouncedManufacturerTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState(categoryFromUrl || 'all')
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
@@ -39,12 +37,6 @@ const Products = () => {
     return () => clearTimeout(timer)
   }, [searchTerm])
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedManufacturerTerm(manufacturerTerm)
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [manufacturerTerm])
 
   // Update selectedCategory when URL changes
   useEffect(() => {
@@ -100,10 +92,6 @@ const Products = () => {
         options.search = debouncedSearchTerm
       }
 
-      // Manufacturer code filter
-      if (debouncedManufacturerTerm) {
-        options.manufacturer_code = debouncedManufacturerTerm
-      }
 
       // For pagination, we'll load more items and handle client-side
       const limit = reset ? ITEMS_PER_PAGE : ITEMS_PER_PAGE * 2
@@ -129,12 +117,12 @@ const Products = () => {
       setLoading(false)
       setLoadingMore(false)
     }
-  }, [selectedCategory, debouncedSearchTerm, debouncedManufacturerTerm, categories])
+  }, [selectedCategory, debouncedSearchTerm, categories])
 
   // Initial load and filter changes
   useEffect(() => {
     loadProducts(true)
-  }, [selectedCategory, debouncedSearchTerm, debouncedManufacturerTerm])
+  }, [selectedCategory, debouncedSearchTerm])
 
   // Load more
   const handleLoadMore = () => {
@@ -248,19 +236,6 @@ const Products = () => {
             </div>
 
             {/* Manufacturer Code Filter */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-              <h4 className="text-slate-800 font-bold uppercase tracking-wider text-sm flex items-center gap-2 shrink-0">
-                <span className="material-symbols-outlined text-amber-500 text-lg">barcode</span>
-                MÃ NHÀ SẢN XUẤT
-              </h4>
-              <input
-                type="text"
-                placeholder="Ví dụ: VG1034080020, WG9525820140..."
-                value={manufacturerTerm}
-                onChange={(e) => setManufacturerTerm(e.target.value)}
-                className="flex-1 min-w-0 max-w-md px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary transition-all"
-              />
-            </div>
           </motion.div>
         )}
 
@@ -269,7 +244,7 @@ const Products = () => {
           loading ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-8">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="bg-white border border-slate-200 rounded-3xl overflow-hidden animate-pulse">
+                <div key={i} className="bg-white border border-slate-200 rounded-2xl overflow-hidden animate-pulse">
                   <div className="aspect-square bg-slate-200"></div>
                   <div className="p-6 space-y-4">
                     <div className="h-6 bg-slate-200 rounded w-3/4"></div>
@@ -290,7 +265,7 @@ const Products = () => {
                     transition={{ delay: Math.min(index * 0.05, 0.3) }}
                     viewport={{ once: true }}
                     whileHover={{ y: -5 }}
-                    className="group bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-lg flex flex-col h-full"
+                    className="group bg-white border border-slate-200 rounded-2xl overflow-hidden hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-lg flex flex-col h-full"
                   >
                     <Link to={`/product/${product.slug || product.id}`}>
                       <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
@@ -323,19 +298,14 @@ const Products = () => {
                       </Link>
                       <p className="text-slate-400 text-xs line-clamp-1 mt-0.5">{product.description || 'Phụ tùng chính hãng'}</p>
 
-                      <div className="flex gap-2 mt-auto pt-3">
+                      <div className="flex justify-end mt-auto pt-3">
                         <Link
                           to={`/product/${product.slug || product.id}`}
-                          className="flex-1 py-2 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:border-primary hover:text-primary transition-all flex items-center justify-center"
+                          className="text-primary hover:text-primary/80 font-medium text-sm transition-colors flex items-center gap-1"
                         >
-                          Chi Tiết
+                          Chi tiết
+                          <span className="material-symbols-outlined text-sm">arrow_forward</span>
                         </Link>
-                        <a
-                          href={`tel:${hotline}`}
-                          className="flex-1 py-2 bg-[#c41e1e] text-white font-medium text-sm rounded-xl hover:bg-[#a01818] transition-all flex items-center justify-center"
-                        >
-                          Đặt Hàng
-                        </a>
                       </div>
                     </div>
                   </motion.div>

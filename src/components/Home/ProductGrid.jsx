@@ -146,7 +146,7 @@ const ProductGrid = () => {
         <Link
             key={p.id || idx}
             to={`/product/${p.slug || p.id}`}
-            className="product-card group relative bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-primary/40 transition-colors duration-300 shadow-sm hover:shadow-lg opacity-0 flex flex-col h-full will-change-transform"
+            className="product-card group relative bg-white border border-slate-200 rounded-2xl overflow-hidden hover:border-primary/40 transition-colors duration-300 shadow-sm hover:shadow-lg opacity-0 flex flex-col h-full will-change-transform"
         >
             <div className="aspect-square overflow-hidden relative bg-gradient-to-br from-gray-100 to-gray-200">
                 {p.image ? (
@@ -176,17 +176,11 @@ const ProductGrid = () => {
                     <p className="text-slate-400 text-xs line-clamp-1 mt-0.5">{p.description || 'Phụ tùng chính hãng'}</p>
                 </div>
 
-                <div className="flex gap-2 mt-auto pt-3">
-                    <div className="flex-1 py-2 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:border-primary hover:text-primary transition-all flex items-center justify-center">
-                        Chi Tiết
+                <div className="flex justify-end mt-auto pt-3">
+                    <div className="text-primary hover:text-primary/80 font-medium text-sm transition-colors flex items-center gap-1 cursor-pointer">
+                        Chi tiết
+                        <span className="material-symbols-outlined text-sm">arrow_forward</span>
                     </div>
-                    <a
-                        href={`tel:${hotline}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="flex-1 py-2 bg-[#c41e1e] text-white font-medium text-sm rounded-xl hover:bg-[#a01818] transition-all flex items-center justify-center"
-                    >
-                        Đặt Hàng
-                    </a>
                 </div>
             </div>
         </Link>
@@ -212,7 +206,7 @@ const ProductGrid = () => {
                 {loading ? (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
                         {[1, 2, 3].map((i) => (
-                            <div key={i} className="bg-white border border-slate-200 rounded-3xl overflow-hidden animate-pulse">
+                            <div key={i} className="bg-white border border-slate-200 rounded-2xl overflow-hidden animate-pulse">
                                 <div className="aspect-[16/10] bg-slate-200" />
                                 <div className="p-6 space-y-4">
                                     <div className="h-6 bg-slate-200 rounded w-3/4" />

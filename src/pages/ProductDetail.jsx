@@ -318,10 +318,11 @@ const ProductDetail = () => {
                         <div className="flex flex-col sm:flex-row gap-3">
                             <a
                                 href={`tel:${hotline}`}
-                                className="flex-1 py-3 px-6 bg-[#c41e1e] text-white font-semibold rounded-lg hover:bg-[#a01818] transition-colors flex items-center justify-center gap-2 shadow-md text-sm"
+                                className="flex-1 py-3 px-6 bg-[#dc2626] text-white font-semibold rounded-lg hover:bg-[#b91c1c] transition-colors flex items-center justify-center gap-2 shadow-md text-sm"
+                                title="Hotline"
                             >
                                 <span className="material-symbols-outlined text-lg">call</span>
-                                Đặt Hàng Ngay
+                                {hotline}
                             </a>
                             <a
                                 href="https://zalo.me/0382890990"

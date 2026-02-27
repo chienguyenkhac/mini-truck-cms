@@ -124,7 +124,7 @@ const Navbar = ({ isScrolled }) => {
     return (
         <>
             <header className={`fixed top-0 z-50 w-full transition-all duration-300 ${isScrolled ? 'bg-background/95 backdrop-blur-md border-b border-border py-3 shadow-lg' : 'bg-transparent py-5'}`}>
-                <div className="container mx-auto px-4 md:px-10 lg:px-20 flex items-center justify-between">
+                <div className="container mx-auto px-4 md:px-10 lg:px-20 flex items-center gap-8">
                     {/* Logo */}
                     <Link ref={logoRef} to="/" className="group cursor-pointer">
                         {siteSettings.site_logo ? (
@@ -198,18 +198,10 @@ const Navbar = ({ isScrolled }) => {
                         ))}
                     </nav>
 
-                    {/* CTA Button */}
-                    <Link
-                        to="/contact"
-                        className="hidden sm:flex items-center gap-2 px-5 py-2 bg-primary hover:brightness-110 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:scale-105 active:scale-95"
-                    >
-                        Nhận Báo Giá
-                        <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                    </Link>
 
                     {/* Mobile Menu Button */}
                     <button
-                        className="lg:hidden text-slate-700 p-2 hover:bg-slate-100 rounded-xl transition-colors"
+                        className="lg:hidden text-slate-700 p-2 hover:bg-slate-100 rounded-xl transition-colors ml-auto"
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                     >
                         <span className="material-symbols-outlined text-3xl">
@@ -294,16 +286,6 @@ const Navbar = ({ isScrolled }) => {
                                             )}
                                         </div>
                                     ))}
-                                    <div className="mt-6">
-                                        <Link
-                                            to="/contact"
-                                            onClick={() => setIsMobileMenuOpen(false)}
-                                            className="flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white text-sm font-semibold rounded-lg shadow-md shadow-primary/20"
-                                        >
-                                            Nhận Báo Giá
-                                            <span className="material-symbols-outlined">arrow_forward</span>
-                                        </Link>
-                                    </div>
                                 </nav>
                             </div>
                         </motion.div>

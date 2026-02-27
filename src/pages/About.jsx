@@ -183,7 +183,7 @@ const About = () => {
           ].map((stat, i) => (
             <div key={i} className="bg-white/90 backdrop-blur-xl border border-slate-200 rounded-xl p-3 md:p-4 text-center shadow-sm">
               <div className="text-primary text-2xl md:text-3xl font-bold">{stat.value}</div>
-              <div className="text-slate-500 text-xs mt-1">{stat.label}</div>
+              <div className="text-slate-500 text-sm mt-1">{stat.label}</div>
             </div>
           ))}
         </motion.div>

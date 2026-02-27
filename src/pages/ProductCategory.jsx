@@ -161,32 +161,26 @@ const ProductCategory = () => {
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-800 tracking-tighter mb-2">
               {title.split(' ')[0]} <span className="text-primary">{title.split(' ').slice(1).join(' ')}</span>
             </h1>
-            <p className="text-slate-500 text-sm md:text-base max-w-xl mx-auto">
-              {description}
-            </p>
           </motion.div>
         </div>
       </div>
 
       <div className="container mx-auto px-4 md:px-10 lg:px-20 pb-20">
-        {/* Search Box */}
-        <div className="mb-6 md:mb-10">
-          <div className="relative max-w-md mx-auto">
+        {/* Search & Filter */}
+        <div className="flex flex-col md:flex-row gap-3 md:gap-4 mb-6 md:mb-10">
+          <div className="flex-grow relative">
             <input
               type="text"
-              placeholder="Tìm kiếm trong danh mục..."
+              placeholder="Tìm kiếm theo tên hoặc mã danh điểm..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-4 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary transition-all shadow-sm"
+              className="w-full pl-4 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary transition-all shadow-sm"
             />
-            <span className="absolute right-4 top-1/2 transform -translate-y-1/2 material-symbols-outlined text-slate-400">
-              search
-            </span>
           </div>
         </div>
 
         {products.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-8">
             {products.map((product, index) => (
               <motion.div
                 key={product.id}
@@ -199,7 +193,7 @@ const ProductCategory = () => {
                   to={`/product/${product.slug || product.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group relative bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-primary/40 transition-colors duration-300 shadow-sm hover:shadow-lg flex flex-col h-full will-change-transform"
+                  className="group relative bg-white border border-slate-200 rounded-2xl overflow-hidden hover:border-primary/40 transition-colors duration-300 shadow-sm hover:shadow-lg flex flex-col h-full will-change-transform"
                 >
                   <div className="aspect-square overflow-hidden relative bg-gradient-to-br from-gray-100 to-gray-200">
                     {product.image ? (
@@ -231,17 +225,11 @@ const ProductCategory = () => {
                       <p className="text-slate-400 text-xs line-clamp-1 mt-0.5">{product.description || 'Phụ tùng chính hãng'}</p>
                     </div>
 
-                    <div className="flex gap-2 mt-auto pt-3">
-                      <div className="flex-1 py-2 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:border-primary hover:text-primary transition-all flex items-center justify-center">
-                        Chi Tiết
+                    <div className="flex justify-end mt-auto pt-3">
+                      <div className="text-primary hover:text-primary/80 font-medium text-sm transition-colors flex items-center gap-1 cursor-pointer">
+                        Chi tiết
+                        <span className="material-symbols-outlined text-sm">arrow_forward</span>
                       </div>
-                      <a
-                        href="tel:0382890990"
-                        onClick={(e) => e.stopPropagation()}
-                        className="flex-1 py-2 bg-[#c41e1e] text-white font-medium text-sm rounded-xl hover:bg-[#a01818] transition-all flex items-center justify-center"
-                      >
-                        Đặt Hàng
-                      </a>
                     </div>
                   </div>
                 </Link>
