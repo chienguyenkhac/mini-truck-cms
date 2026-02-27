@@ -178,8 +178,25 @@ app.get('/api/images', async (req, res) => {
 app.delete('/api/images/:id', async (req, res) => {
     try {
         const { id } = req.params;
+        
+        // Get the image url first
+        const { rows } = await pool.query('SELECT url FROM images WHERE id = $1', [id]);
+        if (rows.length === 0) return res.status(404).json({ error: 'Image not found' });
+        
+        const imageUrl = rows[0].url;
+        
         const { rowCount } = await pool.query('DELETE FROM images WHERE id = $1', [id]);
         if (rowCount === 0) return res.status(404).json({ error: 'Image not found' });
+        
+        // Delete physical file if it exists and is local
+        if (imageUrl && typeof imageUrl === 'string' && imageUrl.startsWith('/uploads/')) {
+            const fileName = path.basename(imageUrl);
+            const physicalPath = path.join(__dirname, './uploads/original', fileName);
+            if (fs.existsSync(physicalPath)) {
+                fs.unlinkSync(physicalPath);
+            }
+        }
+        
         res.json({ success: true, message: 'Image deleted' });
     } catch (error) {
         console.error('Error deleting image:', error);
@@ -661,11 +678,54 @@ app.put('/api/products/:id', async (req, res) => {
 app.delete('/api/products/:id', async (req, res) => {
     try {
         const { id } = req.params;
+        
+        // Find all images associated with this product
+        const { rows: imageRows } = await pool.query(`
+            SELECT i.id, i.url FROM images i
+            JOIN product_images pi ON i.id = pi.image_id
+            WHERE pi.product_id = $1
+        `, [id]);
+        
+        // Also get product image/thumbnail if they exist directly
+        const { rows: prodRows } = await pool.query('SELECT image, thumbnail FROM products WHERE id = $1', [id]);
+        
+        // Delete the product
         const { rowCount } = await pool.query('DELETE FROM products WHERE id = $1', [id]);
 
         if (rowCount === 0) {
             return res.status(404).json({ error: 'Product not found' });
         }
+        
+        // Delete physical files and records from images table
+        const urlsToDelete = new Set();
+        const imageIdsToDelete = [];
+        
+        for (const row of imageRows) {
+            if (row.url) urlsToDelete.add(row.url);
+            imageIdsToDelete.push(row.id);
+        }
+        
+        if (prodRows.length > 0) {
+            if (prodRows[0].image) urlsToDelete.add(prodRows[0].image);
+            if (prodRows[0].thumbnail) urlsToDelete.add(prodRows[0].thumbnail);
+        }
+        
+        // Delete from images table
+        if (imageIdsToDelete.length > 0) {
+            await pool.query('DELETE FROM images WHERE id = ANY($1)', [imageIdsToDelete]);
+        }
+        
+        // Delete physical files
+        urlsToDelete.forEach(url => {
+            if (url && typeof url === 'string' && url.startsWith('/uploads/')) {
+                const fileName = path.basename(url);
+                const physicalPath = path.join(__dirname, './uploads/original', fileName);
+                if (fs.existsSync(physicalPath)) {
+                    fs.unlinkSync(physicalPath);
+                }
+            }
+        });
+
         res.json({ success: true, message: 'Product deleted' });
     } catch (error) {
         console.error('Error deleting product:', error);
@@ -742,16 +802,59 @@ app.post('/api/categories', async (req, res) => {
 app.put('/api/categories/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, code, thumbnail, is_visible, is_vehicle_name, brand } = req.body;
+        const body = req.body;
+        
+        // 1. Get old category to check thumbnail
+        const { rows: oldCategoryRows } = await pool.query('SELECT thumbnail FROM categories WHERE id = $1', [id]);
+        if (oldCategoryRows.length === 0) return res.status(404).json({ error: 'Category not found' });
+        
+        const oldCategory = oldCategoryRows[0];
+        
+        // 2. Prepare new values
+        const newName = body.name !== undefined ? body.name : undefined;
+        const newCode = body.code !== undefined ? body.code : undefined;
+        const newIsVisible = body.is_visible !== undefined ? body.is_visible : undefined;
+        const newIsVehicleName = body.is_vehicle_name !== undefined ? body.is_vehicle_name : undefined;
+        const newBrand = body.brand !== undefined ? body.brand : undefined;
+        
+        // Handle thumbnail: if not provided in body, keep old; if provided as null/empty, clear it
+        let newThumbnail = undefined;
+        if (body.hasOwnProperty('thumbnail')) {
+            newThumbnail = body.thumbnail || null;
+        }
+
         const { rows } = await pool.query(
-            `UPDATE categories SET name = COALESCE($1, name), code = COALESCE($2, code), 
-             thumbnail = COALESCE($3, thumbnail), is_visible = COALESCE($4, is_visible),
-             is_vehicle_name = COALESCE($5, is_vehicle_name), brand = COALESCE($6, brand), updated_at = NOW()
-             WHERE id = $7 RETURNING *`,
-            [name, code, thumbnail, is_visible, is_vehicle_name, brand, id]
+            `UPDATE categories SET 
+             name = COALESCE($1, name), 
+             code = COALESCE($2, code), 
+             thumbnail = CASE WHEN $3::boolean THEN $4 ELSE thumbnail END, 
+             is_visible = COALESCE($5, is_visible),
+             is_vehicle_name = COALESCE($6, is_vehicle_name), 
+             brand = COALESCE($7, brand), 
+             updated_at = NOW()
+             WHERE id = $8 RETURNING *`,
+            [newName, newCode, body.hasOwnProperty('thumbnail'), newThumbnail, newIsVisible, newIsVehicleName, newBrand, id]
         );
-        if (rows.length === 0) return res.status(404).json({ error: 'Category not found' });
-        res.json(rows[0]);
+        
+        const newCategory = rows[0];
+        
+        // 3. Delete old physical file if it changed
+        if (oldCategory.thumbnail && oldCategory.thumbnail !== newCategory.thumbnail) {
+            const url = oldCategory.thumbnail;
+            if (typeof url === 'string' && url.startsWith('/uploads/')) {
+                const fileName = path.basename(url);
+                const physicalPath = path.join(__dirname, './uploads/original', fileName);
+                if (fs.existsSync(physicalPath)) {
+                    try {
+                        fs.unlinkSync(physicalPath);
+                    } catch(err) {
+                        console.error('Lỗi khi xoá file ảnh cũ của danh mục:', err);
+                    }
+                }
+            }
+        }
+        
+        res.json(newCategory);
     } catch (error) {
         console.error('Error updating category:', error);
         res.status(500).json({ error: 'Failed to update category' });
@@ -762,6 +865,9 @@ app.put('/api/categories/:id', async (req, res) => {
 app.delete('/api/categories/:id', async (req, res) => {
     try {
         const { id } = req.params;
+        
+        // Lấy thông tin thumbnail của danh mục sắp bị xoá
+        const { rows: categoryRows } = await pool.query('SELECT thumbnail FROM categories WHERE id = $1', [id]);
         
         // First, check how many products belong to this category
         const { rows: productCheck } = await pool.query(
@@ -782,10 +888,26 @@ app.delete('/api/categories/:id', async (req, res) => {
         const { rowCount } = await pool.query('DELETE FROM categories WHERE id = $1', [id]);
         if (rowCount === 0) return res.status(404).json({ error: 'Category not found' });
         
+        // Thực hiện xoá file vật lý nếu có
+        if (categoryRows.length > 0 && categoryRows[0].thumbnail) {
+            const url = categoryRows[0].thumbnail;
+            if (typeof url === 'string' && url.startsWith('/uploads/')) {
+                const fileName = path.basename(url);
+                const physicalPath = path.join(__dirname, './uploads/original', fileName);
+                if (fs.existsSync(physicalPath)) {
+                    try {
+                        fs.unlinkSync(physicalPath);
+                    } catch(err) {
+                        console.error('Lỗi khi xoá file ảnh danh mục:', err);
+                    }
+                }
+            }
+        }
+        
         res.json({ 
             success: true, 
             message: 'Category deleted',
-            productsAffected: productCount 
+            productsAffected: productCount
         });
     } catch (error) {
         console.error('Error deleting category:', error);
@@ -808,6 +930,29 @@ app.get('/api/site-settings', async (req, res) => {
 app.put('/api/site-settings', async (req, res) => {
     try {
         const updates = req.body;
+        
+        // Handle site_logo physical file deletion if logo is being updated
+        if (updates.hasOwnProperty('site_logo') || updates.hasOwnProperty('company_logo')) {
+            const logoKey = updates.hasOwnProperty('site_logo') ? 'site_logo' : 'company_logo';
+            const newLogoUrl = updates[logoKey];
+            
+            const { rows } = await pool.query('SELECT value FROM site_settings WHERE key = $1', [logoKey]);
+            if (rows.length > 0 && rows[0].value && rows[0].value !== newLogoUrl) {
+                const oldLogoUrl = rows[0].value;
+                if (typeof oldLogoUrl === 'string' && oldLogoUrl.startsWith('/uploads/')) {
+                    const fileName = path.basename(oldLogoUrl);
+                    const physicalPath = path.join(__dirname, './uploads/original', fileName);
+                    if (fs.existsSync(physicalPath)) {
+                        try {
+                            fs.unlinkSync(physicalPath);
+                        } catch(err) {
+                            console.error('Lỗi khi xoá file logo cũ:', err);
+                        }
+                    }
+                }
+            }
+        }
+
         for (const [key, value] of Object.entries(updates)) {
             await pool.query(
                 `INSERT INTO site_settings (key, value, updated_at) VALUES ($1, $2, NOW())
@@ -927,16 +1072,77 @@ app.post('/api/catalog-articles', async (req, res) => {
 app.put('/api/catalog-articles/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, slug, content, thumbnail, is_published } = req.body;
+        const body = req.body;
+        
+        // 1. Get old article to compare images and handle partial updates
+        const { rows: oldArticleRows } = await pool.query('SELECT * FROM catalog_articles WHERE id = $1', [id]);
+        if (oldArticleRows.length === 0) return res.status(404).json({ error: 'Article not found' });
+        
+        const oldArticle = oldArticleRows[0];
+        
+        // 2. Determine new values (handle partial updates)
+        const newTitle = body.title !== undefined ? body.title : oldArticle.title;
+        const newSlug = body.slug !== undefined ? body.slug : oldArticle.slug;
+        const newContent = body.content !== undefined ? body.content : oldArticle.content;
+        // If frontend passes null or empty string, it means delete thumbnail
+        const newThumbnail = body.hasOwnProperty('thumbnail') ? (body.thumbnail || null) : oldArticle.thumbnail;
+        const newIsPublished = body.is_published !== undefined ? body.is_published : oldArticle.is_published;
+        
+        // 3. Perform update
         const { rows } = await pool.query(
-            `UPDATE catalog_articles SET title = COALESCE($1, title), slug = COALESCE($2, slug),
-             content = COALESCE($3, content), thumbnail = COALESCE($4, thumbnail),
-             is_published = COALESCE($5, is_published), updated_at = NOW()
+            `UPDATE catalog_articles SET 
+             title = $1, 
+             slug = $2,
+             content = $3, 
+             thumbnail = $4,
+             is_published = $5, 
+             updated_at = NOW()
              WHERE id = $6 RETURNING *`,
-            [title, slug, content, thumbnail, is_published, id]
+            [newTitle, newSlug, newContent, newThumbnail, newIsPublished, id]
         );
-        if (rows.length === 0) return res.status(404).json({ error: 'Article not found' });
-        res.json(rows[0]);
+        
+        const newArticle = rows[0];
+        
+        // 4. Find and delete orphaned physical files
+        const oldUrls = new Set();
+        const newUrls = new Set();
+        
+        // Collect old URLs
+        if (oldArticle.thumbnail) oldUrls.add(oldArticle.thumbnail);
+        if (oldArticle.content && oldArticle.content.blocks) {
+            oldArticle.content.blocks.forEach(block => {
+                if (block.type === 'image' && block.data && block.data.file && block.data.file.url) {
+                    oldUrls.add(block.data.file.url);
+                }
+            });
+        }
+        
+        // Collect new URLs
+        if (newArticle.thumbnail) newUrls.add(newArticle.thumbnail);
+        if (newArticle.content && newArticle.content.blocks) {
+            newArticle.content.blocks.forEach(block => {
+                if (block.type === 'image' && block.data && block.data.file && block.data.file.url) {
+                    newUrls.add(block.data.file.url);
+                }
+            });
+        }
+        
+        // Delete physical files for orphaned URLs
+        oldUrls.forEach(url => {
+            if (!newUrls.has(url) && url && typeof url === 'string' && url.startsWith('/uploads/')) {
+                const fileName = path.basename(url);
+                const physicalPath = path.join(__dirname, './uploads/original', fileName);
+                if (fs.existsSync(physicalPath)) {
+                    try {
+                        fs.unlinkSync(physicalPath);
+                    } catch(err) {
+                        console.error('Lỗi khi xoá file ảnh cũ của bài viết:', err);
+                    }
+                }
+            }
+        });
+        
+        res.json(newArticle);
     } catch (error) {
         console.error('Error updating article:', error);
         res.status(500).json({ error: 'Failed to update article' });
@@ -947,8 +1153,46 @@ app.put('/api/catalog-articles/:id', async (req, res) => {
 app.delete('/api/catalog-articles/:id', async (req, res) => {
     try {
         const { id } = req.params;
+        
+        // Lấy thông tin bài viết để trích xuất ảnh
+        const { rows: articleRows } = await pool.query('SELECT thumbnail, content FROM catalog_articles WHERE id = $1', [id]);
+        
         const { rowCount } = await pool.query('DELETE FROM catalog_articles WHERE id = $1', [id]);
         if (rowCount === 0) return res.status(404).json({ error: 'Article not found' });
+        
+        // Tìm và xoá các file vật lý
+        if (articleRows.length > 0) {
+            const article = articleRows[0];
+            const urlsToDelete = new Set();
+            
+            // Thumbnail
+            if (article.thumbnail) urlsToDelete.add(article.thumbnail);
+            
+            // Xoá ảnh bên trong EditorJS content blocks
+            if (article.content && article.content.blocks) {
+                article.content.blocks.forEach(block => {
+                    if (block.type === 'image' && block.data && block.data.file && block.data.file.url) {
+                        urlsToDelete.add(block.data.file.url);
+                    }
+                });
+            }
+            
+            // Thực hiện xoá vật lý
+            urlsToDelete.forEach(url => {
+                if (url && typeof url === 'string' && url.startsWith('/uploads/')) {
+                    const fileName = path.basename(url);
+                    const physicalPath = path.join(__dirname, './uploads/original', fileName);
+                    if (fs.existsSync(physicalPath)) {
+                        try {
+                            fs.unlinkSync(physicalPath);
+                        } catch(err) {
+                            console.error('Lỗi khi xoá file ảnh bài viết:', err);
+                        }
+                    }
+                }
+            });
+        }
+        
         res.json({ success: true, message: 'Article deleted' });
     } catch (error) {
         console.error('Error deleting article:', error);
@@ -1001,8 +1245,25 @@ app.post('/api/gallery-images', async (req, res) => {
 app.delete('/api/gallery-images/:id', async (req, res) => {
     try {
         const { id } = req.params;
+        
+        // Get the image path first
+        const { rows } = await pool.query('SELECT image_path FROM gallery_images WHERE id = $1', [id]);
+        if (rows.length === 0) return res.status(404).json({ error: 'Image not found' });
+        
+        const imagePath = rows[0].image_path;
+        
         const { rowCount } = await pool.query('DELETE FROM gallery_images WHERE id = $1', [id]);
         if (rowCount === 0) return res.status(404).json({ error: 'Image not found' });
+        
+        // Delete physical file if it exists and is local
+        if (imagePath && typeof imagePath === 'string' && imagePath.startsWith('/uploads/')) {
+            const fileName = path.basename(imagePath);
+            const physicalPath = path.join(__dirname, './uploads/original', fileName);
+            if (fs.existsSync(physicalPath)) {
+                fs.unlinkSync(physicalPath);
+            }
+        }
+        
         res.json({ success: true, message: 'Image deleted' });
     } catch (error) {
         console.error('Error deleting gallery image:', error);
@@ -1049,8 +1310,32 @@ app.post('/api/product-images', async (req, res) => {
 app.delete('/api/product-images/:id', async (req, res) => {
     try {
         const { id } = req.params;
+        
+        // Find the image_id before deleting
+        const { rows: linkRows } = await pool.query('SELECT image_id FROM product_images WHERE id = $1', [id]);
+        
         const { rowCount } = await pool.query('DELETE FROM product_images WHERE id = $1', [id]);
         if (rowCount === 0) return res.status(404).json({ error: 'Link not found' });
+        
+        // Delete from images and physical file
+        if (linkRows.length > 0) {
+            const imageId = linkRows[0].image_id;
+            const { rows: imageRows } = await pool.query('SELECT url FROM images WHERE id = $1', [imageId]);
+            
+            if (imageRows.length > 0) {
+                const imageUrl = imageRows[0].url;
+                await pool.query('DELETE FROM images WHERE id = $1', [imageId]);
+                
+                if (imageUrl && typeof imageUrl === 'string' && imageUrl.startsWith('/uploads/')) {
+                    const fileName = path.basename(imageUrl);
+                    const physicalPath = path.join(__dirname, './uploads/original', fileName);
+                    if (fs.existsSync(physicalPath)) {
+                        fs.unlinkSync(physicalPath);
+                    }
+                }
+            }
+        }
+        
         res.json({ success: true, message: 'Image unlinked from product' });
     } catch (error) {
         console.error('Error unlinking image:', error);
@@ -1062,11 +1347,29 @@ app.delete('/api/product-images/:id', async (req, res) => {
 app.delete('/api/product-images/:productId/:imageId', async (req, res) => {
     try {
         const { productId, imageId } = req.params;
+        
+        // Get the image URL first
+        const { rows: imageRows } = await pool.query('SELECT url FROM images WHERE id = $1', [imageId]);
+        const imageUrl = imageRows.length > 0 ? imageRows[0].url : null;
+        
         const { rowCount } = await pool.query(
             'DELETE FROM product_images WHERE product_id = $1 AND image_id = $2',
             [productId, imageId]
         );
         if (rowCount === 0) return res.status(404).json({ error: 'Link not found' });
+        
+        // Delete from images table
+        await pool.query('DELETE FROM images WHERE id = $1', [imageId]);
+        
+        // Delete physical file
+        if (imageUrl && typeof imageUrl === 'string' && imageUrl.startsWith('/uploads/')) {
+            const fileName = path.basename(imageUrl);
+            const physicalPath = path.join(__dirname, './uploads/original', fileName);
+            if (fs.existsSync(physicalPath)) {
+                fs.unlinkSync(physicalPath);
+            }
+        }
+        
         res.json({ success: true, message: 'Image unlinked from product' });
     } catch (error) {
         console.error('Error unlinking image:', error);
@@ -1187,6 +1490,29 @@ app.put('/api/admin/profile/:userId', async (req, res) => {
         const updates = [];
         const params = [];
         let paramIndex = 1;
+        
+        // Handle avatar physical file deletion if avatar is being changed
+        if (avatar !== undefined) {
+            const { rows: userRows } = await pool.query('SELECT avatar FROM admin_users WHERE id = $1', [userId]);
+            if (userRows.length > 0 && userRows[0].avatar && userRows[0].avatar !== avatar) {
+                const oldAvatarUrl = userRows[0].avatar;
+                if (typeof oldAvatarUrl === 'string' && oldAvatarUrl.startsWith('/uploads/')) {
+                    // Extract just the filename, whether it's from /uploads/avatars or /uploads/original
+                    const urlParts = oldAvatarUrl.split('/');
+                    const fileName = urlParts[urlParts.length - 1];
+                    const dirName = urlParts[urlParts.length - 2]; // either 'avatars' or 'original'
+                    
+                    const physicalPath = path.join(__dirname, `./uploads/${dirName}`, fileName);
+                    if (fs.existsSync(physicalPath)) {
+                        try {
+                            fs.unlinkSync(physicalPath);
+                        } catch(err) {
+                            console.error('Lỗi khi xoá file ảnh đại diện cũ:', err);
+                        }
+                    }
+                }
+            }
+        }
 
         if (full_name) {
             updates.push(`full_name = $${paramIndex++}`);

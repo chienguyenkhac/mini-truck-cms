@@ -110,20 +110,22 @@ const ImageLibrary: React.FC = () => {
         if (!deleteImage) return;
 
         try {
-            await supabase
-                .from('gallery_images')
-                .delete()
-                .eq('id', deleteImage.id)
-                .then((res: any) => {
-                    if (res.error) throw res.error;
-                });
+            const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
+            const response = await fetch(`${API_BASE}/gallery-images/${deleteImage.id}`, {
+                method: 'DELETE',
+            });
+            
+            const result = await response.json();
+            if (!response.ok || !result.success) {
+                throw new Error(result.error || 'Không thể xóa ảnh');
+            }
             
             notification.success('Đã xóa ảnh');
             setDeleteImage(null);
             loadImages();
-        } catch (err) {
+        } catch (err: any) {
             console.error('Delete error:', err);
-            notification.error('Không thể xóa ảnh');
+            notification.error(err.message || 'Không thể xóa ảnh');
         }
     };
 
