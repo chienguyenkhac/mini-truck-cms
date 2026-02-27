@@ -109,13 +109,15 @@ export interface ProductImage {
 
 // Product Service
 export const productService = {
-    getAll: async (params?: { cursor?: number; limit?: number; category?: string; search?: string }) => {
+    getAll: async (params?: { cursor?: number; offset?: number; limit?: number; category?: string; search?: string; paginated?: boolean }) => {
         const query = new URLSearchParams();
         if (params?.limit) query.append('limit', String(params.limit));
-        if (params?.cursor) query.append('cursor', String(params.cursor));
+        if (params?.cursor !== undefined && params?.offset === undefined) query.append('offset', String(params.cursor));
+        if (params?.offset !== undefined) query.append('offset', String(params.offset));
         if (params?.category && params.category !== 'ALL') query.append('category_id', params.category);
         if (params?.search) query.append('search', params.search);
-        return fetchAPI<Product[]>(`/products?${query}`);
+        if (params?.paginated) query.append('paginated', 'true');
+        return fetchAPI<Product[] | PaginatedResponse<Product>>(`/products?${query}`);
     },
 
     getById: async (id: number) => fetchAPI<Product>(`/products/${id}`),

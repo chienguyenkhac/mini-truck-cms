@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { useNotification } from './shared/Notification';
-import { productService, categoryService, Category } from '../services/supabase';
+import { productService, categoryService, imageService, productImageService, Category } from '../services/supabase';
 import ExcelJS from 'exceljs';
 
 interface ImportExcelModalProps {
@@ -46,22 +46,22 @@ const ImportExcelModal: React.FC<ImportExcelModalProps> = ({ onClose, onImportCo
 
         // Define columns
         sheet.columns = [
-            { header: 'Mã sản phẩm (*)', key: 'code', width: 20 },
-            { header: 'Tên sản phẩm (*)', key: 'name', width: 35 },
-            { header: 'Mã nhà sản xuất', key: 'manufacturer_code', width: 25 },
-            { header: 'Danh mục (*)', key: 'category', width: 25 },
-            { header: 'Ảnh', key: 'image', width: 20 },
-            { header: 'Mô tả', key: 'description', width: 40 },
-            { header: 'Hiện trang chủ (1/0)', key: 'show_on_homepage', width: 20 }
+            { header: 'MÃ SẢN PHẨM (*)', key: 'code', width: 20 },
+            { header: 'TÊN SẢN PHẨM (*)', key: 'name', width: 35 },
+            { header: 'MÃ NHÀ SẢN XUẤT', key: 'manufacturer_code', width: 25 },
+            { header: 'DANH MỤC (*)', key: 'category', width: 25 },
+            { header: 'TÊN FILE ẢNH', key: 'images', width: 35 },
+            { header: 'MÔ TẢ', key: 'description', width: 40 },
+            { header: 'HIỆN TRANG CHỦ (1/0)', key: 'show_on_homepage', width: 20 }
         ];
 
         // Add example row
         sheet.addRow({
-            code: 'XLKVX123',
-            name: 'Xilanh kích cabin VX350',
-            manufacturer_code: 'WEICHAI-612600130777',
+            code: 'BCBL',
+            name: 'Bạc côn Ba Lăng Xê',
+            manufacturer_code: 'WG9901938801',
             category: 'Nhập Tên hoặc ID (Sheet 2)',
-            image: '(Dán ảnh vào đây)',
+            images: 'anh1.jpg, anh2.png, anh3.webp',
             description: 'Phụ tùng chính hãng Sinotruk',
             show_on_homepage: '1'
         });
@@ -115,33 +115,13 @@ const ImportExcelModal: React.FC<ImportExcelModalProps> = ({ onClose, onImportCo
                 return;
             }
 
-            // Extract images and group them by row/column
-            const imagesMap = new Map<string, ExcelJS.Image>();
-            const media = (workbook as any).model.media || [];
-
-            const wsImages = worksheet.getImages();
-            wsImages.forEach(img => {
-                const image = media[img.imageId];
-                if (image) {
-                    // range.tl refers to top-left cell: 0-indexed row and col
-                    const row = Math.floor(img.range.tl.nativeRow) + 1; // Convert to 1-indexed to match data rows
-                    const col = Math.floor(img.range.tl.nativeCol) + 1;
-                    imagesMap.set(`${row}-${col}`, image);
-                }
-            });
-
             const rows: any[] = [];
             worksheet.eachRow((row, rowNumber) => {
                 if (rowNumber === 1) return; // Skip header
 
-                // Find "Ảnh" column index (it's the 5th column typically)
-                const imageColIndex = 5;
-                const imageData = imagesMap.get(`${rowNumber}-${imageColIndex}`);
-
                 rows.push({
                     rowNumber,
-                    data: row.values,
-                    image: imageData
+                    data: row.values
                 });
             });
 
@@ -157,11 +137,11 @@ const ImportExcelModal: React.FC<ImportExcelModalProps> = ({ onClose, onImportCo
             let failed = 0;
 
             for (let i = 0; i < rows.length; i++) {
-                const { data, image } = rows[i];
+                const { data } = rows[i];
                 setImportProgress({ current: i + 1, total: rows.length });
 
                 // ExcelJS row.values is 1-indexed, so:
-                // [empty, code, name, manufacturer_code, category, image_text, description, show_on_homepage]
+                // [empty, code, name, manufacturer_code, category, images_text, description, show_on_homepage]
                 const code = String(data[1] || '').trim();
                 const name = String(data[2] || '').trim();
 
@@ -186,32 +166,11 @@ const ImportExcelModal: React.FC<ImportExcelModalProps> = ({ onClose, onImportCo
                     }
                 }
 
-                // Handle Image Upload if image exists in Excel
-                let imageUrl = null;
-                if (image && image.buffer) {
-                    try {
-                        const uint8Array = new Uint8Array(image.buffer);
-                        let binary = '';
-                        const len = uint8Array.byteLength;
-                        for (let j = 0; j < len; j++) {
-                            binary += String.fromCharCode(uint8Array[j]);
-                        }
-                        const base64 = `data:image/${image.extension};base64,${btoa(binary)}`;
-
-                        const response = await fetch('/api/upload', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ image: base64 }),
-                        });
-
-                        if (response.ok) {
-                            const result = await response.json();
-                            imageUrl = result.url;
-                        }
-                    } catch (err) {
-                        console.error('Error uploading embedded image:', err);
-                    }
-                }
+                // Xử lý danh sách tên file ảnh
+                const imagesText = String(data[5] || '').trim();
+                const imageNames = imagesText ? imagesText.split(',').map(img => img.trim()).filter(Boolean) : [];
+                
+                const primaryImage = imageNames.length > 0 ? imageNames[0] : null;
 
                 const product = {
                     code: code.toUpperCase(),
@@ -219,13 +178,37 @@ const ImportExcelModal: React.FC<ImportExcelModalProps> = ({ onClose, onImportCo
                     manufacturer_code: data[3] || null,
                     category_id: categoryId,
                     description: data[6] || 'Phụ tùng chính hãng Sinotruk, nhập khẩu trực tiếp từ nhà máy.',
-                    image: imageUrl,
-                    thumbnail: imageUrl,
+                    image: primaryImage,
+                    thumbnail: primaryImage,
                     show_on_homepage: data[7] !== '0' && data[7] !== 0,
                 };
 
                 try {
-                    await productService.create(product);
+                    const newProduct = await productService.create(product);
+                    
+                    // Nếu có nhiều ảnh, thêm vào album (product_images)
+                    if (newProduct && newProduct.id && imageNames.length > 0) {
+                        // Import productImageService and imageService at the top or use them if already imported
+                        // Wait, we need to import them! I will add imports later.
+                        
+                        for (let j = 0; j < imageNames.length; j++) {
+                            const imgName = imageNames[j];
+                            try {
+                                // 1. Tạo image record
+                                const newImage = await imageService.create(imgName);
+                                // 2. Link với product
+                                await productImageService.addToProduct(
+                                    newProduct.id, 
+                                    newImage.id, 
+                                    j === 0, // isPrimary = true cho ảnh đầu tiên
+                                    j // sortOrder
+                                );
+                            } catch (imgErr) {
+                                console.error(`Lỗi khi thêm ảnh ${imgName} cho sản phẩm ${code}:`, imgErr);
+                            }
+                        }
+                    }
+                    
                     imported++;
                 } catch (err: any) {
                     console.error('Error importing row:', data, err);
@@ -268,7 +251,7 @@ const ImportExcelModal: React.FC<ImportExcelModalProps> = ({ onClose, onImportCo
                             <span className="material-symbols-outlined text-blue-500 mt-0.5">info</span>
                             <div className="flex-1">
                                 <p className="font-medium text-blue-800">Chưa có file mẫu?</p>
-                                <p className="text-sm text-blue-600 mt-1">Tải file mẫu để biết định dạng chuẩn cho việc nhập sản phẩm. Bạn có thể dán trực tiếp ảnh vào cột "Ảnh".</p>
+                                <p className="text-sm text-blue-600 mt-1">Tải file mẫu để biết định dạng chuẩn. Cột "Tên file ảnh" nhập tên các file cách nhau bằng dấu phẩy (VD: hinh1.jpg, hinh2.png).</p>
                                 <button
                                     onClick={handleDownloadTemplate}
                                     className="mt-3 flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors"

@@ -97,6 +97,45 @@ async function getSiteSettings() {
     }
 }
 
+// Helper function to delete physical file
+function deletePhysicalFile(url) {
+    if (!url || typeof url !== 'string') return;
+    
+    // Ignore external URLs
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+        return;
+    }
+
+    let fileName = null;
+    let dirName = 'original';
+
+    if (url.startsWith('/uploads/')) {
+        fileName = path.basename(url);
+        if (url.includes('/uploads/avatars/')) {
+            dirName = 'avatars';
+        } else if (url.includes('/uploads/watermarked/')) {
+            dirName = 'watermarked';
+        }
+    } else if (!url.includes('/')) {
+        // It's just a filename like 'image.jpg' from excel import
+        fileName = url;
+    } else {
+        // Fallback for other local paths
+        fileName = path.basename(url);
+    }
+
+    if (fileName) {
+        const physicalPath = path.join(__dirname, `./uploads/${dirName}`, fileName);
+        if (fs.existsSync(physicalPath)) {
+            try {
+                fs.unlinkSync(physicalPath);
+            } catch (err) {
+                console.error(`Lỗi khi xoá file vật lý ${physicalPath}:`, err);
+            }
+        }
+    }
+}
+
 // API: Upload image (supports both multipart/form-data and JSON base64)
 app.post('/api/upload', upload.single('image'), async (req, res) => {
     try {
@@ -189,13 +228,7 @@ app.delete('/api/images/:id', async (req, res) => {
         if (rowCount === 0) return res.status(404).json({ error: 'Image not found' });
         
         // Delete physical file if it exists and is local
-        if (imageUrl && typeof imageUrl === 'string' && imageUrl.startsWith('/uploads/')) {
-            const fileName = path.basename(imageUrl);
-            const physicalPath = path.join(__dirname, './uploads/original', fileName);
-            if (fs.existsSync(physicalPath)) {
-                fs.unlinkSync(physicalPath);
-            }
-        }
+        deletePhysicalFile(imageUrl);
         
         res.json({ success: true, message: 'Image deleted' });
     } catch (error) {
@@ -571,6 +604,55 @@ app.get('/api/products', async (req, res) => {
         params.push(parseInt(offset));
 
         const { rows } = await pool.query(query, params);
+
+        // If paginated response is requested
+        if (req.query.paginated === 'true') {
+            // Get total count
+            const countQuery = `SELECT COUNT(*) as total FROM products WHERE 1=1 ${
+                category_id ? `AND category_id = ${category_id}` : 
+                (category ? 
+                    (categoryRows && categoryRows.length > 0 ? 
+                        (categoryRows[0].is_vehicle_name ? `AND ${categoryRows[0].id} = ANY(vehicle_ids)` : `AND category_id = ${categoryRows[0].id}`)
+                    : '') 
+                : '')
+            } ${
+                show_on_homepage === 'true' ? 'AND show_on_homepage = true' : ''
+            } ${
+                search ? `AND (name ILIKE '%${search}%' OR code ILIKE '%${search}%' OR manufacturer_code ILIKE '%${search}%')` : ''
+            } ${
+                manufacturer_code ? `AND manufacturer_code ILIKE '%${manufacturer_code}%'` : ''
+            } ${
+                slug ? `AND slug = '${slug}'` : ''
+            }`;
+            
+            // Re-evaluating count more safely
+            let countWhere = '1=1';
+            if (category_id) countWhere += ` AND category_id = $1`;
+            // Actually it's easier to just strip the ORDER BY and LIMIT from the original query
+            // and replace SELECT * with SELECT COUNT(*)
+            const countQuerySafe = query.replace('SELECT *', 'SELECT COUNT(*) as total').split(' ORDER BY ')[0];
+            // The params for countQuery are the same except for the last two (limit, offset)
+            const countParams = params.slice(0, -2);
+            
+            const { rows: countRowsRes } = await pool.query(countQuerySafe, countParams);
+            const total = parseInt(countRowsRes[0].total);
+            const currentOffset = parseInt(offset);
+            const currentLimit = parseInt(limit);
+            
+            return res.json({
+                data: rows,
+                pagination: {
+                    total,
+                    limit: currentLimit,
+                    offset: currentOffset,
+                    page: Math.floor(currentOffset / currentLimit) + 1,
+                    totalPages: Math.ceil(total / currentLimit),
+                    hasNext: currentOffset + currentLimit < total,
+                    hasPrev: currentOffset > 0
+                }
+            });
+        }
+
         res.json(rows);
     } catch (error) {
         console.error('Error fetching products:', error);
@@ -717,13 +799,7 @@ app.delete('/api/products/:id', async (req, res) => {
         
         // Delete physical files
         urlsToDelete.forEach(url => {
-            if (url && typeof url === 'string' && url.startsWith('/uploads/')) {
-                const fileName = path.basename(url);
-                const physicalPath = path.join(__dirname, './uploads/original', fileName);
-                if (fs.existsSync(physicalPath)) {
-                    fs.unlinkSync(physicalPath);
-                }
-            }
+            deletePhysicalFile(url);
         });
 
         res.json({ success: true, message: 'Product deleted' });
@@ -840,18 +916,7 @@ app.put('/api/categories/:id', async (req, res) => {
         
         // 3. Delete old physical file if it changed
         if (oldCategory.thumbnail && oldCategory.thumbnail !== newCategory.thumbnail) {
-            const url = oldCategory.thumbnail;
-            if (typeof url === 'string' && url.startsWith('/uploads/')) {
-                const fileName = path.basename(url);
-                const physicalPath = path.join(__dirname, './uploads/original', fileName);
-                if (fs.existsSync(physicalPath)) {
-                    try {
-                        fs.unlinkSync(physicalPath);
-                    } catch(err) {
-                        console.error('Lỗi khi xoá file ảnh cũ của danh mục:', err);
-                    }
-                }
-            }
+            deletePhysicalFile(oldCategory.thumbnail);
         }
         
         res.json(newCategory);
@@ -890,18 +955,7 @@ app.delete('/api/categories/:id', async (req, res) => {
         
         // Thực hiện xoá file vật lý nếu có
         if (categoryRows.length > 0 && categoryRows[0].thumbnail) {
-            const url = categoryRows[0].thumbnail;
-            if (typeof url === 'string' && url.startsWith('/uploads/')) {
-                const fileName = path.basename(url);
-                const physicalPath = path.join(__dirname, './uploads/original', fileName);
-                if (fs.existsSync(physicalPath)) {
-                    try {
-                        fs.unlinkSync(physicalPath);
-                    } catch(err) {
-                        console.error('Lỗi khi xoá file ảnh danh mục:', err);
-                    }
-                }
-            }
+            deletePhysicalFile(categoryRows[0].thumbnail);
         }
         
         res.json({ 
@@ -938,18 +992,7 @@ app.put('/api/site-settings', async (req, res) => {
             
             const { rows } = await pool.query('SELECT value FROM site_settings WHERE key = $1', [logoKey]);
             if (rows.length > 0 && rows[0].value && rows[0].value !== newLogoUrl) {
-                const oldLogoUrl = rows[0].value;
-                if (typeof oldLogoUrl === 'string' && oldLogoUrl.startsWith('/uploads/')) {
-                    const fileName = path.basename(oldLogoUrl);
-                    const physicalPath = path.join(__dirname, './uploads/original', fileName);
-                    if (fs.existsSync(physicalPath)) {
-                        try {
-                            fs.unlinkSync(physicalPath);
-                        } catch(err) {
-                            console.error('Lỗi khi xoá file logo cũ:', err);
-                        }
-                    }
-                }
+                deletePhysicalFile(rows[0].value);
             }
         }
 
@@ -1153,16 +1196,8 @@ app.put('/api/catalog-articles/:id', async (req, res) => {
         
         // Delete physical files for orphaned URLs
         oldUrls.forEach(url => {
-            if (!newUrls.has(url) && url && typeof url === 'string' && url.startsWith('/uploads/')) {
-                const fileName = path.basename(url);
-                const physicalPath = path.join(__dirname, './uploads/original', fileName);
-                if (fs.existsSync(physicalPath)) {
-                    try {
-                        fs.unlinkSync(physicalPath);
-                    } catch(err) {
-                        console.error('Lỗi khi xoá file ảnh cũ của bài viết:', err);
-                    }
-                }
+            if (!newUrls.has(url)) {
+                deletePhysicalFile(url);
             }
         });
         
@@ -1203,17 +1238,7 @@ app.delete('/api/catalog-articles/:id', async (req, res) => {
             
             // Thực hiện xoá vật lý
             urlsToDelete.forEach(url => {
-                if (url && typeof url === 'string' && url.startsWith('/uploads/')) {
-                    const fileName = path.basename(url);
-                    const physicalPath = path.join(__dirname, './uploads/original', fileName);
-                    if (fs.existsSync(physicalPath)) {
-                        try {
-                            fs.unlinkSync(physicalPath);
-                        } catch(err) {
-                            console.error('Lỗi khi xoá file ảnh bài viết:', err);
-                        }
-                    }
-                }
+                deletePhysicalFile(url);
             });
         }
         
@@ -1280,13 +1305,7 @@ app.delete('/api/gallery-images/:id', async (req, res) => {
         if (rowCount === 0) return res.status(404).json({ error: 'Image not found' });
         
         // Delete physical file if it exists and is local
-        if (imagePath && typeof imagePath === 'string' && imagePath.startsWith('/uploads/')) {
-            const fileName = path.basename(imagePath);
-            const physicalPath = path.join(__dirname, './uploads/original', fileName);
-            if (fs.existsSync(physicalPath)) {
-                fs.unlinkSync(physicalPath);
-            }
-        }
+        deletePhysicalFile(imagePath);
         
         res.json({ success: true, message: 'Image deleted' });
     } catch (error) {
@@ -1350,13 +1369,7 @@ app.delete('/api/product-images/:id', async (req, res) => {
                 const imageUrl = imageRows[0].url;
                 await pool.query('DELETE FROM images WHERE id = $1', [imageId]);
                 
-                if (imageUrl && typeof imageUrl === 'string' && imageUrl.startsWith('/uploads/')) {
-                    const fileName = path.basename(imageUrl);
-                    const physicalPath = path.join(__dirname, './uploads/original', fileName);
-                    if (fs.existsSync(physicalPath)) {
-                        fs.unlinkSync(physicalPath);
-                    }
-                }
+                deletePhysicalFile(imageUrl);
             }
         }
         
@@ -1386,13 +1399,7 @@ app.delete('/api/product-images/:productId/:imageId', async (req, res) => {
         await pool.query('DELETE FROM images WHERE id = $1', [imageId]);
         
         // Delete physical file
-        if (imageUrl && typeof imageUrl === 'string' && imageUrl.startsWith('/uploads/')) {
-            const fileName = path.basename(imageUrl);
-            const physicalPath = path.join(__dirname, './uploads/original', fileName);
-            if (fs.existsSync(physicalPath)) {
-                fs.unlinkSync(physicalPath);
-            }
-        }
+        deletePhysicalFile(imageUrl);
         
         res.json({ success: true, message: 'Image unlinked from product' });
     } catch (error) {
@@ -1519,22 +1526,7 @@ app.put('/api/admin/profile/:userId', async (req, res) => {
         if (avatar !== undefined) {
             const { rows: userRows } = await pool.query('SELECT avatar FROM admin_users WHERE id = $1', [userId]);
             if (userRows.length > 0 && userRows[0].avatar && userRows[0].avatar !== avatar) {
-                const oldAvatarUrl = userRows[0].avatar;
-                if (typeof oldAvatarUrl === 'string' && oldAvatarUrl.startsWith('/uploads/')) {
-                    // Extract just the filename, whether it's from /uploads/avatars or /uploads/original
-                    const urlParts = oldAvatarUrl.split('/');
-                    const fileName = urlParts[urlParts.length - 1];
-                    const dirName = urlParts[urlParts.length - 2]; // either 'avatars' or 'original'
-                    
-                    const physicalPath = path.join(__dirname, `./uploads/${dirName}`, fileName);
-                    if (fs.existsSync(physicalPath)) {
-                        try {
-                            fs.unlinkSync(physicalPath);
-                        } catch(err) {
-                            console.error('Lỗi khi xoá file ảnh đại diện cũ:', err);
-                        }
-                    }
-                }
+                deletePhysicalFile(userRows[0].avatar);
             }
         }
 
