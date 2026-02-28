@@ -55,3 +55,4 @@ coverage/
 *.temp
 .temp/
 deploy/deploy.zip
+*.zip
