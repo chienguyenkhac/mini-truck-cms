@@ -686,6 +686,171 @@ app.get('/api/products/:identifier', async (req, res) => {
     }
 });
 
+// Helper function to download external image and save locally
+async function downloadAndSaveImage(url) {
+    if (!url || typeof url !== 'string' || (!url.startsWith('http://') && !url.startsWith('https://'))) {
+        return { success: true, url: url }; // Không phải link ngoài, coi như thành công và trả về nguyên bản
+    }
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            console.error(`⚠️ Failed to download image from ${url} (Status: ${response.status}).`);
+            return { success: false, error: `Failed to download image (Status: ${response.status})` }; 
+        }
+
+        const buffer = Buffer.from(await response.arrayBuffer());
+
+        // Xác định định dạng file từ headers
+        let ext = '.jpg';
+        const contentType = response.headers.get('content-type');
+        if (contentType) {
+            if (contentType.includes('png')) ext = '.png';
+            else if (contentType.includes('webp')) ext = '.webp';
+            else if (contentType.includes('gif')) ext = '.gif';
+        } else {
+            // Cố gắng lấy từ đuôi url nếu không có header
+            const match = url.match(/\.(jpg|jpeg|png|webp|gif)/i);
+            if (match) ext = `.${match[1].toLowerCase()}`;
+        }
+
+        const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${ext}`;
+        const uploadDir = path.join(__dirname, './uploads/original');
+        
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+
+        const filePath = path.join(uploadDir, uniqueName);
+        fs.writeFileSync(filePath, buffer);
+
+        return { success: true, url: `/uploads/original/${uniqueName}` };
+    } catch (error) {
+        console.error(`❌ Error downloading image ${url}:`, error.message);
+        return { success: false, error: error.message }; 
+    }
+}
+
+// POST /api/webhooks/products - Generic webhook to create a new product from external sources
+app.post('/api/webhooks/products', async (req, res) => {
+    try {
+        // Kiểm tra xem chức năng webhook có được bật trong cài đặt hệ thống không
+        const settings = await getSiteSettings();
+        if (settings.webhook_enabled !== 'true') {
+            return res.status(403).json({ error: 'Forbidden: Webhook product creation is disabled in system settings' });
+        }
+
+        // Tuỳ chọn: Kiểm tra API Key (có thể cấu hình trong file .env là WEBHOOK_API_KEY)
+        const apiKey = req.headers['x-api-key'] || req.query.api_key;
+        const expectedKey = process.env.WEBHOOK_API_KEY;
+        
+        if (expectedKey && apiKey !== expectedKey) {
+            return res.status(401).json({ error: 'Unauthorized: Invalid API Key' });
+        }
+
+        const {
+            code, name, category_id, description,
+            vehicle_ids, show_on_homepage, manufacturer_code,
+            image, thumbnail, images // Support both single image and array of images
+        } = req.body;
+
+        if (!name) {
+            return res.status(400).json({ error: 'Product name is required' });
+        }
+
+        // Xử lý danh sách ảnh
+        let imageUrlsToProcess = [];
+        if (Array.isArray(images) && images.length > 0) {
+            imageUrlsToProcess = images;
+        } else if (image) {
+            imageUrlsToProcess = [image];
+        }
+
+        const downloadedImages = [];
+        let primaryImage = null;
+        let primaryThumbnail = null;
+
+        // Tải toàn bộ ảnh về server
+        for (let i = 0; i < imageUrlsToProcess.length; i++) {
+            const url = imageUrlsToProcess[i];
+            if (url) {
+                const result = await downloadAndSaveImage(url);
+                if (result.success) {
+                    downloadedImages.push(result.url);
+                } else {
+                    console.warn(`Webhook warning: Failed to download image ${url}`);
+                }
+            }
+        }
+
+        // Xác định ảnh chính và thumbnail
+        if (downloadedImages.length > 0) {
+            primaryImage = downloadedImages[0]; // Lấy ảnh đầu tiên làm ảnh chính
+            primaryThumbnail = downloadedImages[0]; // Lấy ảnh đầu tiên làm thumbnail mặc định
+        }
+
+        // Nếu họ có gửi explicit thumbnail riêng biệt và nó khác với ảnh chính
+        if (thumbnail && thumbnail !== image && thumbnail !== (images && images[0])) {
+             const thumbResult = await downloadAndSaveImage(thumbnail);
+             if (thumbResult.success) {
+                 primaryThumbnail = thumbResult.url;
+             }
+        }
+
+        // Generate unique slug from product name
+        const baseSlug = generateSlug(name);
+        const slug = await ensureUniqueSlug(baseSlug);
+
+        // Bắt đầu transaction hoặc thực hiện tuần tự
+        const { rows } = await pool.query(
+            `INSERT INTO products (code, name, category_id, image, description, slug, vehicle_ids, show_on_homepage, thumbnail, manufacturer_code, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
+             RETURNING *`,
+            [
+                code || null, 
+                name, 
+                category_id || null, 
+                primaryImage, 
+                description || null, 
+                slug, 
+                vehicle_ids || [], 
+                show_on_homepage !== undefined ? show_on_homepage : true, 
+                primaryThumbnail, 
+                manufacturer_code || null
+            ]
+        );
+
+        const newProduct = rows[0];
+
+        // Lưu ảnh vào bảng images và product_images (để hiển thị đúng trong thư viện ảnh Admin UI)
+        for (let i = 0; i < downloadedImages.length; i++) {
+            const localUrl = downloadedImages[i];
+            
+            // 1. Thêm vào bảng images
+            const imageResult = await pool.query(
+                `INSERT INTO images (url, created_at) VALUES ($1, NOW()) RETURNING id`,
+                [localUrl]
+            );
+            
+            if (imageResult.rows.length > 0) {
+                const imageId = imageResult.rows[0].id;
+                
+                // 2. Thêm vào product_images
+                await pool.query(
+                    `INSERT INTO product_images (product_id, image_id, sort_order, is_primary, created_at)
+                     VALUES ($1, $2, $3, $4, NOW())`,
+                    [newProduct.id, imageId, i, i === 0] // Ảnh đầu tiên (i=0) là primary
+                );
+            }
+        }
+
+        res.status(201).json({ success: true, message: 'Product created successfully', data: newProduct });
+    } catch (error) {
+        console.error('Error creating product from webhook:', error);
+        res.status(500).json({ error: 'Failed to create product from webhook', details: error.message });
+    }
+});
+
 // POST /api/products - Create new product
 app.post('/api/products', async (req, res) => {
     try {

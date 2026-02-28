@@ -306,6 +306,34 @@ const Settings: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Integrations Settings */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div className="p-6 border-b border-slate-100 bg-slate-50">
+                    <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <span className="material-symbols-outlined text-primary">webhook</span>
+                        Tích hợp & Webhook
+                    </h2>
+                </div>
+                <div className="p-6 space-y-6">
+                    {/* Enable Webhook Toggle */}
+                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700">Cho phép tạo sản phẩm qua Webhook</label>
+                            <p className="text-xs text-slate-400 mt-1">Cho phép các hệ thống bên thứ ba tự động tạo sản phẩm mới thông qua API Webhook.</p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={formData.webhook_enabled === 'true'}
+                                onChange={(e) => handleChange('webhook_enabled', e.target.checked ? 'true' : 'false')}
+                                className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };

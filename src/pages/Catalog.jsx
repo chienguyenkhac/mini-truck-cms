@@ -239,7 +239,7 @@ const Catalog = () => {
           <div className="text-center py-20">
             <span className="material-symbols-outlined text-8xl text-slate-300 mb-6">article</span>
             <h2 className="text-2xl font-bold text-slate-600 mb-2">Chưa có bài viết nào</h2>
-            <p className="text-slate-400 max-w-md mx-auto">
+            <p className="text-slate-400 text-sm max-w-md mx-auto">
               Các bài viết hướng dẫn kỹ thuật và thông tin về phụ tùng xe tải sẽ được cập nhật tại đây.
             </p>
           </div>
@@ -437,15 +437,15 @@ const Catalog = () => {
         )}
 
         {/* Contact CTA */}
-        <div className="mt-6 text-center p-4 md:p-5 bg-gradient-to-r from-primary to-sky-600 rounded-2xl shadow-lg">
-          <span className="material-symbols-outlined text-4xl text-white/80 mb-2 block">support_agent</span>
+        <div className="mt-6 text-center py-2.5 px-4 md:py-3 md:px-5 bg-gradient-to-r from-primary to-sky-600 rounded-2xl shadow-lg">
+          <span className="material-symbols-outlined text-4xl text-white/80 mb-1 block">support_agent</span>
           <h3 className="text-white text-lg font-bold mb-0.5">Cần tra mã phụ tùng?</h3>
-          <p className="text-white/80 text-sm mb-3">
+          <p className="text-white/80 text-sm mb-2">
             Liên hệ hotline để được hỗ trợ tra cứu và báo giá nhanh nhất
           </p>
           <a
             href="tel:0382890990"
-            className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-white text-primary font-bold rounded-lg hover:bg-slate-100 transition-colors shadow-lg text-sm"
+            className="inline-flex items-center gap-1.5 px-5 py-2 bg-white text-primary font-bold rounded-lg hover:bg-slate-100 transition-colors shadow-lg text-sm"
           >
             <span className="material-symbols-outlined text-lg">call</span>
             0382.890.990

@@ -333,7 +333,8 @@ INSERT INTO public.site_settings (id, key, value, type, description, created_at,
 (6, 'show_homepage_products', 'true', 'boolean', 'Hiển thị sản phẩm trên trang chủ', now(), now()),
 (7, 'site_logo', '', 'text', 'Logo website', now(), now()),
 (8, 'watermark_enabled', 'false', 'boolean', 'Bật watermark', now(), now()),
-(10, 'watermark_opacity', '40', 'text', 'Độ trong suốt watermark', now(), now());
+(10, 'watermark_opacity', '40', 'text', 'Độ trong suốt watermark', now(), now()),
+(11, 'webhook_enabled', 'false', 'boolean', 'Cho phép tạo sản phẩm qua Webhook', now(), now());
 
 -- Cập nhật sequences
 SELECT setval('public.admin_users_id_seq', (SELECT MAX(id) FROM public.admin_users));
