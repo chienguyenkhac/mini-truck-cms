@@ -12,7 +12,7 @@ services:
       POSTGRES_DB: sinotruk
     volumes:
       - postgres_data_local:/var/lib/postgresql/data
-      - ./deploy/sinotruk_full_backup.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./deploy/server/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
       - "5433:5432"
     healthcheck:
