@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { supabase, getImageUrl } from '../services/supabase'
+import { supabase, getImageUrl, getProducts } from '../services/supabase'
 
 const ProductCategory = () => {
   const { category } = useParams()
@@ -95,25 +95,12 @@ const ProductCategory = () => {
         console.log('✅ Category found:', catData)
         setCategoryData(catData)
 
-        // Fetch products for this category
-        let productsQuery = supabase
-          .from('products')
-          .select('*')
-          .order('name')
-          .limit(50)
+        // Fetch products for this category using getProducts API (like ProductGrid)
+        // Use category slug or ID, and pass true for onlyHomepage to filter show_on_homepage = true
+        const categoryIdentifier = catData.slug || String(catData.id)
+        const productsData = await getProducts(50, true, { category: categoryIdentifier })
 
-        // Check if this is a vehicle category or regular category
-        if (catData.is_vehicle_name) {
-          // Filter by vehicle_ids array contains
-          productsQuery = productsQuery.contains('vehicle_ids', [catData.id])
-        } else {
-          // Filter by category_id for regular categories
-          productsQuery = productsQuery.eq('category_id', catData.id)
-        }
-
-        const { data: productsData, error: productsError } = await productsQuery
-
-        if (!productsError) {
+        if (productsData) {
           setAllProducts(productsData || [])
           setProducts(productsData || [])
         }

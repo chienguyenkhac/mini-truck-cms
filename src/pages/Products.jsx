@@ -92,10 +92,10 @@ const Products = () => {
         options.search = debouncedSearchTerm
       }
 
-
       // For pagination, we'll load more items and handle client-side
+      // Pass true as second parameter to filter show_on_homepage = true (like ProductGrid)
       const limit = reset ? ITEMS_PER_PAGE : ITEMS_PER_PAGE * 2
-      const data = await getProducts(limit, false, options)
+      const data = await getProducts(limit, true, options)
 
       if (reset) {
         setProducts(data || [])

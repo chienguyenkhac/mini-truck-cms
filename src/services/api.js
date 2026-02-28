@@ -53,6 +53,9 @@ export const getProducts = async (limit = 12, onlyHomepage = false, options = {}
     try {
         const params = new URLSearchParams({ limit });
         if (onlyHomepage) params.append('show_on_homepage', 'true');
+        if (options.show_on_homepage !== undefined) {
+            params.append('show_on_homepage', options.show_on_homepage ? 'true' : 'false');
+        }
         if (options.search) params.append('search', options.search);
         if (options.manufacturer_code) params.append('manufacturer_code', options.manufacturer_code);
         if (options.category_id) params.append('category_id', options.category_id);
