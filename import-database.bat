@@ -26,7 +26,7 @@ echo [INFO] Đang import database schema và dữ liệu...
 echo Quá trình này có thể mất 1-2 phút...
 echo.
 
-docker cp deploy\sinotruk_full_backup.sql sinotruk-db-local:/tmp/backup.sql
+docker cp deploy\server\init.sql sinotruk-db-local:/tmp/backup.sql
 docker exec sinotruk-db-local psql -U postgres -d sinotruk -f /tmp/backup.sql
 docker exec sinotruk-db-local rm /tmp/backup.sql
 
