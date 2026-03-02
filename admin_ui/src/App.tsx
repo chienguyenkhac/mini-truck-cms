@@ -15,6 +15,9 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     const checkAuth = () => {
         try {
             return localStorage.getItem('isAuthenticated') === 'true';
+            // We now rely on HttpOnly cookie for token, which can't be checked from JS.
+            // If the cookie is expired/missing, the first API call will fail with 401 
+            // and the fetchAPI wrapper will automatically log the user out and redirect.
         } catch (e) {
             return false;
         }
@@ -32,6 +35,9 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const checkAuth = () => {
         try {
             return localStorage.getItem('isAuthenticated') === 'true';
+            // We now rely on HttpOnly cookie for token, which can't be checked from JS.
+            // If the cookie is expired/missing, the first API call will fail with 401 
+            // and the fetchAPI wrapper will automatically log the user out and redirect.
         } catch (e) {
             return false;
         }
@@ -49,6 +55,9 @@ const App: React.FC = () => {
     const checkAuth = () => {
         try {
             return localStorage.getItem('isAuthenticated') === 'true';
+            // We now rely on HttpOnly cookie for token, which can't be checked from JS.
+            // If the cookie is expired/missing, the first API call will fail with 401 
+            // and the fetchAPI wrapper will automatically log the user out and redirect.
         } catch (e) {
             return false;
         }

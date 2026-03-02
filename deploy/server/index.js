@@ -6,6 +6,8 @@ const path = require('path');
 const fs = require('fs');
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 
 // Load environment variables
 require('dotenv').config();
@@ -17,6 +19,7 @@ const PORT = process.env.PORT || 3001;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads';
 const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024; // 10MB default
+const JWT_SECRET = process.env.JWT_SECRET || 'sinotruk-hanoi-super-secret-key-2024';
 
 // Database connection
 if (!process.env.DATABASE_URL) {
@@ -52,6 +55,49 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, UPLOAD_DIR)));
+app.use(cookieParser());
+
+// JWT Authentication Middleware
+const authenticateToken = (req, res, next) => {
+    // Endpoints that don't require authentication at all
+    if (req.path === '/api/admin/login' || req.path === '/api/admin/logout' || req.path === '/api/webhooks/products') {
+        return next();
+    }
+
+    const isWriteMethod = ['POST', 'PUT', 'DELETE'].includes(req.method);
+    const isAdminEndpoint = req.path.startsWith('/api/admin/');
+    const isUploadEndpoint = req.path.startsWith('/api/upload') || req.path.startsWith('/api/images');
+    
+    if (!isWriteMethod && !isAdminEndpoint && !isUploadEndpoint) {
+        // It's a GET request to a public API like /api/products, allow it
+        return next();
+    }
+
+    // Try to get token from cookie first, then fallback to Authorization header
+    let token = null;
+    if (req.cookies && req.cookies.auth_token) {
+        token = req.cookies.auth_token;
+    }
+    
+    if (!token) {
+        const authHeader = req.headers['authorization'];
+        token = authHeader && authHeader.split(' ')[1];
+    }
+
+    if (!token) {
+        return res.status(401).json({ error: 'Truy cập bị từ chối: Thiếu token xác thực' });
+    }
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) {
+            return res.status(403).json({ error: 'Truy cập bị từ chối: Token không hợp lệ hoặc đã hết hạn' });
+        }
+        req.user = user;
+        next();
+    });
+};
+
+app.use(authenticateToken);
 
 // Multer config for file uploads
 const storage = multer.diskStorage({
@@ -1647,13 +1693,38 @@ app.post('/api/admin/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
+        // Generate JWT token
+        const token = jwt.sign(
+            { id: user.id, username: user.username, is_admin: user.is_admin },
+            JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
+        // Set token in HttpOnly cookie
+        res.cookie('auth_token', token, {
+            httpOnly: true,
+            secure: NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        });
+
         // Don't send password hash to client
         const { password: _, ...userWithoutPassword } = user;
-        res.json(userWithoutPassword);
+        res.json({ ...userWithoutPassword });
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ error: 'Login failed' });
     }
+});
+
+// POST /api/admin/logout - Admin logout
+app.post('/api/admin/logout', (req, res) => {
+    res.clearCookie('auth_token', {
+        httpOnly: true,
+        secure: NODE_ENV === 'production',
+        sameSite: 'strict'
+    });
+    res.json({ success: true });
 });
 
 // GET /api/admin/profile/:userId - Get admin profile

@@ -48,6 +48,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
             // Save user info to localStorage
             localStorage.setItem('isAuthenticated', 'true');
+            // We no longer store token in localStorage, relying completely on HttpOnly cookie
             localStorage.setItem('userId', String(user.id));
             localStorage.setItem('username', user.username);
             localStorage.setItem('sinotruk_admin_name', user.full_name);

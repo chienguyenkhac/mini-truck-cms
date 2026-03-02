@@ -180,10 +180,24 @@ const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({ isOpen,
                         </div>
 
                         <button
-                            onClick={() => {
+                            onClick={async () => {
+                                // Call logout API to clear cookie
+                                try {
+                                    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+                                    await fetch(`${API_BASE}/admin/logout`, {
+                                        method: 'POST',
+                                        credentials: 'include'
+                                    });
+                                } catch (e) {
+                                    console.error('Logout error', e);
+                                }
+                                
                                 localStorage.removeItem('isAuthenticated');
+                                localStorage.removeItem('auth_token');
                                 localStorage.removeItem('username');
                                 localStorage.removeItem('userId');
+                                localStorage.removeItem('sinotruk_admin_name');
+                                localStorage.removeItem('sinotruk_admin_avatar');
                                 window.location.href = '/';
                             }}
                             className="text-slate-400 hover:text-primary transition-colors flex-shrink-0"

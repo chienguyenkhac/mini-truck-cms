@@ -6,13 +6,26 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 // Helper function for API calls
 async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${API_BASE}${endpoint}`;
+    
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...options.headers as Record<string, string>
+    };
+
     const response = await fetch(url, {
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        },
-        ...options
+        ...options,
+        headers,
+        credentials: 'include' // Important for sending cookies
     });
+
+    if (response.status === 401 || response.status === 403) {
+        // Clear auth data and redirect to login if unauthorized
+        localStorage.removeItem('isAuthenticated');
+        if (window.location.pathname !== '/login') {
+            window.location.href = '/login';
+        }
+        throw new Error('Unauthorized');
+    }
 
     if (!response.ok) {
         throw new Error(`API Error: ${response.status}`);
@@ -30,6 +43,7 @@ export interface AdminUser {
     avatar: string | null;
     is_admin: boolean;
     password?: string;
+    token?: string;
 }
 
 export interface Category {
