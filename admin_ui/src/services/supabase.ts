@@ -1,15 +1,23 @@
 // Admin Supabase Service - Uses local Express API
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
+import api from '../lib/axios';
 
 // Helper for API calls
 async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const url = `${API_BASE}${endpoint}`;
-    const response = await fetch(url, {
-        headers: { 'Content-Type': 'application/json', ...options.headers },
-        ...options
-    });
-    if (!response.ok) throw new Error(`API Error: ${response.status}`);
-    return response.json();
+    try {
+        const response = await api({
+            url: endpoint,
+            method: options.method || 'GET',
+            data: options.body ? JSON.parse(options.body as string) : undefined,
+            headers: options.headers as any
+        });
+        return response.data;
+    } catch (error: any) {
+        if (error.response && error.response.data) {
+            // Forward specific API errors 
+            throw new Error(error.response.data.error || error.response.data.message || 'API Error');
+        }
+        throw error;
+    }
 }
 
 export const getImageUrl = (image: string | null | undefined): string => {
@@ -220,6 +228,9 @@ export const productImageService = {
 
 // Mock supabase for backward compatibility
 export const supabase = {
+    // Custom fetch for other API endpoints
+    customFetch: fetchAPI,
+    
     from: (table: string) => ({
         select: () => {
             const doFetch = async () => {

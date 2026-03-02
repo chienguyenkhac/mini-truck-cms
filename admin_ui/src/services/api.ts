@@ -1,8 +1,6 @@
 // Admin API Service - connects to Laravel backend
 // Uses same API as customer website but with authentication
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dongha.sinotruk-hanoi.com/api';
-
 // Types - reuse from backend models
 export interface Product {
     id: number;
@@ -32,20 +30,6 @@ export interface Customer {
     monthly_discount: number | null;
 }
 
-export interface Order {
-    id: number;
-    user_id: number;
-    tenphieu: string;
-    money: number;
-    lock: boolean;
-    invisible: boolean;
-    completed: boolean;
-    vanchuyen: number;
-    tygia: number;
-    loinhuan: number;
-    created_at: string;
-    updated_at: string;
-}
 
 export interface Category {
     id: number;
@@ -53,48 +37,49 @@ export interface Category {
     products_count?: number;
 }
 
+import api from '../lib/axios';
+
 // API Helper with auth token
 async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const token = localStorage.getItem('auth_token');
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-            ...options?.headers,
-        },
-    });
-
-    if (response.status === 401) {
-        // Redirect to login
-        window.location.href = '/login';
-        throw new Error('Unauthorized');
+    try {
+        const response = await api({
+            url: endpoint,
+            method: options?.method || 'GET',
+            data: options?.body ? JSON.parse(options.body as string) : undefined,
+            headers: {
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+                ...(options?.headers as any),
+            }
+        });
+        return response.data;
+    } catch (error: any) {
+        if (error.response && error.response.data) {
+            throw new Error(error.response.data.error || error.response.data.message || 'API Error');
+        }
+        throw error;
     }
-
-    if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
-    }
-
-    return response.json();
 }
 
 // Auth Service
 export const authService = {
     login: async (username: string, password: string) => {
-        // Laravel uses web routes for auth, this needs to be adapted
-        const response = await fetch(`${API_BASE_URL.replace('/api', '')}/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: username, password }),
-        });
-        return response.json();
+        try {
+            const response = await api.post('/login', { username, password });
+            return response.data;
+        } catch (error: any) {
+            if (error.response && error.response.data) {
+                throw new Error(error.response.data.error || 'Login failed');
+            }
+            throw error;
+        }
     },
 
     logout: () => {
         localStorage.removeItem('auth_token');
-        window.location.href = '/login';
+        const loginPath = import.meta.env.BASE_URL ? `${import.meta.env.BASE_URL}login`.replace('//', '/') : '/secret/login';
+        window.location.href = loginPath;
     },
 };
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { getProfile, getSiteSettings } from '../../lib/supabase';
+import { getProfile, getSiteSettings, supabase } from '../../lib/supabase';
 import ProfileModal from '../ProfileModal';
 
 const ADMIN_NAME_KEY = 'sinotruk_admin_name';
@@ -183,10 +183,8 @@ const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({ isOpen,
                             onClick={async () => {
                                 // Call logout API to clear cookie
                                 try {
-                                    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-                                    await fetch(`${API_BASE}/admin/logout`, {
-                                        method: 'POST',
-                                        credentials: 'include'
+                                    await supabase.customFetch('/logout', {
+                                        method: 'POST'
                                     });
                                 } catch (e) {
                                     console.error('Logout error', e);
@@ -198,7 +196,8 @@ const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({ isOpen,
                                 localStorage.removeItem('userId');
                                 localStorage.removeItem('sinotruk_admin_name');
                                 localStorage.removeItem('sinotruk_admin_avatar');
-                                window.location.href = '/';
+                                const loginPath = import.meta.env.BASE_URL ? `${import.meta.env.BASE_URL}login`.replace('//', '/') : '/secret/login';
+                                window.location.href = loginPath;
                             }}
                             className="text-slate-400 hover:text-primary transition-colors flex-shrink-0"
                             title="Đăng xuất"

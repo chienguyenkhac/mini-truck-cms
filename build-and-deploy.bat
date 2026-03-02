@@ -59,7 +59,7 @@ echo - Admin UI build completed successfully
 echo.
 
 :: Copy admin UI dist to deploy/admin
-echo [3/6] Copying admin UI files to deploy/admin...
+echo [3/8] Copying admin UI files to deploy/admin...
 if exist "admin_ui\dist" (
     xcopy "admin_ui\dist\*" "deploy\admin\" /E /I /Y /Q
     echo - Admin UI files copied successfully
@@ -70,8 +70,18 @@ if exist "admin_ui\dist" (
 )
 echo.
 
+:: Clean admin UI dist directory
+echo [4/8] Cleaning admin UI dist directory...
+if exist "admin_ui\dist" (
+    rmdir /s /q "admin_ui\dist"
+    echo - Removed admin_ui\dist directory
+) else (
+    echo - admin_ui\dist directory not found (already clean)
+)
+echo.
+
 :: Build main project (client)
-echo [4/6] Building main project (client)...
+echo [5/8] Building main project (client)...
 echo - Installing dependencies for main project...
 call npm install
 if !errorlevel! neq 0 (
@@ -91,7 +101,7 @@ echo - Main project build completed successfully
 echo.
 
 :: Copy main project dist to deploy/client
-echo [5/6] Copying main project files to deploy/client...
+echo [6/8] Copying main project files to deploy/client...
 if exist "dist" (
     xcopy "dist\*" "deploy\client\" /E /I /Y /Q
     echo - Main project files copied successfully
@@ -102,8 +112,18 @@ if exist "dist" (
 )
 echo.
 
+:: Clean main project dist directory
+echo [7/8] Cleaning main project dist directory...
+if exist "dist" (
+    rmdir /s /q "dist"
+    echo - Removed dist directory
+) else (
+    echo - dist directory not found (already clean)
+)
+echo.
+
 :: Create zip file
-echo [6/6] Creating deployment zip file...
+echo [8/8] Creating deployment zip file...
 set "zipname=deploy_%timestamp%.zip"
 
 :: Use PowerShell to create zip file (available on Windows 10+)

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { useNotification } from './shared/Notification';
-import { productService, categoryService, imageService, productImageService, Category, Product, ProductImage } from '../services/supabase';
+import { productService, categoryService, imageService, productImageService, Category, Product, ProductImage, supabase } from '../services/supabase';
 
 interface CategoryWithVehicle extends Category {
     is_vehicle_name?: boolean;
@@ -89,16 +89,14 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
 
                 const base64Image = await base64Promise;
 
-                const response = await fetch('/api/upload', {
+                const result = await supabase.customFetch<{success: boolean, url?: string, message?: string, error?: string}>('/upload', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ image: base64Image }),
                 });
 
-                if (!response.ok) throw new Error('Upload failed');
+                if (!result.success && !result.url) throw new Error('Upload failed');
 
-                const result = await response.json();
-                setImages(prev => [...prev, { url: result.url, isNew: true }]);
+                setImages(prev => [...prev, { url: result.url || '', isNew: true }]);
             } catch (error: any) {
                 console.error('Error uploading image:', error);
                 notification.error(`Không thể tải ảnh ${file.name}`);

@@ -1,37 +1,24 @@
 // API Client for Admin UI - Replaces Supabase
 // Uses local Express API server
-
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+import api from './axios';
 
 // Helper function for API calls
 async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const url = `${API_BASE}${endpoint}`;
-    
-    const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-        ...options.headers as Record<string, string>
-    };
-
-    const response = await fetch(url, {
-        ...options,
-        headers,
-        credentials: 'include' // Important for sending cookies
-    });
-
-    if (response.status === 401 || response.status === 403) {
-        // Clear auth data and redirect to login if unauthorized
-        localStorage.removeItem('isAuthenticated');
-        if (window.location.pathname !== '/login') {
-            window.location.href = '/login';
+    try {
+        const response = await api({
+            url: endpoint,
+            method: options.method || 'GET',
+            data: options.body ? JSON.parse(options.body as string) : undefined,
+            headers: options.headers as any
+        });
+        return response.data;
+    } catch (error: any) {
+        if (error.response && error.response.data) {
+            // Forward specific API errors 
+            throw new Error(error.response.data.error || error.response.data.message || 'API Error');
         }
-        throw new Error('Unauthorized');
+        throw error;
     }
-
-    if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
-    }
-
-    return response.json();
 }
 
 // Types
@@ -79,7 +66,7 @@ export interface SiteSettings {
 // Auth functions
 export const loginUser = async (username: string, password: string): Promise<AdminUser | null> => {
     try {
-        return await fetchAPI<AdminUser>('/admin/login', {
+        return await fetchAPI<AdminUser>('/login', {
             method: 'POST',
             body: JSON.stringify({ username, password })
         });
@@ -92,7 +79,7 @@ export const loginUser = async (username: string, password: string): Promise<Adm
 // Profile functions
 export const getProfile = async (userId: number): Promise<AdminUser | null> => {
     try {
-        return await fetchAPI<AdminUser>(`/admin/profile/${userId}`);
+        return await fetchAPI<AdminUser>(`/profile/${userId}`);
     } catch (error) {
         console.error('Error fetching profile:', error);
         return null;
@@ -101,7 +88,7 @@ export const getProfile = async (userId: number): Promise<AdminUser | null> => {
 
 export const updateProfile = async (userId: number, updates: Partial<AdminUser>): Promise<AdminUser | null> => {
     try {
-        return await fetchAPI<AdminUser>(`/admin/profile/${userId}`, {
+        return await fetchAPI<AdminUser>(`/profile/${userId}`, {
             method: 'PUT',
             body: JSON.stringify(updates)
         });
@@ -189,6 +176,9 @@ export const updateSiteSetting = async (key: string, value: string): Promise<boo
 
 // Mock supabase object for backward compatibility
 export const supabase = {
+    // Custom fetch for other API endpoints
+    customFetch: fetchAPI,
+
     from: (table: string) => ({
         select: (_columns?: string) => {
             const state = {

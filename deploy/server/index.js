@@ -68,8 +68,12 @@ const authenticateToken = (req, res, next) => {
     const isAdminEndpoint = req.path.startsWith('/api/admin/');
     const isUploadEndpoint = req.path.startsWith('/api/upload') || req.path.startsWith('/api/images');
     
+    // Yêu cầu xác thực nếu:
+    // 1. Là các method Ghi (POST, PUT, DELETE)
+    // 2. Hoặc là request đến /api/admin/* (Bảo vệ triệt để Admin UI)
+    // 3. Hoặc là API upload
     if (!isWriteMethod && !isAdminEndpoint && !isUploadEndpoint) {
-        // It's a GET request to a public API like /api/products, allow it
+        // Các request GET public như /api/products từ trang khách hàng
         return next();
     }
 
@@ -98,6 +102,21 @@ const authenticateToken = (req, res, next) => {
 };
 
 app.use(authenticateToken);
+
+// API URL Rewrite Middleware cho Admin UI
+// Bất cứ request nào có tiền tố /api/admin/ nhưng lại KHÔNG PHẢI là API đặc thù của Admin 
+// (như login, logout, profile) thì sẽ được gỡ bỏ chữ /admin/ và chạy tiếp các route bên dưới
+app.use((req, res, next) => {
+    const isAdminSpecific = req.path === '/api/admin/login' || 
+                            req.path === '/api/admin/logout' || 
+                            req.path.startsWith('/api/admin/profile');
+                            
+    if (req.path.startsWith('/api/admin/') && !isAdminSpecific) {
+        // Rewrite URL: Xóa bỏ chữ /admin/ (ví dụ: /api/admin/products -> /api/products)
+        req.url = req.url.replace('/api/admin/', '/api/');
+    }
+    next();
+});
 
 // Multer config for file uploads
 const storage = multer.diskStorage({

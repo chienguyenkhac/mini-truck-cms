@@ -26,15 +26,13 @@ const ImageLibrary: React.FC = () => {
     const loadImages = async () => {
         setLoading(true);
         try {
-            const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
-            const response = await fetch(`${API_BASE}/gallery-images?page=${currentPage}&limit=${ITEMS_PER_PAGE}`);
-            const result = await response.json();
+            const result = await supabase.customFetch<{data?: GalleryImage[], count?: number, length?: number, [key: string]: any}>(`/gallery-images?page=${currentPage}&limit=${ITEMS_PER_PAGE}`);
 
             if (result.data) {
                 setImages(result.data);
                 setTotalCount(result.count || 0);
             } else if (Array.isArray(result)) {
-                setImages(result);
+                setImages(result as GalleryImage[]);
                 setTotalCount(result.length);
             }
         } catch (err) {
@@ -68,16 +66,14 @@ const ImageLibrary: React.FC = () => {
                 const base64 = await base64Promise;
 
                 // Upload via API
-                const response = await fetch('/api/upload', {
+                const result = await supabase.customFetch<{success: boolean, message?: string, url?: string}>('/upload', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         image: base64,
                         fileName: file.name.replace(/\.[^/.]+$/, '')
                     })
                 });
 
-                const result = await response.json();
                 if (!result.success) {
                     throw new Error(result.message || 'Upload failed');
                 }
@@ -110,13 +106,11 @@ const ImageLibrary: React.FC = () => {
         if (!deleteImage) return;
 
         try {
-            const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
-            const response = await fetch(`${API_BASE}/gallery-images/${deleteImage.id}`, {
+            const result = await supabase.customFetch<{success: boolean, error?: string}>(`/gallery-images/${deleteImage.id}`, {
                 method: 'DELETE',
             });
             
-            const result = await response.json();
-            if (!response.ok || !result.success) {
+            if (!result.success) {
                 throw new Error(result.error || 'Không thể xóa ảnh');
             }
             

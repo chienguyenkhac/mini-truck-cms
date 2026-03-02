@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNotification } from '../components/shared/Notification';
 import ConfirmDeleteModal from '../components/shared/ConfirmDeleteModal';
-import { categoryService, Category } from '../services/supabase';
+import { categoryService, Category, supabase } from '../services/supabase';
 
 interface CategoryWithExtras extends Category {
     is_vehicle_name?: boolean;
@@ -53,17 +53,15 @@ const Categories: React.FC = () => {
         });
         const base64Image = await base64Promise;
 
-        const response = await fetch('/api/upload', {
+        const data = await supabase.customFetch<{success: boolean, url: string, message?: string}>('/upload', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ image: base64Image, fileName: file.name }),
         });
 
-        if (!response.ok) {
+        if (!data.success && !data.url) {
             throw new Error('Upload failed');
         }
 
-        const data = await response.json();
         return data.url;
     };
 
@@ -192,9 +190,7 @@ const Categories: React.FC = () => {
     // Count products in category before showing delete modal
     const handleDeleteClick = async (cat: CategoryWithExtras) => {
         try {
-            const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
-            const response = await fetch(`${API_BASE}/products?category_id=${cat.id}`);
-            const products = await response.json();
+            const products = await supabase.customFetch<any[]>(`/products?category_id=${cat.id}`);
             const count = Array.isArray(products) ? products.length : 0;
             setProductCount(count);
             setDeleteCategory(cat);
@@ -208,18 +204,16 @@ const Categories: React.FC = () => {
     const confirmDelete = async () => {
         if (!deleteCategory) return;
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3002/api'}/categories/${deleteCategory.id}`, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' }
+            const result = await supabase.customFetch<{success: boolean, message?: string, error?: string, productsAffected?: number}>(`/categories/${deleteCategory.id}`, {
+                method: 'DELETE'
             });
-            const result = await response.json();
             
-            if (!response.ok) {
+            if (!result.success && !result.message) {
                 throw new Error(result.error || 'Có lỗi xảy ra');
             }
             
             // Show success message with info about affected products
-            if (result.productsAffected > 0) {
+            if (result.productsAffected && result.productsAffected > 0) {
                 notification.success(
                     `Đã xóa "${deleteCategory.name}". ${result.productsAffected} sản phẩm đã được chuyển sang trạng thái "Không có danh mục".`
                 );

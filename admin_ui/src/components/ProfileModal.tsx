@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { updateProfile } from '../lib/supabase';
+import { updateProfile, supabase } from '../lib/supabase';
 
 interface ProfileModalProps {
     onClose: () => void;
@@ -49,15 +49,13 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ onClose, currentUsername, c
 
             // Try Cloudinary upload
             try {
-                const response = await fetch('/api/upload-avatar', {
+                const result = await supabase.customFetch<{success: boolean, url?: string, message?: string, error?: string}>('/upload-avatar', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ image: base64Image }),
                 });
 
-                if (response.ok) {
-                    const result = await response.json();
-                    setAvatar(result.url);
+                if (result.success || result.url) {
+                    setAvatar(result.url || base64Image);
                 } else {
                     setAvatar(base64Image);
                 }

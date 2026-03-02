@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useNotification } from '../components/shared/Notification';
 import ConfirmDeleteModal from '../components/shared/ConfirmDeleteModal';
-import { catalogService, CatalogArticle, PaginatedResponse } from '../services/supabase';
+import { catalogService, CatalogArticle, PaginatedResponse, supabase } from '../services/supabase';
 import EditorJS from '@editorjs/editorjs';
 import Header from '@editorjs/header';
 import List from '@editorjs/list';
@@ -110,17 +110,14 @@ const Catalogs: React.FC = () => {
             });
             const base64Image = await base64Promise;
 
-            const response = await fetch('/api/upload', {
+            const result = await supabase.customFetch<{success: boolean, url?: string, message?: string, error?: string, availableBuckets?: string}>('/upload', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ image: base64Image }),
             });
 
-            const result = await response.json();
-
-            if (!response.ok) {
+            if (!result.success && !result.url) {
                 console.error('Catalog upload failed:', result);
-                const errorMsg = result.error || result.message || response.statusText;
+                const errorMsg = result.error || result.message || 'Upload failed';
                 const bucketInfo = result.availableBuckets ? ` (Buckets: ${result.availableBuckets})` : '';
                 throw new Error(`${errorMsg}${bucketInfo}`);
             }
@@ -229,19 +226,16 @@ const Catalogs: React.FC = () => {
             });
             const base64Image = await base64Promise;
 
-            const response = await fetch('/api/upload', {
+            const result = await supabase.customFetch<{success: boolean, url?: string, error?: string}>('/upload', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ image: base64Image }),
             });
 
-            const result = await response.json();
-
-            if (!response.ok) {
+            if (!result.success && !result.url) {
                 throw new Error(result.error || 'Upload failed');
             }
 
-            setFormData({ ...formData, thumbnail: result.url });
+            setFormData({ ...formData, thumbnail: result.url || '' });
             notification.success('Đã tải ảnh đại diện lên');
         } catch (error: any) {
             notification.error(`Không thể tải ảnh lên: ${error.message}`);

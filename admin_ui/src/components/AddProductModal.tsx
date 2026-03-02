@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { useNotification } from './shared/Notification';
-import { productService, categoryService, imageService, productImageService, Category } from '../services/supabase';
+import { productService, categoryService, imageService, productImageService, Category, supabase } from '../services/supabase';
 
 interface UploadedImage {
     id?: number;
@@ -92,22 +92,19 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ onClose, onAdd }) => 
 
                 const base64Image = await base64Promise;
 
-                const response = await fetch('/api/upload', {
+                const result = await supabase.customFetch<{success: boolean, url?: string, message?: string, error?: string, availableBuckets?: string}>('/upload', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ image: base64Image, fileName: file.name }),
                 });
 
-                const result = await response.json();
-
-                if (!response.ok) {
+                if (!result.success && !result.url) {
                     console.error('Upload failed:', result);
-                    const errorMsg = result.error || result.message || response.statusText;
+                    const errorMsg = result.error || result.message || 'Upload failed';
                     const bucketInfo = result.availableBuckets ? ` (Buckets: ${result.availableBuckets})` : '';
                     throw new Error(`${errorMsg}${bucketInfo}`);
                 }
 
-                setImages(prev => [...prev, { url: result.url, isNew: true }]);
+                setImages(prev => [...prev, { url: result.url || '', isNew: true }]);
                 successCount++;
             } catch (error: any) {
                 console.error('Error uploading image:', error);

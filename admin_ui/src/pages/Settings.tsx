@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNotification } from '../components/shared/Notification';
+import { supabase } from '../services/supabase';
 
 interface Setting {
     id: number;
@@ -33,16 +34,7 @@ const Settings: React.FC = () => {
 
     const loadSettings = async () => {
         try {
-            const response = await fetch('/api/site-settings', {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch settings: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await supabase.customFetch<Setting[]>('/site-settings');
             setSettings(data || []);
         } catch (err) {
             console.error('Error loading settings:', err);
@@ -80,15 +72,10 @@ const Settings: React.FC = () => {
             }
 
             // Send all updates in one request
-            const response = await fetch('/api/site-settings', {
+            await supabase.customFetch('/site-settings', {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updates)
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to save settings');
-            }
 
             notification.success('Đã lưu cấu hình thành công!');
             loadSettings(); // Reload to get fresh data
@@ -114,22 +101,21 @@ const Settings: React.FC = () => {
 
             const base64Image = await base64Promise;
 
-            const response = await fetch('/api/upload', {
+            const result = await supabase.customFetch<{success: boolean, url?: string, message?: string, error?: string, availableBuckets?: string}>('/upload', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ image: base64Image }),
             });
 
-            const result = await response.json();
-
-            if (!response.ok) {
+            if (!result.success && !result.url) {
                 console.error('Logo upload failed:', result);
-                const errorMsg = result.error || result.message || response.statusText;
+                const errorMsg = result.error || result.message || 'Upload failed';
                 const bucketInfo = result.availableBuckets ? ` (Buckets: ${result.availableBuckets})` : '';
                 throw new Error(`${errorMsg}${bucketInfo}`);
             }
-            handleChange('site_logo', result.url);
-            notification.success('Đã tải logo lên');
+            if (result.url) {
+                handleChange('site_logo', result.url);
+                notification.success('Đã tải logo lên');
+            }
         } catch (err: any) {
             console.error('Error uploading logo:', err);
             notification.error(`Không thể tải logo: ${err.message}`);
