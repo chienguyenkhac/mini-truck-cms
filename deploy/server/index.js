@@ -806,21 +806,66 @@ app.post('/api/webhooks/products', async (req, res) => {
         }
 
         // Tuỳ chọn: Kiểm tra API Key (có thể cấu hình trong file .env là WEBHOOK_API_KEY)
-        const apiKey = req.headers['x-api-key'] || req.query.api_key;
+        // Hỗ trợ header Authorization chuẩn của HTTP (VD: Authorization: Bearer YOUR_API_KEY)
+        let apiKey = req.query.api_key;
+        
+        if (!apiKey && req.headers.authorization) {
+            const authHeader = req.headers.authorization;
+            // Xử lý cả 2 trường hợp: "Bearer <key>" hoặc chỉ truyền "<key>"
+            if (authHeader.startsWith('Bearer ')) {
+                apiKey = authHeader.substring(7);
+            } else {
+                apiKey = authHeader;
+            }
+        }
+        
+        // Vẫn giữ lại x-api-key như một phương án fallback
+        if (!apiKey) {
+            apiKey = req.headers['x-api-key'];
+        }
+
         const expectedKey = process.env.WEBHOOK_API_KEY;
         
         if (expectedKey && apiKey !== expectedKey) {
             return res.status(401).json({ error: 'Unauthorized: Invalid API Key' });
         }
 
-        const {
-            code, name, category_id, description,
-            vehicle_ids, show_on_homepage, manufacturer_code,
+        let {
+            code, name, category_id, category_code, description,
+            vehicle_ids, vehicle_codes, show_on_homepage, manufacturer_code,
             image, thumbnail, images // Support both single image and array of images
         } = req.body;
 
         if (!name) {
             return res.status(400).json({ error: 'Product name is required' });
+        }
+
+        // Ưu tiên tìm category_id từ category_code hoặc slug nếu được cung cấp
+        if (category_code && !category_id) {
+            const { rows: catRows } = await pool.query(
+                'SELECT id FROM categories WHERE code = $1 OR slug = $1 LIMIT 1',
+                [category_code]
+            );
+            
+            if (catRows.length > 0) {
+                category_id = catRows[0].id;
+            } else {
+                return res.status(400).json({ error: `Category with code or slug '${category_code}' not found` });
+            }
+        }
+
+        // Xử lý vehicle_codes để chuyển thành vehicle_ids
+        if (vehicle_codes && Array.isArray(vehicle_codes) && vehicle_codes.length > 0) {
+            if (!vehicle_ids) vehicle_ids = [];
+            
+            const { rows: vehicleRows } = await pool.query(
+                'SELECT id FROM categories WHERE is_vehicle_name = true AND (code = ANY($1) OR slug = ANY($1))',
+                [vehicle_codes]
+            );
+            
+            const foundIds = vehicleRows.map(row => row.id);
+            // Gộp với vehicle_ids hiện tại (nếu có) và loại bỏ trùng lặp
+            vehicle_ids = [...new Set([...vehicle_ids, ...foundIds])];
         }
 
         // Xử lý danh sách ảnh
