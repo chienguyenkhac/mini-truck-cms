@@ -60,6 +60,7 @@ export const getProducts = async (limit = 12, onlyHomepage = false, options = {}
         if (options.manufacturer_code) params.append('manufacturer_code', options.manufacturer_code);
         if (options.category_id) params.append('category_id', options.category_id);
         if (options.category) params.append('category', options.category);
+        if (options.vehicle) params.append('vehicle', options.vehicle);
 
         return await fetchAPI(`/products?${params}`);
     } catch (error) {

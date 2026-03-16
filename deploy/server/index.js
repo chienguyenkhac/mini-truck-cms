@@ -606,7 +606,7 @@ async function ensureUniqueSlug(baseSlug, productId = null) {
 // GET /api/products - Get products with optional filters
 app.get('/api/products', async (req, res) => {
     try {
-        const { limit = 50, offset = 0, category_id, category, show_on_homepage, search, manufacturer_code, slug } = req.query;
+        const { limit = 50, offset = 0, category_id, category, vehicle, show_on_homepage, search, manufacturer_code, slug } = req.query;
 
         let query = 'SELECT * FROM products WHERE 1=1';
         const params = [];
@@ -620,15 +620,15 @@ app.get('/api/products', async (req, res) => {
             // First try to find category by slug, then by ID (if numeric)
             let categoryQuery = 'SELECT id, is_vehicle_name FROM categories WHERE slug = $1';
             let categoryParams = [category];
-            
+
             // If category is numeric, also check by ID
             if (!isNaN(category)) {
                 categoryQuery = 'SELECT id, is_vehicle_name FROM categories WHERE slug = $1 OR id = $2';
                 categoryParams = [category, parseInt(category)];
             }
-            
+
             const { rows: categoryRows } = await pool.query(categoryQuery, categoryParams);
-            
+
             if (categoryRows.length > 0) {
                 const cat = categoryRows[0];
                 if (cat.is_vehicle_name) {
@@ -640,6 +640,24 @@ app.get('/api/products', async (req, res) => {
                     query += ` AND category_id = $${paramIndex++}`;
                     params.push(cat.id);
                 }
+            }
+        }
+
+        // Handle vehicle filter independently (can combine with category filter above)
+        if (vehicle) {
+            let vehicleQuery = 'SELECT id FROM categories WHERE is_vehicle_name = true AND slug = $1';
+            let vehicleParams = [vehicle];
+
+            if (!isNaN(vehicle)) {
+                vehicleQuery = 'SELECT id FROM categories WHERE is_vehicle_name = true AND (slug = $1 OR id = $2)';
+                vehicleParams = [vehicle, parseInt(vehicle)];
+            }
+
+            const { rows: vehicleRows } = await pool.query(vehicleQuery, vehicleParams);
+
+            if (vehicleRows.length > 0) {
+                query += ` AND $${paramIndex++} = ANY(vehicle_ids)`;
+                params.push(vehicleRows[0].id);
             }
         }
 

@@ -20,7 +20,8 @@ const Products = () => {
 
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState(categoryFromUrl || 'all')
+  const [selectedPart, setSelectedPart] = useState('all')
+  const [selectedVehicle, setSelectedVehicle] = useState('all')
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
@@ -38,23 +39,24 @@ const Products = () => {
   }, [searchTerm])
 
 
-  // Update selectedCategory when URL changes
+  // Update selected filters when URL changes
   useEffect(() => {
-    if (categoryFromUrl) {
-      // If categoryFromUrl is a slug, find the corresponding category
-      const categoryBySlug = categories.find(c => c.slug === categoryFromUrl)
-      const categoryById = categories.find(c => String(c.id) === categoryFromUrl)
-      
-      if (categoryBySlug) {
-        setSelectedCategory(categoryBySlug.slug || String(categoryBySlug.id))
-      } else if (categoryById) {
-        setSelectedCategory(categoryById.slug || String(categoryById.id))
+    if (categoryFromUrl && categories.length > 0) {
+      const found = categories.find(c => c.slug === categoryFromUrl || String(c.id) === categoryFromUrl)
+      if (found) {
+        const val = found.slug || String(found.id)
+        if (found.is_vehicle_name) {
+          setSelectedVehicle(val)
+        } else {
+          setSelectedPart(val)
+        }
       } else {
-        // Fallback to using the value directly
-        setSelectedCategory(categoryFromUrl)
+        // Fallback: không biết loại, thử set part
+        setSelectedPart(categoryFromUrl)
       }
-    } else {
-      setSelectedCategory('all')
+    } else if (!categoryFromUrl) {
+      setSelectedPart('all')
+      setSelectedVehicle('all')
     }
   }, [categoryFromUrl, categories])
 
@@ -79,12 +81,16 @@ const Products = () => {
     }
 
     try {
-      // Build API options
       const options = {}
-      
-      // Category filter - use slug or ID
-      if (selectedCategory !== 'all') {
-        options.category = selectedCategory
+
+      // Filter theo loại phụ tùng
+      if (selectedPart !== 'all') {
+        options.category = selectedPart
+      }
+
+      // Filter theo loại xe
+      if (selectedVehicle !== 'all') {
+        options.vehicle = selectedVehicle
       }
 
       // Search filter
@@ -92,19 +98,15 @@ const Products = () => {
         options.search = debouncedSearchTerm
       }
 
-      // For pagination, we'll load more items and handle client-side
-      // Pass true as second parameter to filter show_on_homepage = true (like ProductGrid)
       const limit = reset ? ITEMS_PER_PAGE : ITEMS_PER_PAGE * 2
       const data = await getProducts(limit, true, options)
 
       if (reset) {
         setProducts(data || [])
       } else {
-        // Simple pagination - just load more
         setProducts(data || [])
       }
 
-      // Check if there are more products (simplified)
       setHasMore((data || []).length >= limit)
       if (data && data.length > 0) {
         setLastId(data[data.length - 1].id)
@@ -117,12 +119,12 @@ const Products = () => {
       setLoading(false)
       setLoadingMore(false)
     }
-  }, [selectedCategory, debouncedSearchTerm, categories])
+  }, [selectedPart, selectedVehicle, debouncedSearchTerm])
 
   // Initial load and filter changes
   useEffect(() => {
     loadProducts(true)
-  }, [selectedCategory, debouncedSearchTerm])
+  }, [selectedPart, selectedVehicle, debouncedSearchTerm])
 
   // Load more
   const handleLoadMore = () => {
@@ -188,22 +190,22 @@ const Products = () => {
               </h4>
               <div className="flex flex-wrap gap-2">
                 <button
-                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${selectedCategory === 'all'
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${selectedPart === 'all'
                     ? 'bg-primary text-white'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-800'
                     }`}
-                  onClick={() => setSelectedCategory('all')}
+                  onClick={() => setSelectedPart('all')}
                 >
                   TẤT CẢ
                 </button>
                 {categories.filter(c => !c.is_vehicle_name).map((cat) => (
                   <button
                     key={cat.id}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${selectedCategory === (cat.slug || String(cat.id))
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${selectedPart === (cat.slug || String(cat.id))
                       ? 'bg-primary text-white'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-800'
                       }`}
-                    onClick={() => setSelectedCategory(cat.slug || String(cat.id))}
+                    onClick={() => setSelectedPart(cat.slug || String(cat.id))}
                   >
                     {cat.name}
                   </button>
@@ -217,14 +219,23 @@ const Products = () => {
                 HÃNG XE
               </h4>
               <div className="flex flex-wrap gap-2">
+                <button
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${selectedVehicle === 'all'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-800 border border-blue-200'
+                    }`}
+                  onClick={() => setSelectedVehicle('all')}
+                >
+                  TẤT CẢ
+                </button>
                 {categories.filter(c => c.is_vehicle_name).map((cat) => (
                   <button
                     key={cat.id}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${selectedCategory === (cat.slug || String(cat.id))
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${selectedVehicle === (cat.slug || String(cat.id))
                       ? 'bg-blue-500 text-white'
                       : 'bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-800 border border-blue-200'
                       }`}
-                    onClick={() => setSelectedCategory(cat.slug || String(cat.id))}
+                    onClick={() => setSelectedVehicle(cat.slug || String(cat.id))}
                   >
                     {cat.name}
                   </button>
