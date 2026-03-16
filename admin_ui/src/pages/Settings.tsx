@@ -17,6 +17,10 @@ const Settings: React.FC = () => {
     const [saving, setSaving] = useState(false);
     const [formData, setFormData] = useState<Record<string, string>>({});
 
+    // Lấy domain từ URL hiện tại của admin (cùng server với API)
+    const apiBase = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}`;
+    const webhookUrl = `${apiBase}/api/webhooks/products`;
+
     useEffect(() => {
         loadSettings();
     }, []);
@@ -317,6 +321,34 @@ const Settings: React.FC = () => {
                             />
                             <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                         </label>
+                    </div>
+
+                    {/* Webhook Endpoint URL */}
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Địa chỉ API Webhook
+                        </label>
+                        <div className="flex items-center gap-2">
+                            <div className="flex-1 flex items-center gap-2 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm text-slate-700 overflow-x-auto">
+                                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-bold rounded shrink-0">POST</span>
+                                <span className="select-all">{webhookUrl}</span>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    navigator.clipboard.writeText(webhookUrl);
+                                    notification.success('Đã sao chép địa chỉ API');
+                                }}
+                                className="flex items-center gap-1.5 px-4 py-3 bg-white border border-slate-200 hover:border-primary hover:text-primary text-slate-600 rounded-xl transition-colors shrink-0"
+                                title="Sao chép"
+                            >
+                                <span className="material-symbols-outlined text-base">content_copy</span>
+                                <span className="text-sm font-medium">Sao chép</span>
+                            </button>
+                        </div>
+                        <p className="text-xs text-slate-400 mt-2">
+                            Gửi request <span className="font-mono">POST</span> đến địa chỉ này kèm header <span className="font-mono">Authorization: Bearer YOUR_API_KEY</span> để tạo sản phẩm từ hệ thống bên ngoài.
+                        </p>
                     </div>
                 </div>
             </div>
