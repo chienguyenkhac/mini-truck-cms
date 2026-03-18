@@ -858,6 +858,24 @@ app.post('/api/webhooks/products', async (req, res) => {
             return res.status(400).json({ error: 'Product name is required' });
         }
 
+        // Kiểm tra trùng mã sản phẩm (code) trong database
+        if (code) {
+            const { rows: existingProducts } = await pool.query(
+                'SELECT id, name FROM products WHERE code = $1 LIMIT 1',
+                [code]
+            );
+            if (existingProducts.length > 0) {
+                return res.status(409).json({
+                    error: `Product with code '${code}' already exists`,
+                    existing_product: {
+                        id: existingProducts[0].id,
+                        name: existingProducts[0].name,
+                        code: code
+                    }
+                });
+            }
+        }
+
         // Ưu tiên tìm category_id từ category_code hoặc slug nếu được cung cấp
         if (category_code && !category_id) {
             const { rows: catRows } = await pool.query(

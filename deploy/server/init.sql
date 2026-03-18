@@ -284,19 +284,20 @@ INSERT INTO public.catalog_articles (id, title, slug, content, thumbnail, is_pub
 
 -- Dữ liệu categories (danh mục sản phẩm)
 INSERT INTO public.categories (id, name, created_at, updated_at, is_vehicle_name, code, thumbnail, is_visible, brand, slug) VALUES 
-(1, 'CABIN & THÂN VỎ', now(), now(), false, NULL, NULL, true, NULL, 'cabin-than-vo'),
-(2, 'ĐỘNG CƠ', now(), now(), false, NULL, NULL, true, NULL, 'dong-co'),
-(3, 'HỘP SỐ', now(), now(), false, NULL, NULL, true, NULL, 'hop-so'),
-(4, 'HỆ THỐNG CẦU', now(), now(), false, NULL, NULL, true, NULL, 'he-thong-cau'),
-(5, 'LY HỢP', now(), now(), false, NULL, NULL, true, NULL, 'ly-hop'),
-(6, 'GIẰNG TREO', now(), now(), false, NULL, NULL, true, NULL, 'giang-treo'),
-(7, 'TRUYỀN ĐỘNG', now(), now(), false, NULL, NULL, true, NULL, 'truyen-dong'),
-(8, 'HỆ THỐNG LÁI', now(), now(), false, NULL, NULL, true, NULL, 'he-thong-lai'),
-(9, 'HỆ THỐNG HÚT XẢ', now(), now(), false, NULL, NULL, true, NULL, 'he-thong-hut-xa'),
-(10, 'HỆ THỐNG LÀM MÁT', now(), now(), false, NULL, NULL, true, NULL, 'he-thong-lam-mat'),
-(11, 'HỆ THỐNG ĐIỆN', now(), now(), false, NULL, NULL, true, NULL, 'he-thong-dien'),
-(12, 'HỆ THỐNG NHIÊN LIỆU', now(), now(), false, NULL, NULL, true, NULL, 'he-thong-nhien-lieu'),
-(13, 'PHỤ TÙNG KHÁC', now(), now(), false, NULL, NULL, true, NULL, 'phu-tung-khac');
+(1, 'CABIN & THÂN VỎ', now(), now(), false, 'CABIN', NULL, true, NULL, 'cabin-than-vo'),
+(2, 'ĐỘNG CƠ', now(), now(), false, 'ENGINE', NULL, true, NULL, 'dong-co'),
+(3, 'HỘP SỐ', now(), now(), false, 'GEARBOX', NULL, true, NULL, 'hop-so'),
+(4, 'HỆ THỐNG CẦU', now(), now(), false, 'AXLE', NULL, true, NULL, 'he-thong-cau'),
+(5, 'LY HỢP', now(), now(), false, 'CLUTCH', NULL, true, NULL, 'ly-hop'),
+(6, 'GIẰNG TREO', now(), now(), false, 'SUSPENSION', NULL, true, NULL, 'giang-treo'),
+(7, 'TRUYỀN ĐỘNG', now(), now(), false, 'DRIVESHAFT', NULL, true, NULL, 'truyen-dong'),
+(8, 'HỆ THỐNG LÁI', now(), now(), false, 'STEERING', NULL, true, NULL, 'he-thong-lai'),
+(9, 'HỆ THỐNG HÚT XẢ', now(), now(), false, 'EXHAUST', NULL, true, NULL, 'he-thong-hut-xa'),
+(10, 'HỆ THỐNG LÀM MÁT', now(), now(), false, 'COOLING', NULL, true, NULL, 'he-thong-lam-mat'),
+(11, 'HỆ THỐNG ĐIỆN', now(), now(), false, 'ELECTRIC', NULL, true, NULL, 'he-thong-dien'),
+(12, 'HỆ THỐNG NHIÊN LIỆU', now(), now(), false, 'FUEL', NULL, true, NULL, 'he-thong-nhien-lieu'),
+(13, 'HỆ THỐNG PHANH', now(), now(), false, 'BRAKING', NULL, true, NULL, 'he-thong-nhien-lieu'),
+(14, 'PHỤ TÙNG KHÁC', now(), now(), false, 'OTHER', NULL, true, NULL, 'phu-tung-khac');
 
 
 -- Dữ liệu images mẫu
