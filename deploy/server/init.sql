@@ -296,8 +296,15 @@ INSERT INTO public.categories (id, name, created_at, updated_at, is_vehicle_name
 (10, 'HỆ THỐNG LÀM MÁT', now(), now(), false, 'COOLING', NULL, true, NULL, 'he-thong-lam-mat'),
 (11, 'HỆ THỐNG ĐIỆN', now(), now(), false, 'ELECTRIC', NULL, true, NULL, 'he-thong-dien'),
 (12, 'HỆ THỐNG NHIÊN LIỆU', now(), now(), false, 'FUEL', NULL, true, NULL, 'he-thong-nhien-lieu'),
-(13, 'HỆ THỐNG PHANH', now(), now(), false, 'BRAKING', NULL, true, NULL, 'he-thong-nhien-lieu'),
-(14, 'PHỤ TÙNG KHÁC', now(), now(), false, 'OTHER', NULL, true, NULL, 'phu-tung-khac');
+(13, 'HỆ THỐNG PHANH', now(), now(), false, 'BRAKING', NULL, true, NULL, 'he-thong-phanh'),
+(14, 'PHỤ TÙNG KHÁC', now(), now(), false, 'OTHER', NULL, true, NULL, 'phu-tung-khac'),
+-- Danh mục theo dòng xe (is_vehicle_name = true)
+(15, 'SITRAK', now(), now(), true, 'HOWO', '/images/SITRAK.png', true, 'HOWO', 'sitrak'),
+(16, 'MAX 460HP', now(), now(), true, 'HOWO', '/images/MAX 460HP.png', true, 'HOWO', 'max-460hp'),
+(17, 'TH7', now(), now(), true, 'HOWO', '/images/TH7.png', true, 'HOWO', 'th7'),
+(18, 'A7', now(), now(), true, 'HOWO', '/images/A7.png', true, 'HOWO', 'a7'),
+(19, 'V7G', now(), now(), true, 'HOWO', '/images/V7G.png', true, 'HOWO', 'v7g'),
+(20, 'TX400', now(), now(), true, 'HOWO', '/images/TX400.avif', true, 'HOWO', 'tx400');
 
 
 -- Dữ liệu images mẫu
@@ -327,7 +334,7 @@ INSERT INTO public.product_images (id, product_id, image_id, sort_order, is_prim
 -- Dữ liệu site_settings (cài đặt website mẫu)
 INSERT INTO public.site_settings (id, key, value, type, description, created_at, updated_at) VALUES 
 (1, 'site_name', 'SINOTRUK HÀ NỘI', 'text', 'Tên website', now(), now()),
-(2, 'site_description', 'Phụ tùng xe tải SINOTRUK HÀ NỘI chính hãng', 'text', 'Mô tả website', now(), now()),
+(2, 'site_description', 'Chuyên nhập khẩu và phân phối phụ tùng thay thế cho các dòng xe tải SINOTRUK. Uy tín - Trách nhiệm - Đồng hành bền vững!', 'text', 'Mô tả website', now(), now()),
 (3, 'contact_phone', '0382890990', 'text', 'Số điện thoại liên hệ', now(), now()),
 (4, 'contact_email', 'hnsinotruk@gmail.com', 'email', 'Email liên hệ', now(), now()),
 (5, 'address', 'TP Hà Nội', 'text', 'Địa chỉ công ty', now(), now()),
