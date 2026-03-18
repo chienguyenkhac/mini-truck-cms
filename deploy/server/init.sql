@@ -299,12 +299,12 @@ INSERT INTO public.categories (id, name, created_at, updated_at, is_vehicle_name
 (13, 'HỆ THỐNG PHANH', now(), now(), false, 'BRAKING', NULL, true, NULL, 'he-thong-phanh'),
 (14, 'PHỤ TÙNG KHÁC', now(), now(), false, 'OTHER', NULL, true, NULL, 'phu-tung-khac'),
 -- Danh mục theo dòng xe (is_vehicle_name = true)
-(15, 'SITRAK', now(), now(), true, 'HOWO', '/images/SITRAK.png', true, 'HOWO', 'sitrak'),
-(16, 'MAX 460HP', now(), now(), true, 'HOWO', '/images/MAX 460HP.png', true, 'HOWO', 'max-460hp'),
-(17, 'TH7', now(), now(), true, 'HOWO', '/images/TH7.png', true, 'HOWO', 'th7'),
-(18, 'A7', now(), now(), true, 'HOWO', '/images/A7.png', true, 'HOWO', 'a7'),
-(19, 'V7G', now(), now(), true, 'HOWO', '/images/V7G.png', true, 'HOWO', 'v7g'),
-(20, 'TX400', now(), now(), true, 'HOWO', '/images/TX400.avif', true, 'HOWO', 'tx400');
+(15, 'SITRAK', now(), now(), true, 'SITRAK', '/images/SITRAK.png', true, 'HOWO', 'sitrak'),
+(16, 'MAX 460HP', now(), now(), true, 'MAX460HP', '/images/MAX 460HP.png', true, 'HOWO', 'max-460hp'),
+(17, 'TH7', now(), now(), true, 'TH7', '/images/TH7.png', true, 'HOWO', 'th7'),
+(18, 'A7', now(), now(), true, 'A7', '/images/A7.png', true, 'HOWO', 'a7'),
+(19, 'V7G', now(), now(), true, 'V7G', '/images/V7G.png', true, 'HOWO', 'v7g'),
+(20, 'TX400', now(), now(), true, 'TX400', '/images/TX400.avif', true, 'HOWO', 'tx400');
 
 
 -- Dữ liệu images mẫu

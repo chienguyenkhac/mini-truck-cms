@@ -288,7 +288,7 @@ const Categories: React.FC = () => {
                         />
                         <input
                             type="text"
-                            placeholder={editForm.type === 'vehicle' ? 'Hãng xe' : 'Mã'}
+                            placeholder={editForm.type === 'vehicle' ? 'Mã xe' : 'Mã'}
                             value={editForm.code}
                             onChange={(e) => setEditForm({ ...editForm, code: e.target.value })}
                             className="input py-2 px-3 text-sm w-28 border-slate-300 focus:border-primary focus:ring-1 focus:ring-primary"
@@ -346,7 +346,7 @@ const Categories: React.FC = () => {
                             <span className={`font-medium ${isVehicle ? 'text-blue-700' : 'text-slate-700'}`}>{cat.name}</span>
                             {cat.code && (
                                 <span className="text-xs bg-white px-1.5 py-0.5 rounded border border-slate-200 text-slate-500 font-mono">
-                                    {isVehicle ? `Hãng: ${cat.code}` : cat.code}
+                                    {isVehicle ? `Mã: ${cat.code}` : cat.code}
                                 </span>
                             )}
                             <span className={`text-xs px-1.5 py-0.5 rounded ${isVehicle ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500'}`}>
@@ -448,11 +448,11 @@ const Categories: React.FC = () => {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-1">
-                                {newForm.type === 'vehicle' ? 'Hãng xe' : 'Mã danh mục'}
+                                {newForm.type === 'vehicle' ? 'Mã xe' : 'Mã danh mục'}
                             </label>
                             <input
                                 type="text"
-                                placeholder={newForm.type === 'vehicle' ? 'VD: HOWO, CHENGLONG, SITRAK' : 'VD: DC, PHK (tùy chọn)'}
+                                placeholder={newForm.type === 'vehicle' ? 'VD: DC, PHK (tùy chọn)' : 'VD: DC, PHK (tùy chọn)'}
                                 value={newForm.code}
                                 onChange={(e) => setNewForm({ ...newForm, code: e.target.value })}
                                 className="input w-full"

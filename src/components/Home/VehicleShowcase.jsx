@@ -138,10 +138,6 @@ const VehicleShowcase = () => {
                                     <h3 className="text-sm font-bold text-slate-700 group-hover:text-primary transition-colors uppercase leading-tight line-clamp-2">
                                         {vehicle.name}
                                     </h3>
-                                    {/* Brand (Hãng xe) */}
-                                    {vehicle.code && (
-                                        <p className="text-xs text-slate-400 mt-0.5 uppercase">{vehicle.code}</p>
-                                    )}
                                 </Link>
                             </motion.div>
                         ))}
